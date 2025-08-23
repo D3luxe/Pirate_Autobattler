@@ -1,0 +1,28 @@
+{
+  "Items": [
+    {
+      "id": "item_cannon",
+      "itemName": "Basic Cannon",
+      "description": "Fires a cannonball at the enemy ship.",
+      "rarity": 0,
+      "tags": [0, 2],
+      "cost": 5,
+      "cooldown": 5.0,
+      "trigger": "OnCooldown",
+      "effect": "DealDamage",
+      "effectValue": 5
+    },
+    {
+      "id": "item_cabinboy",
+      "itemName": "Cabin Boy",
+      "description": "Swabs the deck, slowly repairing the ship.",
+      "rarity": 0,
+      "tags": [1, 3],
+      "cost": 4,
+      "cooldown": 0,
+      "trigger": "OnBattleStart",
+      "effect": "HealOverTime",
+      "effectValue": 1
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67705c87b9b7fc74b968dcc3ac953454, type: 3}
+  m_Name: item_deckhand
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSO
+  id: item_deckhand
+  displayName: Deckhand
+  description: 
+  icon: {fileID: 0}
+  rarity: 0
+  isActive: 1
+  cooldownSec: 2
+  baseValue: 1
+  abilities:
+  - triggerType: 0
+    actions:
+    - actionType: 1
+      values:
+      - rarity: 0
+        value: 0
+      - rarity: 1
+        value: 0
+      - rarity: 2
+        value: 0
+      - rarity: 3
+        value: 0
+      durations: []
+      tickIntervals: []
+      stacks: []
+      statType: 0
+  tags: []
+  synergyRules: []

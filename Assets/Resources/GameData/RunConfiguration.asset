@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f84a00e271d9c19408208332b3f5f0e4, type: 3}
+  m_Name: RunConfiguration
+  m_EditorClassIdentifier: Assembly-CSharp::RunConfigSO
+  mapLength: 0
+  enemyHealthMin: 0
+  enemyHealthMax: 0
+  startingLives: 0
+  startingGold: 10
+  rerollBaseCost: 2
+  rerollGrowth: 1.5
+  inventorySize: 5
+  rewardGoldPerWin: 5
+  shopEveryN: 3
+  portEveryN: 1
+  eliteEveryN: 1
+  floorRaritySettings:
+  - minFloorIndex: 1
+    maxFloorIndex: 5
+    rarityProbabilities:
+    - rarity: 0
+      weight: 80
+    - rarity: 1
+      weight: 20
+    - rarity: 2
+      weight: 0
+    - rarity: 3
+      weight: 0

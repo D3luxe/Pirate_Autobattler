@@ -1,0 +1,22 @@
+{
+  "Items": [
+    {
+      "id": "ship_sloop",
+      "shipName": "The Salty Sloop",
+      "description": "A small, nimble vessel.",
+      "baseHealth": 30,
+      "itemSlots": 3,
+      "passiveEffect": "None",
+      "startingItems": ["item_cannon", "item_cabinboy"]
+    },
+    {
+      "id": "ship_brigantine",
+      "shipName": "The Sturdy Brigantine",
+      "description": "A larger ship with more room for activities.",
+      "baseHealth": 40,
+      "itemSlots": 4,
+      "passiveEffect": "Starts with +5 armor.",
+      "startingItems": ["item_cannon"]
+    }
+  ]
+}
