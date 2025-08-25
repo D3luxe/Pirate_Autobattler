@@ -8,6 +8,9 @@ public class GameInitializer : MonoBehaviour
 
     void Start()
     {
+        // Initialize core systems
+        AbilityManager.Initialize();
+
         // Instantiate persistent UI and managers
         if (runManagerPrefab != null && RunManager.Instance == null)
         {
@@ -17,5 +20,11 @@ public class GameInitializer : MonoBehaviour
         // Load the main menu or the first scene of your game
         // For now, we'll load the Run scene directly for testing.
         SceneManager.LoadScene("Run");
+    }
+
+    private void OnApplicationQuit()
+    {
+        // Ensure systems are shut down properly
+        AbilityManager.Shutdown();
     }
 }

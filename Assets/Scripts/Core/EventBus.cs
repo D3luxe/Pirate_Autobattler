@@ -1,5 +1,6 @@
 using System;
 using PirateRoguelike.Data;
+using PirateRoguelike.Combat;
 
 public static class EventBus
 {
@@ -19,7 +20,7 @@ public static class EventBus
     public static event Action<ShipState, float> OnShieldGained; // Target, Amount
     public static event Action<ShipState, ActiveCombatEffect> OnDebuffApplied; // Target, Effect
     public static event Action<ShipState, ActiveCombatEffect> OnBuffApplied; // Target, Effect
-    public static event Action<ShipState, float> OnTick; // Target, DeltaTime
+    public static event Action<ShipState, ShipState, float> OnTick; // PlayerShip, EnemyShip, DeltaTime
 
     // Dispatchers
     public static void DispatchBattleStart(CombatContext ctx) => OnBattleStart?.Invoke(ctx);
@@ -33,7 +34,7 @@ public static class EventBus
     public static void DispatchShieldGained(ShipState target, float amount) => OnShieldGained?.Invoke(target, amount);
     public static void DispatchDebuffApplied(ShipState target, ActiveCombatEffect effect) => OnDebuffApplied?.Invoke(target, effect);
     public static void DispatchBuffApplied(ShipState target, ActiveCombatEffect effect) => OnBuffApplied?.Invoke(target, effect);
-    public static void DispatchTick(ShipState target, float deltaTime) => OnTick?.Invoke(target, deltaTime);
+    public static void DispatchTick(ShipState playerShip, ShipState enemyShip, float deltaTime) => OnTick?.Invoke(playerShip, enemyShip, deltaTime);
 
     // Generic dispatch for other triggers (will be expanded)
     public static void Dispatch(TriggerType triggerType, params object[] args)
@@ -95,9 +96,9 @@ public static class EventBus
                 }
                 break;
             case TriggerType.OnTick:
-                if (args.Length > 1 && args[0] is ShipState targetTickParam && args[1] is float deltaTimeParam)
+                if (args.Length > 2 && args[0] is ShipState playerShipParam && args[1] is ShipState enemyShipParam && args[2] is float deltaTimeParam)
                 {
-                    DispatchTick(targetTickParam, deltaTimeParam);
+                    DispatchTick(playerShipParam, enemyShipParam, deltaTimeParam);
                 }
                 break;
             // Add more cases for other trigger types

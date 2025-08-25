@@ -50,6 +50,8 @@
 ---
 
 ## 🔧 New: Item Object Model & Tooltip Enforcement
+- All item effects must support rarity-based definitions. Ability/action parameters (damage, heal, cooldown, shield, etc.) must be tunable per tier (Bronze/Silver/Gold/Diamond). Merging into a higher rarity must always replace effect values with the new tier’s parameters.
+
 - All items must conform to a unified schema: Identity (id, name, rarity, tags, size), Economy (baseCost, sellValue), Abilities (trigger + actions + priority + type), State (cooldownRemaining, stacks, disabled, vars), and Enchantments.  
 - Items must always be the same object across contexts (shop, reward, inventory, battle).  
 - Tooltips must always render from the item schema, never hardcoded text.  
@@ -59,3 +61,11 @@
 - Boolean effects must display remaining duration only (e.g., Stunned: 3s).  
 - Passives must display their trigger conditions (e.g., “When ally activates…”).  
 - Merge preview must always show the resulting upgrade path (e.g., “Bronze + Bronze ⇒ Silver”).  
+
+
+## 🛡 Enemy Design Enforcement
+- Enemies must be authored as fixed templates (no runtime stat scaling).  
+- Depth progression must control which enemies appear, not their stats.  
+- Same enemy cannot appear in consecutive battles.  
+- One-per-run enemies must not reappear within the same run.  
+- Telemetry/QA must validate enemy pool composition, back-to-back ban, and one-per-run logic.  

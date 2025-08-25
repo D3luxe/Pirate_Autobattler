@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShipSO
   id: ship_ghostly_galleon
   displayName: Ghostly Galleon
-  rarity: 2
-  art: {fileID: 0}
   baseMaxHealth: 99
   baseItemSlots: 4
   builtInItems: []
-  passives: []
-  cost: 5
+  itemLoadout: []
+  art: {fileID: 0}
+  rarity: 2
+  Cost: 0

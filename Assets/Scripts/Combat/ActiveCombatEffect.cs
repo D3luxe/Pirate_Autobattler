@@ -1,60 +1,59 @@
-using PirateRoguelike.Data;
 using UnityEngine;
-using System;
+using PirateRoguelike.Data.Effects;
 
-[Serializable]
+[System.Serializable]
 public class ActiveCombatEffect
 {
-    public ActionType Type { get; private set; }
-    public StatModifier StatModifier { get; private set; } // For stat-changing effects
-    public float Value => StatModifier != null ? StatModifier.Value : 0; // Generic value (e.g., damage per tick, stat modifier)
-    public StatType StatType => StatModifier != null ? StatModifier.StatType : StatType.Attack; // Default or handle null
+    public EffectSO Def { get; private set; }
     public int Stacks { get; private set; }
-    public float Duration { get; private set; } // Remaining duration in seconds
-    public float TickInterval { get; private set; } // How often the effect ticks
-    public float TimeSinceLastTick { get; private set; } // Time elapsed since last tick
+    public float RemainingDuration { get; private set; }
 
-    public ActiveCombatEffect(ActionType type, float value, int stacks, float duration, float tickInterval, StatType statType)
+    private float _timeSinceLastTick;
+
+    public ActiveCombatEffect(EffectSO definition)
     {
-        Type = type;
-        Stacks = stacks;
-        Duration = duration;
-        TickInterval = tickInterval;
-        TimeSinceLastTick = 0f;
-        // For non-stat-modifying effects, StatModifier will be null
-        StatModifier = (type == ActionType.Buff || type == ActionType.Debuff || type == ActionType.StatChange) 
-            ? new StatModifier(statType, StatModifierType.Flat, value) // Assuming flat for now
-            : null;
+        Def = definition;
+        Stacks = 1; // Start with 1 stack
+        RemainingDuration = Def.Duration;
+        _timeSinceLastTick = 0f;
     }
 
-    // Overload for effects that directly provide a StatModifier
-    public ActiveCombatEffect(ActionType type, StatModifier modifier, int stacks, float duration, float tickInterval)
-    {
-        Type = type;
-        StatModifier = modifier;
-        Stacks = stacks;
-        Duration = duration;
-        TickInterval = tickInterval;
-        TimeSinceLastTick = 0f;
-    }
-
-    public void AddStacks(int amount) => Stacks += amount;
-    public void ExtendDuration(float amount) => Duration += amount;
-    public void ReduceStacks(int amount) => Stacks = Mathf.Max(0, Stacks - amount);
-
+    /// <summary>
+    /// Ticks the effect's duration and determines if its action should execute.
+    /// </summary>
+    /// <param name="deltaTime">Time since last game tick.</param>
+    /// <returns>True if the effect's action should execute.</returns>
     public bool Tick(float deltaTime)
     {
-        TimeSinceLastTick += deltaTime;
-        Duration -= deltaTime;
-
-        bool triggered = false;
-        if (TickInterval > 0 && TimeSinceLastTick >= TickInterval)
+        RemainingDuration -= deltaTime;
+        
+        if (Def.TickInterval <= 0)
         {
-            triggered = true;
-            TimeSinceLastTick -= TickInterval; // Reset for next tick
+            return false; // This effect does not tick.
         }
-        return triggered;
+
+        _timeSinceLastTick += deltaTime;
+        if (_timeSinceLastTick >= Def.TickInterval)
+        {
+            _timeSinceLastTick -= Def.TickInterval;
+            return true;
+        }
+
+        return false;
     }
 
-    public bool IsExpired => Duration <= 0;
+    public void AddStack()
+    {
+        if (Def.IsStackable)
+        {
+            Stacks = Mathf.Min(Stacks + 1, Def.MaxStacks);
+        }
+        // Add duration on adding a stack, instead of resetting
+        RemainingDuration += Def.Duration;
+    }
+
+    public bool IsExpired()
+    {
+        return RemainingDuration <= 0;
+    }
 }

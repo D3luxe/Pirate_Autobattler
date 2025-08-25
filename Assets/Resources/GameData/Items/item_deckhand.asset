@@ -19,23 +19,7 @@ MonoBehaviour:
   rarity: 0
   isActive: 1
   cooldownSec: 2
-  baseValue: 1
   abilities:
-  - triggerType: 0
-    actions:
-    - actionType: 1
-      values:
-      - rarity: 0
-        value: 0
-      - rarity: 1
-        value: 0
-      - rarity: 2
-        value: 0
-      - rarity: 3
-        value: 0
-      durations: []
-      tickIntervals: []
-      stacks: []
-      statType: 0
+  - {fileID: 11400000, guid: ff4e561b9e8e1f4459fd8287ba3d47cb, type: 2}
   tags: []
   synergyRules: []

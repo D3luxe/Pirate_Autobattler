@@ -15,8 +15,13 @@ MonoBehaviour:
   id: enc_boss
   type: 4
   weight: 1
+  isElite: 0
+  eliteRewardDepthBonus: 0
   enemies: []
   shopItemCount: 3
   portHealPercent: 0.3
   eventTitle: The Pirate Lord
   eventDescription: 
+  minFloor: 0
+  maxFloor: 0
+  eventChoices: []

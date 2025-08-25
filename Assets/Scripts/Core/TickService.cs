@@ -8,8 +8,9 @@ public class TickService : MonoBehaviour, ITickService
 
     private Coroutine _tickCoroutine;
 
-    public void Start()
+    public void StartTicking()
     {
+        Debug.Log("TickService: StartTicking called.");
         if (_tickCoroutine != null)
         {
             StopCoroutine(_tickCoroutine);
@@ -19,6 +20,7 @@ public class TickService : MonoBehaviour, ITickService
 
     public void Stop()
     {
+        Debug.Log("TickService: Stop called.");
         if (_tickCoroutine != null)
         {
             StopCoroutine(_tickCoroutine);
@@ -28,11 +30,13 @@ public class TickService : MonoBehaviour, ITickService
 
     private System.Collections.IEnumerator TickCoroutine()
     {
+        Debug.Log("TickService: TickCoroutine started.");
         var wait = new WaitForSeconds(IntervalSec);
         while (true)
         {
             yield return wait;
             OnTick?.Invoke();
+            //Debug.Log("TickService: Tick!");
         }
     }
 

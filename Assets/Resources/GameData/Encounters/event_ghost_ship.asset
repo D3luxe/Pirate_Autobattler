@@ -15,9 +15,14 @@ MonoBehaviour:
   id: event_ghost_ship
   type: 3
   weight: 1
+  isElite: 0
+  eliteRewardDepthBonus: 0
   enemies: []
   shopItemCount: 3
   portHealPercent: 0.3
   eventTitle: A Ghostly Encounter
   eventDescription: A spectral galleon offers to trade ships. Its power is immense,
     but it seems... unstable.
+  minFloor: 0
+  maxFloor: 0
+  eventChoices: []

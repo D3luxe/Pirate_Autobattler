@@ -15,8 +15,13 @@ MonoBehaviour:
   id: enc_shop
   type: 1
   weight: 1
+  isElite: 0
+  eliteRewardDepthBonus: 0
   enemies: []
   shopItemCount: 3
   portHealPercent: 0.3
   eventTitle: A Shady Port
   eventDescription: 
+  minFloor: 0
+  maxFloor: 0
+  eventChoices: []

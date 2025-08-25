@@ -10,13 +10,19 @@ public class GameDataEditorWindow : EditorWindow
     private List<ItemSO> _items;
     private List<ShipSO> _ships;
     private List<EncounterSO> _encounters;
+    private List<EnemySO> _enemies; // New: List for EnemySO
 
     private ItemSO _selectedItem;
     private ShipSO _selectedShip;
     private EncounterSO _selectedEncounter;
+    private EnemySO _selectedEnemy; // New: Selected EnemySO
 
     private Vector2 _scrollPosition;
     private int _selectedTab = 0;
+
+    // Filtering and Sorting for Enemies
+    private string _enemySearchString = "";
+    private bool _sortEnemiesByNameAsc = true;
 
     [MenuItem("Game/Game Data Editor")]
     public static void ShowWindow()
@@ -34,13 +40,14 @@ public class GameDataEditorWindow : EditorWindow
         _items = AssetDatabase.FindAssets("t:ItemSO").Select(guid => AssetDatabase.LoadAssetAtPath<ItemSO>(AssetDatabase.GUIDToAssetPath(guid))).ToList();
         _ships = AssetDatabase.FindAssets("t:ShipSO").Select(guid => AssetDatabase.LoadAssetAtPath<ShipSO>(AssetDatabase.GUIDToAssetPath(guid))).ToList();
         _encounters = AssetDatabase.FindAssets("t:EncounterSO").Select(guid => AssetDatabase.LoadAssetAtPath<EncounterSO>(AssetDatabase.GUIDToAssetPath(guid))).ToList();
+        _enemies = AssetDatabase.FindAssets("t:EnemySO").Select(guid => AssetDatabase.LoadAssetAtPath<EnemySO>(AssetDatabase.GUIDToAssetPath(guid))).ToList(); // New: Load EnemySO
     }
 
     private void OnGUI()
     {
         GUILayout.Label("Game Data Editor", EditorStyles.boldLabel);
 
-        _selectedTab = GUILayout.Toolbar(_selectedTab, new string[] { "Items", "Ships", "Encounters" });
+        _selectedTab = GUILayout.Toolbar(_selectedTab, new string[] { "Items", "Ships", "Encounters", "Enemies" }); // New: Add "Enemies" tab
 
         _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 
@@ -55,6 +62,9 @@ public class GameDataEditorWindow : EditorWindow
             case 2: // Encounters Tab
                 DrawEncountersTab();
                 break;
+            case 3: // Enemies Tab (New)
+                DrawEnemiesTab();
+                break;
         }
 
         EditorGUILayout.EndScrollView();
@@ -68,7 +78,7 @@ public class GameDataEditorWindow : EditorWindow
     private void DrawItemsTab()
     {
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.BeginVertical(GUILayout.Width(position.width * 0.3f));
+        EditorGUILayout.BeginVertical(GUILayout.Width(position.width * 0.2f)); // Changed from 0.3f to 0.2f
         GUILayout.Label("Items", EditorStyles.boldLabel);
 
         foreach (var item in _items)
@@ -78,6 +88,7 @@ public class GameDataEditorWindow : EditorWindow
                 _selectedItem = item;
                 _selectedShip = null;
                 _selectedEncounter = null;
+                _selectedEnemy = null; // New: Deselect enemy
             }
         }
         EditorGUILayout.EndVertical();
@@ -99,7 +110,7 @@ public class GameDataEditorWindow : EditorWindow
     private void DrawShipsTab()
     {
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.BeginVertical(GUILayout.Width(position.width * 0.3f));
+        EditorGUILayout.BeginVertical(GUILayout.Width(position.width * 0.2f)); // Changed from 0.3f to 0.2f
         GUILayout.Label("Ships", EditorStyles.boldLabel);
 
         foreach (var ship in _ships)
@@ -109,6 +120,7 @@ public class GameDataEditorWindow : EditorWindow
                 _selectedShip = ship;
                 _selectedItem = null;
                 _selectedEncounter = null;
+                _selectedEnemy = null; // New: Deselect enemy
             }
         }
         EditorGUILayout.EndVertical();
@@ -130,7 +142,7 @@ public class GameDataEditorWindow : EditorWindow
     private void DrawEncountersTab()
     {
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.BeginVertical(GUILayout.Width(position.width * 0.3f));
+        EditorGUILayout.BeginVertical(GUILayout.Width(position.width * 0.2f)); // Changed from 0.3f to 0.2f
         GUILayout.Label("Encounters", EditorStyles.boldLabel);
 
         foreach (var encounter in _encounters)
@@ -140,6 +152,7 @@ public class GameDataEditorWindow : EditorWindow
                 _selectedEncounter = encounter;
                 _selectedItem = null;
                 _selectedShip = null;
+                _selectedEnemy = null; // New: Deselect enemy
             }
         }
         EditorGUILayout.EndVertical();
@@ -158,6 +171,60 @@ public class GameDataEditorWindow : EditorWindow
         EditorGUILayout.EndHorizontal();
     }
 
+    // New: Draw Enemies Tab
+    private void DrawEnemiesTab()
+    {
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.BeginVertical(GUILayout.Width(position.width * 0.2f)); // Changed from 0.3f to 0.2f
+        GUILayout.Label("Enemies", EditorStyles.boldLabel);
+
+        // Filtering
+        EditorGUILayout.BeginHorizontal();
+        _enemySearchString = EditorGUILayout.TextField("Search:", _enemySearchString);
+        if (GUILayout.Button("Clear", GUILayout.Width(50)))
+        {
+            _enemySearchString = "";
+        }
+        EditorGUILayout.EndHorizontal();
+
+        // Sorting
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.Label("Sort by Name:");
+        if (GUILayout.Button(_sortEnemiesByNameAsc ? "Asc" : "Desc", GUILayout.Width(50)))
+        {
+            _sortEnemiesByNameAsc = !_sortEnemiesByNameAsc;
+        }
+        EditorGUILayout.EndHorizontal();
+
+        var filteredEnemies = _enemies.Where(e => string.IsNullOrEmpty(_enemySearchString) || e.displayName.ToLower().Contains(_enemySearchString.ToLower()));
+        var sortedEnemies = _sortEnemiesByNameAsc ? filteredEnemies.OrderBy(e => e.displayName) : filteredEnemies.OrderByDescending(e => e.displayName);
+
+        foreach (var enemy in sortedEnemies)
+        {
+            if (GUILayout.Button(enemy.displayName))
+            {
+                _selectedEnemy = enemy;
+                _selectedItem = null;
+                _selectedShip = null;
+                _selectedEncounter = null;
+            }
+        }
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.BeginVertical();
+        if (_selectedEnemy != null)
+        {
+            GUILayout.Label($"Editing Enemy: {_selectedEnemy.displayName}", EditorStyles.boldLabel);
+            DrawEnemyProperties(_selectedEnemy);
+        }
+        else
+        {
+            GUILayout.Label("Select an Enemy to edit.");
+        }
+        EditorGUILayout.EndVertical();
+        EditorGUILayout.EndHorizontal();
+    }
+
     private void DrawItemProperties(ItemSO item)
     {
         SerializedObject serializedObject = new SerializedObject(item);
@@ -168,7 +235,6 @@ public class GameDataEditorWindow : EditorWindow
         SerializedProperty rarityProp = serializedObject.FindProperty("rarity");
         SerializedProperty isActiveProp = serializedObject.FindProperty("isActive");
         SerializedProperty cooldownSecProp = serializedObject.FindProperty("cooldownSec");
-        SerializedProperty baseValueProp = serializedObject.FindProperty("baseValue");
         SerializedProperty abilitiesProp = serializedObject.FindProperty("abilities");
 
         EditorGUILayout.PropertyField(idProp);
@@ -178,7 +244,6 @@ public class GameDataEditorWindow : EditorWindow
         EditorGUILayout.PropertyField(rarityProp);
         EditorGUILayout.PropertyField(isActiveProp);
         EditorGUILayout.PropertyField(cooldownSecProp);
-        EditorGUILayout.PropertyField(baseValueProp);
 
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Abilities", EditorStyles.boldLabel);
@@ -251,6 +316,25 @@ public class GameDataEditorWindow : EditorWindow
         serializedObject.ApplyModifiedProperties();
     }
 
+    // New: Draw Enemy Properties
+    private void DrawEnemyProperties(EnemySO enemy)
+    {
+        SerializedObject serializedObject = new SerializedObject(enemy);
+        SerializedProperty idProp = serializedObject.FindProperty("id");
+        SerializedProperty displayNameProp = serializedObject.FindProperty("displayName");
+        SerializedProperty shipIdProp = serializedObject.FindProperty("shipId");
+        SerializedProperty itemLoadoutProp = serializedObject.FindProperty("itemLoadout");
+        SerializedProperty targetingStrategyProp = serializedObject.FindProperty("targetingStrategy");
+
+        EditorGUILayout.PropertyField(idProp);
+        EditorGUILayout.PropertyField(displayNameProp);
+        EditorGUILayout.PropertyField(shipIdProp);
+        EditorGUILayout.PropertyField(itemLoadoutProp, true); // true for expandable list
+        EditorGUILayout.PropertyField(targetingStrategyProp);
+
+        serializedObject.ApplyModifiedProperties();
+    }
+
     private void DrawRarityTieredValueList(string label, List<RarityTieredValue> list)
     {
         // This method is no longer needed as EditorGUILayout.PropertyField handles lists automatically.
@@ -282,3 +366,5 @@ public class GameDataEditorWindow : EditorWindow
         EditorGUILayout.EndVertical();
     }
 }
+
+    

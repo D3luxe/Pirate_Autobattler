@@ -145,7 +145,29 @@ All items share a single, consistent schema across every context (shop, rewards,
 - `vars`: Per-battle custom values (e.g., currentDamage)  
 
 **Enchantments**
-- Optional extensions that add new abilities (trigger + actions)  
+- Optional extensions that add new abilities (trigger + actions)
+
+
+**Tier-Based Parameters**
+- Abilities and actions may define parameters that vary by rarity.  
+- Each rarity (Bronze, Silver, Gold, Diamond) can have distinct values for attributes such as damage, healing, cooldown, shield strength, etc.  
+- Example:
+  ```json
+  "actions": [
+    {
+      "class": "Damage",
+      "paramsByRarity": {
+        "Bronze": { "amount": 3 },
+        "Silver": { "amount": 5 },
+        "Gold": { "amount": 8 },
+        "Diamond": { "amount": 12 }
+      },
+      "target": "EnemyShip"
+    }
+  ]
+  ```
+- When an item is upgraded via merging, its abilities must automatically use the parameters corresponding to the new rarity.
+  
 
 ---
 
@@ -428,3 +450,28 @@ Examples:
 - Target frequency of rare ship events per run?  
 - Exact % healing at Ports, gold values, and shop balancing require tuning.  
 - Should some event-exclusive ships require additional unique tradeoffs (life, crew)?  
+
+
+
+### Enemy Design & Progression Rules
+
+**Fixed Templates**
+- Enemies are authored as fixed templates. Their HP, ship, and abilities are defined in design and do not change at runtime.
+- Difficulty is not applied through runtime stat scaling.
+
+**Depth-Based Pools**
+- Encounter depth progression controls which enemies can appear. Deeper floors unlock access to tougher enemies.
+- Scaling is achieved by introducing higher-tier enemies rather than buffing existing ones.
+
+**Repetition Rules**
+- Same enemy cannot appear in two consecutive battles (back-to-back ban).
+- Designers can mark certain enemies as *one-per-run*, preventing multiple appearances in a single run.
+- Otherwise, repetition is allowed, controlled by pool composition and ban rules.
+
+**Balancing Focus**
+- Designers balance difficulty by controlling pools and authored stats, not runtime multipliers.
+- QA and telemetry must verify correct pool composition, enforcement of the back-to-back ban, and one-per-run rules.
+
+**Net Effect**
+- The system is designer-driven, predictable, and progression is clear to players.
+- Difficulty comes from *which enemies appear*, not how much their stats scale.

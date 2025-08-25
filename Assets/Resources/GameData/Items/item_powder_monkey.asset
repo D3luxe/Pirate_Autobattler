@@ -17,9 +17,8 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   rarity: 0
-  isActive: 1
+  isActive: 0
   cooldownSec: 10
-  baseValue: 1
-  effect: 
+  abilities: []
   tags: []
   synergyRules: []

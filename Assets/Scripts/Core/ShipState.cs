@@ -2,8 +2,8 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PirateRoguelike.Combat;
 using PirateRoguelike.Data;
+using PirateRoguelike.Data.Effects;
 
 public class ShipState
 {
@@ -80,6 +80,19 @@ public class ShipState
             }
         }
         return new SerializableShipState(ShipId, CurrentHealth, CurrentShield, _stunDuration, equippedSerializable, ActiveEffects, _activeStatModifiers);
+    }
+
+    public void ApplyEffect(EffectSO effectToApply)
+    {
+        var existingEffect = ActiveEffects.FirstOrDefault(e => e.Def == effectToApply);
+        if (existingEffect != null)
+        {
+            existingEffect.AddStack();
+        }
+        else
+        {
+            ActiveEffects.Add(new ActiveCombatEffect(effectToApply));
+        }
     }
 
     public void SetCurrentHealth(int amount)
@@ -179,16 +192,40 @@ public class ShipState
 
     public void TakeDamage(int amount)
     {
-        // Apply defense modifier here
-        float finalDamage = amount / (1 + GetCurrentDefense()); // Simple defense reduction
-        CurrentHealth -= Mathf.RoundToInt(finalDamage);
+        float incomingDamage = amount;
+
+        // 1. Damage reduction (flat and percentage from modifiers)
+        float flatDefense = _activeStatModifiers.Where(m => m.StatType == StatType.Defense && m.ModifierType == StatModifierType.Flat).Sum(m => m.Value);
+        float percentDefense = _activeStatModifiers.Where(m => m.StatType == StatType.Defense && m.ModifierType == StatModifierType.Percentage).Sum(m => m.Value);
+
+        incomingDamage -= flatDefense;
+        incomingDamage *= (1 - percentDefense); // 1 - 0.1 = 0.9 for 10% reduction
+
+        // Ensure damage doesn't go below zero after reduction
+        incomingDamage = Mathf.Max(0, incomingDamage);
+
+        // 2. Shield absorption
+        float damageToShield = Mathf.Min(incomingDamage, CurrentShield);
+        CurrentShield -= damageToShield;
+        incomingDamage -= damageToShield;
+
+        // 3. HP loss
+        CurrentHealth -= Mathf.RoundToInt(incomingDamage);
         if (CurrentHealth < 0) CurrentHealth = 0;
+
         OnHealthChanged?.Invoke();
-        EventBus.DispatchDamageReceived(this, amount);
+        EventBus.DispatchDamageReceived(this, amount); // Dispatch original amount for event
     }
 
     public void Heal(int amount)
     {
+        // Healing nullified if HP <= 0 in the same tick
+        if (CurrentHealth <= 0)
+        {
+            Debug.Log($"{Def.displayName} is at 0 HP. Healing nullified.");
+            return;
+        }
+
         CurrentHealth += amount;
         if (CurrentHealth > Def.baseMaxHealth) CurrentHealth = Def.baseMaxHealth;
         OnHealthChanged?.Invoke();

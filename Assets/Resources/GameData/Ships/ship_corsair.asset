@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShipSO
   id: ship_corsair
   displayName: Corsair
-  rarity: 1
-  art: {fileID: 0}
   baseMaxHealth: 80
   baseItemSlots: 5
   builtInItems: []
-  passives: []
-  cost: 5
+  itemLoadout: []
+  art: {fileID: 0}
+  rarity: 1
+  Cost: 0

@@ -8,7 +8,6 @@ public class EnemySO : ScriptableObject
     public string id;
     public string displayName;
     public string shipId; // The ID of the ShipSO this enemy uses
-    public int health;
-    public List<ItemRef> itemLoadout;
+    public List<ItemSO> itemLoadout;
     public TargetingStrategy targetingStrategy; // AI targeting strategy
 }

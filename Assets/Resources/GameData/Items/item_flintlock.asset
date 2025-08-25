@@ -19,7 +19,6 @@ MonoBehaviour:
   rarity: 0
   isActive: 0
   cooldownSec: 0
-  baseValue: 0
-  effect: 
+  abilities: []
   tags: []
   synergyRules: []

@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShipSO
   id: ship_ironclad
   displayName: Ironclad
-  rarity: 1
-  art: {fileID: 0}
   baseMaxHealth: 150
   baseItemSlots: 3
   builtInItems: []
-  passives: []
-  cost: 5
+  itemLoadout: []
+  art: {fileID: 0}
+  rarity: 1
+  Cost: 0

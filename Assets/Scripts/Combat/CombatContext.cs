@@ -1,14 +1,15 @@
-using System.Collections.Generic;
-using PirateRoguelike.Data;
-
-public class CombatContext
+namespace PirateRoguelike.Combat
 {
-    public ShipState Caster { get; set; }
-    public ShipState Target { get; set; }
-    public List<(IEffect Effect, ActionType Type)> EffectsToApply { get; private set; } = new List<(IEffect, ActionType)>();
-
-    public void AddEffectToQueue(IEffect effect, ActionType type)
+    /// <summary>
+    /// Holds the context for a single combat event or action.
+    /// </summary>
+    public class CombatContext
     {
-        EffectsToApply.Add((effect, type));
+        public ShipState Caster { get; set; }
+        public ShipState Target { get; set; }
+        
+        // Optional data that may be relevant to specific triggers
+        public float DamageAmount { get; set; }
+        public float HealAmount { get; set; }
     }
 }

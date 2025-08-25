@@ -14,12 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShipSO
   id: ship_brigantine
   displayName: Brigantine
-  rarity: 0
-  art: {fileID: 0}
   baseMaxHealth: 100
   baseItemSlots: 4
-  builtInItems:
-  - id: item_cannon_wood
-  - id: item_cannon_wood
-  passives: []
-  cost: 5
+  builtInItems: []
+  itemLoadout: []
+  art: {fileID: 0}
+  rarity: 0
+  Cost: 0

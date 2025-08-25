@@ -2,7 +2,10 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using PirateRoguelike.Data;
-using PirateRoguelike.Combat;
+using PirateRoguelike.Data.Actions; // New using
+using PirateRoguelike.Data.Effects; // New using
+using PirateRoguelike.Data.Abilities; // New using
+using System.Collections.Generic; // Added for List
 
 public class ContentTools : EditorWindow
 {
@@ -39,6 +42,9 @@ public class ContentTools : EditorWindow
         Directory.CreateDirectory("Assets/Resources/GameData/Items");
         Directory.CreateDirectory("Assets/Resources/GameData/Ships");
         Directory.CreateDirectory("Assets/Resources/GameData/Encounters");
+        Directory.CreateDirectory("Assets/Resources/GameData/Actions"); // New
+        Directory.CreateDirectory("Assets/Resources/GameData/Effects"); // New
+        Directory.CreateDirectory("Assets/Resources/GameData/Abilities"); // New
 
         CreateRunConfig();
         CreateItems();
@@ -58,46 +64,70 @@ public class ContentTools : EditorWindow
 
     private static void CreateItems()
     {
-        // Cannon (Damage)
+        Debug.Log("Creating item assets...");
+
+        // --- Create Actions ---
+        // Damage Actions
+        DamageActionSO cannonDamage = CreateActionAsset<DamageActionSO>("action_damage_cannon", "Cannon Damage", 5);
+        DamageActionSO burnTickDamage = CreateActionAsset<DamageActionSO>("action_damage_burntick", "Burn Tick Damage", 1);
+        DamageActionSO poisonTickDamage = CreateActionAsset<DamageActionSO>("action_damage_poisontick", "Poison Tick Damage", 1);
+
+        // Heal Actions
+        HealActionSO deckhandHeal = CreateActionAsset<HealActionSO>("action_heal_deckhand", "Deckhand Heal", 1);
+
+        // Apply Effect Actions
+        // Need to create EffectSOs first for these
+
+        // --- Create Effects ---
+        // Burn Effect
+        EffectSO burnEffect = CreateEffectAsset("effect_burn", "Burn", 5f, 1f, burnTickDamage, true, 3);
+        ApplyEffectActionSO applyBurn = CreateActionAsset<ApplyEffectActionSO>("action_apply_burn", "Apply Burn", burnEffect);
+
+        // Poison Effect
+        EffectSO poisonEffect = CreateEffectAsset("effect_poison", "Poison", 10f, 2f, poisonTickDamage, true, 2);
+        ApplyEffectActionSO applyPoison = CreateActionAsset<ApplyEffectActionSO>("action_apply_poison", "Apply Poison", poisonEffect);
+
+        // Stun Effect (no tick action)
+        EffectSO stunEffect = CreateEffectAsset("effect_stun", "Stun", 3f, 0f, null, false, 1);
+        ApplyEffectActionSO applyStun = CreateActionAsset<ApplyEffectActionSO>("action_apply_stun", "Apply Stun", stunEffect);
+
+
+        // --- Create Abilities ---
+        // Cannon Ability
+        AbilitySO cannonAbility = CreateAbilityAsset("ability_cannon_onready", "Cannon Shot", TriggerType.OnItemReady, new List<ActionSO> { cannonDamage });
+
+        // Deckhand Ability
+        AbilitySO deckhandAbility = CreateAbilityAsset("ability_deckhand_onready", "Deckhand Heal", TriggerType.OnItemReady, new List<ActionSO> { deckhandHeal });
+
+        // Fire Bomb Ability
+        AbilitySO fireBombAbility = CreateAbilityAsset("ability_firebomb_onready", "Fire Bomb", TriggerType.OnItemReady, new List<ActionSO> { applyBurn });
+
+        // Poison Vial Ability
+        AbilitySO poisonVialAbility = CreateAbilityAsset("ability_poisonvial_onready", "Poison Vial", TriggerType.OnItemReady, new List<ActionSO> { applyPoison });
+
+        // Stun Grenade Ability
+        AbilitySO stunGrenadeAbility = CreateAbilityAsset("ability_stungrenade_onready", "Stun Grenade", TriggerType.OnItemReady, new List<ActionSO> { applyStun });
+
+
+        // --- Create ItemSOs ---
+        // Cannon
         ItemSO cannon = ScriptableObject.CreateInstance<ItemSO>();
         cannon.id = "item_cannon_wood";
         cannon.displayName = "Wooden Cannon";
         cannon.rarity = Rarity.Bronze;
         cannon.isActive = true;
         cannon.cooldownSec = 5f;
-        cannon.baseValue = 5; // Base damage
-        cannon.abilities = new System.Collections.Generic.List<Ability>
-        {
-            new Ability
-            {
-                triggerType = TriggerType.OnItemReady,
-                actions = new System.Collections.Generic.List<AbilityAction>
-                {
-                    new AbilityAction { actionType = ActionType.Damage, values = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Bronze, value = cannon.baseValue } } }
-                }
-            }
-        };
+        cannon.abilities = new List<AbilitySO> { cannonAbility };
         AssetDatabase.CreateAsset(cannon, "Assets/Resources/GameData/Items/item_cannon_wood.asset");
 
-        // Deckhand (Heal)
+        // Deckhand
         ItemSO deckhand = ScriptableObject.CreateInstance<ItemSO>();
         deckhand.id = "item_deckhand";
         deckhand.displayName = "Deckhand";
         deckhand.rarity = Rarity.Bronze;
         deckhand.isActive = true;
         deckhand.cooldownSec = 2f;
-        deckhand.baseValue = 1; // Base heal
-        deckhand.abilities = new System.Collections.Generic.List<Ability>
-        {
-            new Ability
-            {
-                triggerType = TriggerType.OnItemReady,
-                actions = new System.Collections.Generic.List<AbilityAction>
-                {
-                    new AbilityAction { actionType = ActionType.Heal, values = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Bronze, value = deckhand.baseValue } } }
-                }
-            }
-        };
+        deckhand.abilities = new List<AbilitySO> { deckhandAbility };
         AssetDatabase.CreateAsset(deckhand, "Assets/Resources/GameData/Items/item_deckhand.asset");
 
         // Flintlock (No active ability, passive or instant)
@@ -108,95 +138,104 @@ public class ContentTools : EditorWindow
         flintlock.isActive = false;
         AssetDatabase.CreateAsset(flintlock, "Assets/Resources/GameData/Items/item_flintlock.asset");
 
-        // Powder Monkey (Example for a buff/debuff, currently no specific ability)
+        // Powder Monkey (No active ability, passive or instant)
         ItemSO powderMonkey = ScriptableObject.CreateInstance<ItemSO>();
         powderMonkey.id = "item_powder_monkey";
         powderMonkey.displayName = "Powder Monkey";
         powderMonkey.rarity = Rarity.Bronze;
-        powderMonkey.isActive = true;
-        powderMonkey.cooldownSec = 10f;
-        powderMonkey.baseValue = 1; // Example: could be a buff value
+        powderMonkey.isActive = false; // Assuming it's passive
+        powderMonkey.cooldownSec = 10f; // Still has cooldown for consistency, but no active ability
         AssetDatabase.CreateAsset(powderMonkey, "Assets/Resources/GameData/Items/item_powder_monkey.asset");
 
-        // New: Fire Bomb (Burn Debuff)
+        // Fire Bomb
         ItemSO fireBomb = ScriptableObject.CreateInstance<ItemSO>();
         fireBomb.id = "item_fire_bomb";
         fireBomb.displayName = "Fire Bomb";
         fireBomb.rarity = Rarity.Silver;
         fireBomb.isActive = true;
         fireBomb.cooldownSec = 8f;
-        fireBomb.baseValue = 1; // Damage per stack per tick
-        fireBomb.abilities = new System.Collections.Generic.List<Ability>
-        {
-            new Ability
-            {
-                triggerType = TriggerType.OnItemReady,
-                actions = new System.Collections.Generic.List<AbilityAction>
-                {
-                    new AbilityAction
-                    {
-                        actionType = ActionType.Burn,
-                        values = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Silver, value = fireBomb.baseValue } },
-                        durations = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Silver, value = 5f } },
-                        tickIntervals = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Silver, value = 1f } },
-                        stacks = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Silver, value = 3 } }
-                    }
-                }
-            }
-        };
+        fireBomb.abilities = new List<AbilitySO> { fireBombAbility };
         AssetDatabase.CreateAsset(fireBomb, "Assets/Resources/GameData/Items/item_fire_bomb.asset");
 
-        // New: Poison Vial (Poison Debuff)
+        // Poison Vial
         ItemSO poisonVial = ScriptableObject.CreateInstance<ItemSO>();
         poisonVial.id = "item_poison_vial";
         poisonVial.displayName = "Poison Vial";
         poisonVial.rarity = Rarity.Silver;
         poisonVial.isActive = true;
         poisonVial.cooldownSec = 7f;
-        poisonVial.baseValue = 1; // Damage per stack per tick
-        poisonVial.abilities = new System.Collections.Generic.List<Ability>
-        {
-            new Ability
-            {
-                triggerType = TriggerType.OnItemReady,
-                actions = new System.Collections.Generic.List<AbilityAction>
-                {
-                    new AbilityAction
-                    {
-                        actionType = ActionType.Poison,
-                        values = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Silver, value = poisonVial.baseValue } },
-                        durations = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Silver, value = 10f } },
-                        tickIntervals = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Silver, value = 2f } },
-                        stacks = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Silver, value = 2 } }
-                    }
-                }
-            }
-        };
+        poisonVial.abilities = new List<AbilitySO> { poisonVialAbility };
         AssetDatabase.CreateAsset(poisonVial, "Assets/Resources/GameData/Items/item_poison_vial.asset");
 
-        // New: Stun Grenade (Stun Debuff)
+        // Stun Grenade
         ItemSO stunGrenade = ScriptableObject.CreateInstance<ItemSO>();
         stunGrenade.id = "item_stun_grenade";
         stunGrenade.displayName = "Stun Grenade";
         stunGrenade.rarity = Rarity.Gold;
         stunGrenade.isActive = true;
         stunGrenade.cooldownSec = 12f;
-        stunGrenade.abilities = new System.Collections.Generic.List<Ability>
-        {
-            new Ability
-            {
-                triggerType = TriggerType.OnItemReady,
-                actions = new System.Collections.Generic.List<AbilityAction>
-                {
-                    new AbilityAction
-                    {
-                        actionType = ActionType.Stun,
-                        durations = new System.Collections.Generic.List<RarityTieredValue> { new RarityTieredValue { rarity = Rarity.Gold, value = 3f } }
-                    } // Stun has no value or stacks
-                }
-            }
-        };
+        stunGrenade.abilities = new List<AbilitySO> { stunGrenadeAbility };
         AssetDatabase.CreateAsset(stunGrenade, "Assets/Resources/GameData/Items/item_stun_grenade.asset");
+    }
+
+    // --- Helper Methods --- //
+
+    private static T CreateActionAsset<T>(string id, string displayName, int value) where T : ActionSO
+    {
+        T action = ScriptableObject.CreateInstance<T>();
+        action.name = id; // Set the asset name
+        // Assuming all actions have a 'value' field for simplicity in this helper
+        // This will need to be refined for actions without a simple 'value'
+        if (action is DamageActionSO damageAction) damageAction.damageAmount = value;
+        else if (action is HealActionSO healAction) healAction.healAmount = value;
+        // Add other action types as needed
+
+        AssetDatabase.CreateAsset(action, $"Assets/Resources/GameData/Actions/{id}.asset");
+        return action;
+    }
+
+    private static T CreateActionAsset<T>(string id, string displayName, EffectSO effect) where T : ApplyEffectActionSO
+    {
+        T action = ScriptableObject.CreateInstance<T>();
+        action.name = id; // Set the asset name
+        action.effectToApply = effect;
+        AssetDatabase.CreateAsset(action, $"Assets/Resources/GameData/Actions/{id}.asset");
+        return action;
+    }
+
+    private static EffectSO CreateEffectAsset(string id, string displayName, float duration, float tickInterval, ActionSO tickAction, bool isStackable, int maxStacks)
+    {
+        EffectSO effect = ScriptableObject.CreateInstance<EffectSO>();
+        effect.name = id; // Set the asset name
+        // Assign properties directly (assuming public setters or internal access)
+        // For now, using reflection or direct field assignment if properties are private set
+        // Or, better, make properties public set for editor tools
+        // For this example, I'll assume direct field assignment is possible or properties are public set.
+        // In a real scenario, you'd use a constructor or public properties.
+        effect.id = id; // Assuming id field is public or has a setter
+        effect.displayName = displayName; // Assuming displayName field is public or has a setter
+        effect.duration = duration;
+        effect.tickInterval = tickInterval;
+        effect.tickAction = tickAction;
+        effect.isStackable = isStackable;
+        effect.maxStacks = maxStacks;
+
+        AssetDatabase.CreateAsset(effect, $"Assets/Resources/GameData/Effects/{id}.asset");
+        return effect;
+    }
+
+    private static AbilitySO CreateAbilityAsset(string id, string displayName, TriggerType trigger, List<ActionSO> actions)
+    {
+        AbilitySO ability = ScriptableObject.CreateInstance<AbilitySO>();
+        ability.name = id; // Set the asset name
+        // Assign properties directly
+        ability.id = id; // Assuming id field is public or has a setter
+        ability.displayName = displayName; // Assuming displayName field is public or has a setter
+        ability.trigger = trigger;
+        ability.actions = actions;
+
+        AssetDatabase.CreateAsset(ability, $"Assets/Resources/GameData/Abilities/{id}.asset");
+        return ability;
     }
 
     private static void CreateShips()

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using PirateRoguelike.Data;
-using PirateRoguelike.Combat;
+using PirateRoguelike.Data.Abilities; // Using the new AbilitySO
 
 [CreateAssetMenu(fileName = "NewItem", menuName = "Pirate/Data/Item")]
 public class ItemSO : ScriptableObject
@@ -17,8 +17,7 @@ public class ItemSO : ScriptableObject
     public Rarity rarity;
     public bool isActive;
     public float cooldownSec;
-    public float baseValue; // Damage, healing, etc.
-    public List<Ability> abilities;
+    public List<AbilitySO> abilities; // Switched to AbilitySO
 
     [Header("Gameplay")]
     public List<Tag> tags;
