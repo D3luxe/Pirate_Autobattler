@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: f91e1719681138344917d895ee5f780e
+guid: f366d59ef64fe1b488c13bc5a583333b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2500295678424699892
-    second: Item_Gold_0
+      213: -4280515266368176437
+    second: PanelBackgroundWithEquipment_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Item_Gold_0
+      name: PanelBackgroundWithEquipment_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 76
-        height: 80
+        y: 1
+        width: 1024
+        height: 404
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4f3d2f12ca5d2b220800000000000000
-      internalID: 2500295678424699892
+      spriteID: bcefc7c5b0e8894c0800000000000000
+      internalID: -4280515266368176437
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Item_Gold_0: 2500295678424699892
+      PanelBackgroundWithEquipment_0: -4280515266368176437
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

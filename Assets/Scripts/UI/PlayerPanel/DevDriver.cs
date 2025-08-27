@@ -37,6 +37,7 @@ namespace PirateRoguelike.UI
         public IShipViewData ShipData { get; set; }
         public IHudViewData HudData { get; set; }
         public List<ISlotViewData> EquipmentSlots { get; set; }
+        public List<ISlotViewData> InventorySlots { get; set; }
     }
 
     [RequireComponent(typeof(UIDocument))]
@@ -68,7 +69,8 @@ namespace PirateRoguelike.UI
                     Lives = 3,
                     Depth = 5
                 },
-                EquipmentSlots = new List<ISlotViewData>()
+                EquipmentSlots = new List<ISlotViewData>(),
+                InventorySlots = new List<ISlotViewData>()
             };
 
             for (int i = 0; i < 10; i++)

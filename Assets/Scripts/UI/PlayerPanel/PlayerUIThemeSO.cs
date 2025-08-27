@@ -9,6 +9,9 @@ namespace PirateRoguelike.UI
         [Header("Fonts")]
         public Font mainFont;
 
+        [Header("Backgrounds")]
+        public Sprite mainBackgroundSprite;
+
         [Header("Slots")]
         public Sprite emptySlotBackground;
         public Sprite filledSlotBackground;

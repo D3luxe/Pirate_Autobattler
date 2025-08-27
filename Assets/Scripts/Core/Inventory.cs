@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using PirateRoguelike.Data;
+using UnityEngine;
 
 public class Inventory
 {
@@ -32,6 +33,7 @@ public class Inventory
                     {
                         Items[i] = new ItemInstance(upgradedItemSO); // Replace with upgraded item
                         OnInventoryChanged?.Invoke();
+//                        Debug.Log("Inventory: OnInventoryChanged invoked from AddItem (merge).");
                         return true;
                     }
                 }
@@ -45,6 +47,7 @@ public class Inventory
             {
                 Items[i] = newItem;
                 OnInventoryChanged?.Invoke();
+//                Debug.Log("Inventory: OnInventoryChanged invoked from AddItem (new slot).");
                 return true;
             }
         }
@@ -99,6 +102,7 @@ public class Inventory
         if (index < 0 || index >= MaxSize) return;
         Items[index] = item;
         OnInventoryChanged?.Invoke();
+//        Debug.Log("Inventory: OnInventoryChanged invoked from AddItemAt.");
     }
 
     public ItemInstance RemoveItemAt(int index)
@@ -107,6 +111,7 @@ public class Inventory
         ItemInstance item = Items[index];
         Items[index] = null;
         OnInventoryChanged?.Invoke();
+ //       Debug.Log("Inventory: OnInventoryChanged invoked from RemoveItemAt.");
         return item;
     }
 
@@ -115,6 +120,7 @@ public class Inventory
         if (indexA < 0 || indexA >= MaxSize || indexB < 0 || indexB >= MaxSize) return;
         (Items[indexA], Items[indexB]) = (Items[indexB], Items[indexA]);
         OnInventoryChanged?.Invoke();
+//        Debug.Log("Inventory: OnInventoryChanged invoked from SwapItems.");
     }
 
     public ItemInstance GetItemAt(int index)
@@ -128,5 +134,6 @@ public class Inventory
         if (index < 0 || index >= MaxSize) return;
         Items[index] = item;
         OnInventoryChanged?.Invoke();
+//        Debug.Log("Inventory: OnInventoryChanged invoked from SetItemAt.");
     }
 }

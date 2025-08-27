@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: f91e1719681138344917d895ee5f780e
+guid: 0fa2da96e6ea12842a38562d15c70f6e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2500295678424699892
-    second: Item_Gold_0
+      213: 3684886395777432642
+    second: LabelBackground_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Item_Gold_0
+      name: LabelBackground_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 76
-        height: 80
+        width: 153
+        height: 40
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4f3d2f12ca5d2b220800000000000000
-      internalID: 2500295678424699892
+      spriteID: 24cbbf157a8532330800000000000000
+      internalID: 3684886395777432642
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Item_Gold_0: 2500295678424699892
+      LabelBackground_0: 3684886395777432642
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

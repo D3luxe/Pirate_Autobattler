@@ -169,7 +169,7 @@ public class ShipState
         if (indexA < 0 || indexA >= Equipped.Length || indexB < 0 || indexB >= Equipped.Length) return;
         (Equipped[indexA], Equipped[indexB]) = (Equipped[indexB], Equipped[indexA]);
         OnEquipmentChanged?.Invoke();
-        Debug.Log("ShipState: OnEquipmentChanged invoked from SwapEquipment.");
+        //Debug.Log("ShipState: OnEquipmentChanged invoked from SwapEquipment.");
     }
 
     public void RemoveEquippedAt(int index)
@@ -178,7 +178,7 @@ public class ShipState
         {
             Equipped[index] = null;
             OnEquipmentChanged?.Invoke();
-            Debug.Log("ShipState: OnEquipmentChanged invoked from RemoveEquippedAt.");
+            //Debug.Log("ShipState: OnEquipmentChanged invoked from RemoveEquippedAt.");
         }
     }
 
@@ -188,7 +188,7 @@ public class ShipState
         {
             Equipped[index] = item;
             OnEquipmentChanged?.Invoke();
-            Debug.Log("ShipState: OnEquipmentChanged invoked from SetEquippedAt.");
+            //Debug.Log("ShipState: OnEquipmentChanged invoked from SetEquippedAt.");
         }
     }
 
@@ -229,7 +229,7 @@ public class ShipState
         // Healing nullified if HP <= 0 in the same tick
         if (CurrentHealth <= 0)
         {
-            Debug.Log($"{Def.displayName} is at 0 HP. Healing nullified.");
+            //Debug.Log($"{Def.displayName} is at 0 HP. Healing nullified.");
             return;
         }
 

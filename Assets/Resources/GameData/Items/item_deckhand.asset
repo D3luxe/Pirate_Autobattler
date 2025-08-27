@@ -15,7 +15,7 @@ MonoBehaviour:
   id: item_deckhand
   displayName: Deckhand
   description: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 909ea20a5b5b87c46b5d50d4b76f74fb, type: 3}
   rarity: 0
   isActive: 1
   cooldownSec: 2

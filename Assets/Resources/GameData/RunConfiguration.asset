@@ -19,7 +19,7 @@ MonoBehaviour:
   startingGold: 10
   rerollBaseCost: 2
   rerollGrowth: 0
-  inventorySize: 5
+  inventorySize: 10
   rewardGoldPerWin: 5
   shopEveryN: 3
   portEveryN: 5

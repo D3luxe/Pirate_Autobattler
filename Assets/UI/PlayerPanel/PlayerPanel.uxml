@@ -1,47 +1,50 @@
-
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <!-- Define templates for reusable components -->
-    <ui:Template name="ShipPanelTemplate" src="ShipPanel.uxml" />
-    <ui:Template name="SlotTemplate" src="Slot.uxml" />
-
-    <!-- Main Panel -->
-    <ui:VisualElement name="player-panel" class="player-panel">
-
-        <!-- Left Side: Ship and Equipment -->
-        <ui:VisualElement name="left-column" class="player-panel__left-column">
-            <ui:Instance template="ShipPanelTemplate" name="ship-panel-instance" />
-            <ui:VisualElement name="equipment-bar" class="equipment-bar" />
-        </ui:VisualElement>
-
-        <!-- Right Side: Counters and Controls -->
-        <ui:VisualElement name="right-column" class="player-panel__right-column">
-            <ui:VisualElement name="hud-counters" class="hud-counters">
-                <ui:VisualElement name="gold-counter" class="hud-counter">
-                    <ui:Image name="gold-icon" class="hud-counter__icon" />
-                    <ui:Label name="gold-label" text="0" class="hud-counter__label" />
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="ShipPanelTemplate" src="project://database/Assets/UI/PlayerPanel/ShipPanel.uxml?fileID=9197481963319205126&amp;guid=74b2d9d265bec2146b4e3607d29ce1fc&amp;type=3#ShipPanel" />
+    <Style src="project://database/Assets/UI/PlayerPanel/player-panel.uss?fileID=7433441132597879392&amp;guid=e6042dd557d2a57459742ed1366a4cd0&amp;type=3#player-panel" />
+    <ui:VisualElement name="player-panel" class="player-panel" style="align-items: center; justify-content: center; position: absolute; top: auto; left: auto; right: auto; bottom: 0%;">
+        <ui:VisualElement name="main-container" style="width: 1000px; height: 380px; position: relative; background-image: url(&quot;project://database/Assets/Art/UI/PanelBackgroundWithEquipment.png?fileID=2800000&amp;guid=f366d59ef64fe1b488c13bc5a583333b&amp;type=3#PanelBackgroundWithEquipment&quot;);">
+            <ui:VisualElement name="top-bar" style="position: absolute; width: 750px; left: 125px; height: 70px; top: 23px; justify-content: center; flex-direction: row; align-items: center;">
+                <ui:VisualElement name="equipment-bar" class="equipment-bar" style="display: flex; flex-direction: row; flex-wrap: nowrap;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="left-column" style="position: absolute; top: 127px; left: 32px; flex-direction: column; align-items: center;">
+                <ui:Instance template="ShipPanelTemplate" name="ship-panel-instance" />
+            </ui:VisualElement>
+            <ui:VisualElement name="middle-column" style="position: absolute; left: 365px; top: 127px; width: 360px; height: 140px;">
+                <ui:VisualElement name="inventory-container" style="flex-grow: 1; display: flex; flex-direction: row; flex-wrap: wrap;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="right-column" style="position: absolute; top: 119px; left: 756px; width: 200px; height: 220px;">
+                <ui:VisualElement name="counters-container" style="width: 153px; height: 135px;">
+                    <ui:VisualElement name="Gold" style="position: absolute; top: 0; left: 0; width: 153px; height: 40px;">
+                        <ui:VisualElement name="gold-counter" class="hud-counter">
+                            <ui:Image name="gold-icon" class="hud-counter__icon" style="width: 40px; height: 40px; position: absolute; top: 0; left: 16px;" />
+                            <ui:Label name="gold-label" text="0" class="hud-counter__label" style="position: absolute; left: 63px; height: 40px; width: 50px; color: rgb(192, 139, 0); -unity-text-align: middle-left; font-size: 20px; text-shadow: 2px 1px 0 rgb(0, 0, 0);" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Lives" style="position: absolute; top: 45px; left: 0; width: 153px; height: 40px;">
+                        <ui:VisualElement name="lives-counter" class="hud-counter">
+                            <ui:Image name="lives-icon" class="hud-counter__icon" style="width: 27px; height: 25px; position: absolute; top: 6px; left: 22px;" />
+                            <ui:Label name="lives-label" text="0" class="hud-counter__label" style="position: absolute; left: 63px; width: 52px; height: 40px; -unity-text-align: middle-left; font-size: 20px; color: rgb(176, 4, 4); text-shadow: 2px 1px 0 rgb(0, 0, 0);" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Depth" style="position: absolute; top: 90px; left: 0; width: 153px; height: 40px;">
+                        <ui:VisualElement name="depth-counter" class="hud-counter">
+                            <ui:Image name="depth-icon" class="hud-counter__icon" style="width: 32px; height: 32px; position: absolute; top: 3px; left: 18px;" />
+                            <ui:Label name="depth-label" text="0" class="hud-counter__label" style="width: 52px; height: 40px; position: absolute; left: 63px; -unity-text-align: middle-left; color: rgb(178, 178, 178); font-size: 20px; text-shadow: 2px 1px 0 rgb(0, 0, 0);" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement name="lives-counter" class="hud-counter">
-                    <ui:Image name="lives-icon" class="hud-counter__icon" />
-                    <ui:Label name="lives-label" text="0" class="hud-counter__label" />
-                </ui:VisualElement>
-                <ui:VisualElement name="depth-counter" class="hud-counter">
-                    <ui:Image name="depth-icon" class="hud-counter__icon" />
-                    <ui:Label name="depth-label" text="0" class="hud-counter__label" />
+                <ui:VisualElement name="controls-container" style="position: absolute; top: 149px; left: 7px; flex-direction: row; align-items: center;">
+                    <ui:Button name="pause-button" class="control-button" style="width: 61px; height: 61px; background-color: rgba(0, 0, 0, 0); border-width: 0; padding: 0;">
+                        <ui:Image name="pause-icon" style="width: 100%; height: 100%;" />
+                    </ui:Button>
+                    <ui:Button name="settings-button" class="control-button" style="width: 42px; height: 42px; background-color: rgba(0, 0, 0, 0); border-width: 0; padding: 0; margin-left: 10px;">
+                        <ui:Image name="settings-icon" style="width: 100%; height: 100%;" />
+                    </ui:Button>
+                    <ui:Button name="battle-speed-button" class="control-button" style="width: 68px; height: 34px; background-color: rgba(0, 0, 0, 0); border-width: 0; padding: 0; margin-left: 10px;">
+                        <ui:Image name="battle-speed-icon" style="width: 100%; height: 100%;" />
+                    </ui:Button>
                 </ui:VisualElement>
             </ui:VisualElement>
-
-            <ui:VisualElement name="controls-row" class="controls-row">
-                <ui:Button name="pause-button" class="control-button">
-                    <ui:Image name="pause-icon" />
-                </ui:Button>
-                <ui:Button name="settings-button" class="control-button">
-                    <ui:Image name="settings-icon" />
-                </ui:Button>
-                <ui:Button name="battle-speed-button" class="control-button">
-                    <ui:Image name="battle-speed-icon" />
-                </ui:Button>
-            </ui:VisualElement>
         </ui:VisualElement>
-
     </ui:VisualElement>
 </ui:UXML>

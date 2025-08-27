@@ -14,7 +14,7 @@ namespace PirateRoguelike.UI
         // Slot Interaction Events
         public static Action<int> OnSlotClicked;
         public static Action<int, PointerDownEvent> OnSlotBeginDrag;
-        public static Action<int, int> OnSlotDropped; // fromSlot, toSlot
+        public static Action<int, SlotContainerType, int, SlotContainerType> OnSlotDropped; // fromSlotId, fromContainer, toSlotId, toContainer
 
         // Tooltip Events
         public static Action<int> OnTooltipRequested;

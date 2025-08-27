@@ -1,45 +1,37 @@
-
-/* USS Variables */
 :root {
-    --font-main: resource("Fonts/some-pirate-font"); /* Placeholder */
-    --color-background: rgba(10, 20, 30, 0.8);
-    --color-foreground: #EFEFEF;
-    --color-hp: #FF4444;
-    --color-hp-background: #441111;
+    --color-background: rgba(10, 20, 30, 0);
+    --color-foreground: rgb(239, 239, 239);
+    --color-hp: rgb(255, 68, 68);
+    --color-hp-background: rgb(68, 17, 17);
     --color-cooldown: rgba(0, 0, 0, 0.7);
-    --color-rarity-bronze: #CD7F32;
-    --color-rarity-silver: #C0C0C0;
-    --color-rarity-gold: #FFD700;
-    --color-rarity-diamond: #B9F2FF;
+    --color-rarity-bronze: rgb(205, 127, 50);
+    --color-rarity-silver: rgb(192, 192, 192);
+    --color-rarity-gold: rgb(255, 215, 0);
+    --color-rarity-diamond: rgb(185, 242, 255);
 }
 
-/* Main Panel Layout */
 .player-panel {
     flex-grow: 1;
     flex-direction: row;
     justify-content: space-between;
-    background-color: var(--color-background);
+    background-color: rgba(10, 20, 30, 0);
     padding: 10px;
-    /* For safe area, assuming a class is added via C# */
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-    padding-bottom: env(safe-area-inset-bottom);
+    align-self: center;
 }
 
 .player-panel__left-column {
     flex-direction: column;
     align-items: center;
-    flex-shrink: 0; /* Prevent column from collapsing */
+    flex-shrink: 0;
 }
 
 .player-panel__right-column {
     flex-direction: column;
     justify-content: space-between;
     align-items: flex-end;
-    flex-shrink: 0; /* Prevent column from collapsing */
+    flex-shrink: 0;
 }
 
-/* Ship Panel */
 .ship-panel {
     align-items: center;
 }
@@ -47,12 +39,15 @@
 .ship-panel__sprite {
     width: 128px;
     height: 128px;
+    background-color: transparent;
+    color: white;
+    scale: 1 1;
 }
 
 .ship-panel__name {
     font-size: 20px;
     -unity-font-style: bold;
-    color: var(--color-foreground);
+    color: rgb(239, 239, 239);
 }
 
 .hp-bar {
@@ -63,33 +58,47 @@
 
 .hp-bar__background {
     flex-grow: 1;
-    background-color: var(--color-hp-background);
+    background-color: rgb(68, 17, 17);
     border-radius: 5px;
 }
 
 .hp-bar__foreground {
     flex-grow: 1;
-    background-color: var(--color-hp);
+    background-color: rgb(255, 68, 68);
     border-radius: 5px;
-    width: 50%; /* Default width */
+    width: 50%;
     transition: width 0.5s ease-in-out;
 }
 
-/* Equipment Bar */
 .equipment-bar {
-    flex-direction: row;
-    flex-wrap: wrap; /* Default to wrap */
     justify-content: center;
     margin-top: 10px;
-    width: 350px; /* 5 slots * (60px width + 10px margin) */
+    width: 350px;
 }
 
-/* Slot Styling */
+.inventory-container {
+    justify-content: flex-start;
+    width: 350px;
+    height: 140px;
+}
+
 .slot {
     width: 60px;
     height: 60px;
     margin: 5px;
-    background-color: #333;
+    background-color: rgba(51, 51, 51, 0);
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.slot {
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    background-color: rgba(51, 51, 51, 0);
     justify-content: center;
     align-items: center;
     border-radius: 8px;
@@ -101,43 +110,63 @@
     height: 100%;
     border-width: 3px;
     border-radius: 8px;
+    background-color: transparent;
+    color: white;
+    scale: 1 1;
 }
 
 .slot__icon {
     width: 50px;
     height: 50px;
+    background-color: transparent;
+    color: white;
+    scale: 1 1;
 }
 
 .slot__cooldown-overlay {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: var(--color-cooldown);
+    background-color: rgba(0, 0, 0, 0.7);
     transform-origin: bottom;
-    scale: 1 0; /* Default scale, will be changed by C# */
+    scale: 1 0;
     transition: scale 0.1s linear;
 }
 
-/* Slot States */
-.slot--empty .slot__icon { visibility: hidden; }
-.slot--disabled .slot__icon { -unity-slice-scale: 0.8; }
+.slot--empty .slot__icon {
+    visibility: hidden;
+}
+
+.slot--disabled .slot__icon {
+    -unity-slice-scale: 0.8;
+}
+
 .slot--hover {
     border-color: white;
     border-width: 2px;
 }
+
 .slot--merge {
-    /* Add a special effect, e.g., a glowing border */
     --glow-color: yellow;
     box-shadow: 0 0 10px 5px var(--glow-color);
 }
 
-/* Rarity Classes */
-.rarity--bronze .slot__rarity-frame { border-color: var(--color-rarity-bronze); }
-.rarity--silver .slot__rarity-frame { border-color: var(--color-rarity-silver); }
-.rarity--gold .slot__rarity-frame { border-color: var(--color-rarity-gold); }
-.rarity--diamond .slot__rarity-frame { border-color: var(--color-rarity-diamond); }
+.rarity--bronze .slot__rarity-frame {
+    border-color: rgb(205, 127, 50);
+}
 
-/* HUD Counters */
+.rarity--silver .slot__rarity-frame {
+    border-color: rgb(192, 192, 192);
+}
+
+.rarity--gold .slot__rarity-frame {
+    border-color: rgb(255, 215, 0);
+}
+
+.rarity--diamond .slot__rarity-frame {
+    border-color: rgb(185, 242, 255);
+}
+
 .hud-counters {
     flex-direction: row;
 }
@@ -152,14 +181,16 @@
     width: 24px;
     height: 24px;
     margin-right: 5px;
+    background-color: transparent;
+    color: white;
+    scale: 1 1;
 }
 
 .hud-counter__label {
     font-size: 18px;
-    color: var(--color-foreground);
+    color: rgb(239, 239, 239);
 }
 
-/* Controls Row */
 .controls-row {
     flex-direction: row;
     margin-top: 10px;
@@ -171,10 +202,20 @@
     margin-left: 10px;
 }
 
-/* Focus Ring for Keyboard/Gamepad Navigation */
-.control-button:focus,
+.control-button Image {
+    background-color: transparent;
+    color: white;
+    scale: 1 1;
+}
+
+.control-button:focus {
+    border-width: 2px;
+    border-color: rgb(77, 144, 254);
+    box-shadow: 0 0 5px 2px rgb(77, 144, 254);
+}
+
 .slot:focus {
     border-width: 2px;
-    border-color: #4D90FE; /* A distinct blue focus color */
-    box-shadow: 0 0 5px 2px #4D90FE;
+    border-color: rgb(77, 144, 254);
+    box-shadow: 0 0 5px 2px rgb(77, 144, 254);
 }

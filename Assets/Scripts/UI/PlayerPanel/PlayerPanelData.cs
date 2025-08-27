@@ -39,5 +39,6 @@ namespace PirateRoguelike.UI
         IShipViewData ShipData { get; }
         IHudViewData HudData { get; }
         List<ISlotViewData> EquipmentSlots { get; }
+        List<ISlotViewData> InventorySlots { get; }
     }
 }

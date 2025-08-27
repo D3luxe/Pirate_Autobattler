@@ -1,9 +1,8 @@
-
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:VisualElement name="slot" class="slot">
-        <ui:VisualElement name="rarity-frame" class="slot__rarity-frame" />
-        <ui:Image name="icon" class="slot__icon" />
-        <ui:VisualElement name="cooldown-overlay" class="slot__cooldown-overlay" />
-        <ui:Label name="slot-id-label" class="slot__id-label" />
+        <ui:Image name="icon" class="slot__icon" style="position: absolute; width: 50px; height: 50px; left: 5px; top: 5px;" />
+        <ui:Image name="rarity-frame" class="slot__rarity-frame" style="position: absolute; width: 60px; height: 60px;" />
+        <ui:VisualElement name="cooldown-overlay" class="slot__cooldown-overlay" style="position: absolute; width: 60px; height: 60px;" />
+        <ui:Label name="slot-id-label" class="slot__id-label" style="position: absolute; width: 80px; top: 72px; left: auto;" />
     </ui:VisualElement>
 </ui:UXML>

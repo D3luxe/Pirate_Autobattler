@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: ship_brigantine
   m_EditorClassIdentifier: Assembly-CSharp::ShipSO
   id: ship_brigantine
-  displayName: Brigantine
+  displayName: Brigantine2
   baseMaxHealth: 100
   baseItemSlots: 4
   builtInItems: []
   itemLoadout: []
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: ca7641a3acaf6e34da4ae29fde7f717e, type: 3}
   rarity: 0
   Cost: 0
