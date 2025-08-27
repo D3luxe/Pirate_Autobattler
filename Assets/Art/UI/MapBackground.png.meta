@@ -46,13 +46,13 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 0, y: 75, z: 0, w: 75}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -236,7 +236,7 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: 41eff58d9dfd9b1408cad254a6bcecd3
-    internalID: 0
+    internalID: 238847759
     vertices: []
     indices: 
     edges: []
@@ -249,12 +249,12 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":true,"gridCellCount":{"x":3.0,"y":2.0},"gridSpriteSize":{"x":206.0,"y":230.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      MapBackground_0: -4276307609272850541
-      MapBackground_1: -794117370
-      MapBackground_2: 1045065359
-      MapBackground_3: 397972637
-      MapBackground_4: 187901888
-      MapBackground_5: -319876292
+      MapBackground_0: 1808412827
+      MapBackground_1: 9090767
+      MapBackground_2: -216963081
+      MapBackground_3: -935218513
+      MapBackground_4: 203629833
+      MapBackground_5: -1866956445
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

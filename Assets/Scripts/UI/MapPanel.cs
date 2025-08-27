@@ -10,13 +10,17 @@ public class MapPanel : MonoBehaviour
 {
     public VisualTreeAsset mapPanelAsset;
     public VisualTreeAsset nodeButtonAsset;
+    public Sprite mapBackgroundSprite;
 
     private VisualElement _root;
     private VisualElement _mapNodesContainer;
     private VisualElement _mapLinesContainer;
     private VisualElement _pannableMapContent;
-    private VisualElement _mapBackground;
+    private Image _mapBackgroundImage;
     private List<List<MapNodeData>> _mapNodes; // Make mapNodes a class member
+
+    private float _minNodeY;
+    private float _maxNodeY;
 
     private bool _isDragging = false;
     private Vector2 _lastMousePosition;
@@ -29,7 +33,7 @@ public class MapPanel : MonoBehaviour
         _mapNodesContainer = _root.Q<VisualElement>("MapNodes");
         _mapLinesContainer = _root.Q<VisualElement>("MapLines");
         _pannableMapContent = _root.Q<VisualElement>("PannableMapContent");
-        _mapBackground = _root.Q<VisualElement>("MapBackground");
+        _mapBackgroundImage = _root.Q<Image>("MapBackgroundImage");
 
         _pannableMapContent.RegisterCallback<PointerDownEvent>(OnPointerDown);
         _pannableMapContent.RegisterCallback<PointerMoveEvent>(OnPointerMove);
@@ -57,6 +61,8 @@ public class MapPanel : MonoBehaviour
     private const float NODE_HEIGHT = 100f;
     private const float HORIZONTAL_PADDING = 20f;
     private const float VERTICAL_PADDING = 20f;
+    private const float TOP_BORDER_HEIGHT = 75f;
+    private const float BOTTOM_BORDER_HEIGHT = 75f;
 
     private void GenerateMapVisuals()
     {
@@ -68,7 +74,7 @@ public class MapPanel : MonoBehaviour
 
         MapManager.Instance.GenerateMapIfNeeded();
 
-        _mapNodes = MapManager.Instance.GetMapNodes();
+        _mapNodes = MapManager.Instance.GetConvertedMapNodes();
         if (_mapNodes == null || _mapNodes.Count == 0)
         {
             Debug.LogError("Map data not found or empty!");
@@ -132,9 +138,19 @@ public class MapPanel : MonoBehaviour
                     _mapNodesContainer.Add(nodeElement);
                     currentNodeElements.Add(nodeElement);
                     
+                    
                     nodeElement.style.position = Position.Absolute;
-                    nodeElement.style.left = 10f + nodeData.rowIndex * (NODE_WIDTH + HORIZONTAL_PADDING);
-                    nodeElement.style.top = 10f + (_mapNodes.Count - 1 - nodeData.columnIndex) * (NODE_HEIGHT + VERTICAL_PADDING);
+
+                    float rootWidth = _root.resolvedStyle.width;
+                    float mapContainerWidth = rootWidth * 0.8f;
+                    float availableWidth = mapContainerWidth;
+
+                    int nodesInCurrentColumn = _mapNodes[i].Count;
+                    float totalNodesWidth = nodesInCurrentColumn * NODE_WIDTH + (nodesInCurrentColumn - 1) * HORIZONTAL_PADDING;
+                    float startLeftOffset = (availableWidth - totalNodesWidth) / 2f;
+
+                    nodeElement.style.left = startLeftOffset + nodeData.rowIndex * (NODE_WIDTH + HORIZONTAL_PADDING);
+                    nodeElement.style.top = TOP_BORDER_HEIGHT + 10f + (_mapNodes.Count - 1 - nodeData.columnIndex) * (NODE_HEIGHT + VERTICAL_PADDING);
                     Debug.Log($"MapPanel Debug: Node (i:{nodeData.columnIndex}, j:{nodeData.rowIndex}) - Left: {nodeElement.style.left.value.ToString()}, Top: {nodeElement.style.top.value.ToString()}");
                 }
             }
@@ -191,19 +207,37 @@ public class MapPanel : MonoBehaviour
             }
             UpdateNodeVisuals(_mapNodes, currentNodeElements);
 
-            // Calculate total map content height and set it to _mapBackgroundSprite
-            float maxNodeTop = 0f;
+            // Calculate total map content height and set it to _pannableMapContent
+            _minNodeY = float.MaxValue;
+            _maxNodeY = float.MinValue;
 
-            if (_mapNodes != null && _mapNodes.Any())
+            foreach (var nodeElement in currentNodeElements)
             {
-                maxNodeTop = 10f + (_mapNodes.Count - 1 - 0) * (NODE_HEIGHT + VERTICAL_PADDING);
-            }
-            float totalMapContentHeight = maxNodeTop + NODE_HEIGHT + 10f; // Add node height and some bottom offset
-            _mapBackground.style.height = totalMapContentHeight + 150f;
+                float nodeTop = nodeElement.style.top.value.value;
+                float nodeBottom = nodeTop + NODE_HEIGHT; // Assuming NODE_HEIGHT is the actual height of the node VisualElement
 
-            Debug.Log($"MapPanel Debug: maxNodeTop: {maxNodeTop}");
-            Debug.Log($"MapPanel Debug: totalMapContentHeight (nodes only): {totalMapContentHeight}");
-            Debug.Log($"MapPanel Debug: _mapBackground.style.height: {_mapBackground.style.height.value.ToString()}");
+                if (nodeTop < _minNodeY) _minNodeY = nodeTop;
+                if (nodeBottom > _maxNodeY) _maxNodeY = nodeBottom;
+            }
+
+            float calculatedNodeContentHeight = _maxNodeY - _minNodeY;
+            float totalMapContentHeight = calculatedNodeContentHeight + TOP_BORDER_HEIGHT + BOTTOM_BORDER_HEIGHT; // Add 150f for 75px top and bottom borders
+            _pannableMapContent.style.height = totalMapContentHeight;
+
+            // Assign the background sprite and set scale mode
+            if (mapBackgroundSprite != null)
+            {
+                _mapBackgroundImage.sprite = mapBackgroundSprite;
+                _mapBackgroundImage.scaleMode = ScaleMode.StretchToFill;
+            }
+            else
+            {
+                Debug.LogWarning("MapPanel: mapBackgroundSprite is not assigned in the Inspector.");
+            }
+
+            Debug.Log($"MapPanel Debug: calculatedNodeContentHeight: {calculatedNodeContentHeight}");
+            Debug.Log($"MapPanel Debug: totalMapContentHeight (including borders): {totalMapContentHeight}");
+            Debug.Log($"MapPanel Debug: _pannableMapContent.style.height: {_pannableMapContent.style.height.value.ToString()}");
 
         });
     }
@@ -222,37 +256,17 @@ public class MapPanel : MonoBehaviour
             float deltaY = evt.position.y - _lastMousePosition.y;
             float newTop = _pannableMapContent.style.top.value.value + deltaY;
 
-            // Calculate limits based on actual map content and visible area
-            float maxNodeTop = 0f;
-
-            if (_mapNodes != null && _mapNodes.Any())
-            {
-                // The nodes are laid out from bottom to top, so the highest 'top' value (lowest visual position)
-                // will be for nodes in the first column (columnIndex = 0).
-                // We need to find the maximum 'top' value among all nodes in the first column.
-                // Since all nodes in a column have the same columnIndex, we can just use the formula for columnIndex = 0.
-                maxNodeTop = 10f + (_mapNodes.Count - 1 - 0) * (NODE_HEIGHT + VERTICAL_PADDING);
-            }
-
-            float totalMapContentHeight = maxNodeTop + NODE_HEIGHT + 10f; // Add node height and some bottom offset
-
             float visibleViewportHeight = _root.resolvedStyle.height;
 
             // Define padding for the top and bottom of the visible area
             float topPadding = 50f; // Example: 50 pixels from the top
             float bottomPadding = 50f; // Example: 50 pixels from the bottom
 
-            // Calculate minPanTop (when the bottom of the map content aligns with the bottom of the viewport)
-            // The map content moves up, so a more negative 'top' value means it's moved further up.
-            // When the bottom of the map content is at the bottom of the viewport,
-            // its 'top' position will be: visibleViewportHeight - totalMapContentHeight - bottomPadding
-            float minPanTop = visibleViewportHeight - totalMapContentHeight - bottomPadding;
-
             // Calculate maxPanTop (when the top of the map content aligns with the top of the viewport)
-            // The map content moves down, so a more positive 'top' value means it's moved further down.
-            // When the top of the map content is at the top of the viewport,
-            // its 'top' position will be: topPadding
             float maxPanTop = topPadding;
+
+            // Calculate minPanTop (when the bottom of the map content aligns with the bottom of the viewport)
+            float minPanTop = (visibleViewportHeight - bottomPadding) - _pannableMapContent.style.height.value.value;
 
             newTop = Mathf.Clamp(newTop, minPanTop, maxPanTop);
 
@@ -334,7 +348,7 @@ public class MapPanel : MonoBehaviour
             return;
         }
 
-        MapNodeData playerCurrentNode = MapManager.Instance.GetMapNodes()
+        MapNodeData playerCurrentNode = MapManager.Instance.GetConvertedMapNodes()
             .SelectMany(column => column)
             .FirstOrDefault(n => 
                 n.columnIndex == GameSession.CurrentRunState.currentColumnIndex && 

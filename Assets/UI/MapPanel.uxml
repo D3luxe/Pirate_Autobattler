@@ -1,10 +1,8 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <Style src="MapPanelStyles.uss" />
-    <ui:VisualElement name="MapContainer" style="flex-grow: 1; height: 100%; position: relative;">
-        <ui:VisualElement name="MapBackground" style="position: absolute; background-image: url(&quot;project://database/Assets/Art/UI/MapBackground.png?fileID=2800000&amp;guid=bd96be6edcea709419b9deb02593db59&amp;type=3#MapBackground&quot;); -unity-slice-type: sliced; -unity-background-scale-mode: scale-to-fit; -unity-slice-left: 0; -unity-slice-top: 0; -unity-slice-right: 0; -unity-slice-bottom: 0; width: 100%; height: 100%;" />
-        <ui:VisualElement name="PannableMapContent" style="position: absolute; width: 100%; height: 100%;">
-            <ui:VisualElement name="MapNodes" style="flex-grow: 1; position: relative;" />
-            <ui:VisualElement name="MapLines" style="flex-grow: 1; position: absolute; align-self: center;" />
-        </ui:VisualElement>
-    </ui:VisualElement>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+  <ScrollView name="MapScroll" horizontal-scroller-visibility="Hidden">
+    <VisualElement name="MapCanvas" class="map-canvas">
+      <VisualElement name="EdgeLayer" class="edge-layer"/>
+      <!-- Node elements are created at runtime -->
+    </VisualElement>
+  </ScrollView>
 </ui:UXML>

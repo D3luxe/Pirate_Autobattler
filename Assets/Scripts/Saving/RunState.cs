@@ -21,4 +21,11 @@ public class RunState
     public int rerollsThisShop; // Save reroll count for current shop
     public List<RunModifier> activeRunModifiers;
     public List<SerializableItemInstance> battleRewards; // Items offered as battle rewards
+    public UnknownContext unknownContext; // Context for unknown node resolution
+
+    public RunState()
+    {
+        pityState = new PityState();
+        unknownContext = new UnknownContext();
+    }
 }

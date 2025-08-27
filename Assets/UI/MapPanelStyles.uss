@@ -1,0 +1,21 @@
+.current-node {
+    border-width: 3px;
+    border-color: yellow;
+    background-color: rgba(255, 255, 0, 0.3); /* Semi-transparent yellow */
+}
+
+.reachable-node {
+    border-width: 2px;
+    border-color: green;
+    background-color: rgba(0, 255, 0, 0.1); /* Semi-transparent green */
+}
+
+.unreachable-node {
+    opacity: 0.3;
+    -unity-slice-scale: 50%; /* Example: make it slightly smaller */
+}
+
+.map-node {
+    width: 100px;
+    height: 100px;
+}

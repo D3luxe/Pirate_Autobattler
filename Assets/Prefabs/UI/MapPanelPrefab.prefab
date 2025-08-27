@@ -70,3 +70,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapPanel
   mapPanelAsset: {fileID: 9197481963319205126, guid: 131cc073b5614264c96e2aff081d0821, type: 3}
   nodeButtonAsset: {fileID: 9197481963319205126, guid: 930dc29b07d5d3e41a90a83845327c33, type: 3}
+  mapBackgroundSprite: {fileID: 21300000, guid: bd96be6edcea709419b9deb02593db59, type: 3}

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using PirateRoguelike.Data;
+using Pirate.MapGen; // Added for Rules
 
 [CreateAssetMenu(fileName = "RunConfigSO", menuName = "Data/RunConfigSO")]
 public class RunConfigSO : ScriptableObject
@@ -18,6 +19,7 @@ public class RunConfigSO : ScriptableObject
     public int portEveryN;
     public int eliteEveryN;
     public List<FloorRaritySettings> floorRaritySettings;
+    public Rules rules; // Map generation rules
 }
 
 [System.Serializable]

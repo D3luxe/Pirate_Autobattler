@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Pirate.MapGen; // Added for NodeType
 
 [Serializable]
 public class MapNodeData
 {
-    public EncounterSO encounter;
+    public NodeType nodeType; // The type of map node (Battle, Elite, Unknown, etc.)
+    public EncounterSO encounter; // The specific encounter data for this node (resolved from nodeType)
     public List<int> nextNodeIndices = new List<int>();
     public int columnIndex;
     public int rowIndex;

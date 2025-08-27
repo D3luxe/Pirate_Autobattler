@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using PirateRoguelike.Data;
+using Pirate.MapGen; // Added for MapGraph, NodeType, ActSpec, Rules, MapGenerator, GenerationResult
+using System; // Added for Enum.Parse
 
 public class MapManager : MonoBehaviour
 {
@@ -10,17 +12,13 @@ public class MapManager : MonoBehaviour
     public int mapLength = 15;
     public Vector2Int nodesPerColumnRange = new Vector2Int(2, 4);
 
-    private List<List<MapNodeData>> _mapNodes = new List<List<MapNodeData>>();
+    private MapGraphData _mapGraphData; // Changed to MapGraphData
     private bool _isMapGenerated = false;
     private RunConfigSO _runConfig;
+    private List<List<MapNodeData>> _convertedMapNodes;
 
-    public List<List<MapNodeData>> GetMapNodes() => _mapNodes;
-
-    public void SetMapNodes(List<List<MapNodeData>> nodes)
-    {
-        _mapNodes = nodes;
-        _isMapGenerated = true;
-    }
+    public MapGraphData GetMapGraphData() => _mapGraphData; // Changed return type
+    public List<List<MapNodeData>> GetConvertedMapNodes() => _convertedMapNodes;
 
     void Start()
     {
@@ -48,255 +46,170 @@ public class MapManager : MonoBehaviour
         if (_isMapGenerated) return;
         GenerateMapData();
         _isMapGenerated = true;
-        PrecomputeReachabilityCache();
+        // PrecomputeReachabilityCache(); // Removed
     }
+
+    private MapGraph _currentMapGraph; // Store the generated MapGraph
 
     void GenerateMapData()
     {
-        _mapNodes.Clear();
-
-        // Define encounter probabilities (adjust as needed for balance)
-        var encounterProbabilities = new List<EncounterProbability>
+        ActSpec actSpec = new ActSpec
         {
-            new EncounterProbability { type = EncounterType.Battle, weight = 60 },
-            new EncounterProbability { type = EncounterType.Shop, weight = 10 },
-            new EncounterProbability { type = EncounterType.Port, weight = 15 },
-            new EncounterProbability { type = EncounterType.Event, weight = 15 }
+            Rows = mapLength,
+            Columns = nodesPerColumnRange.y,
+            Branchiness = 0.5f
         };
 
-        // Pre-load all possible encounters
-        Dictionary<EncounterType, List<EncounterSO>> availableEncounters = new Dictionary<EncounterType, List<EncounterSO>>();
-        foreach (EncounterType type in System.Enum.GetValues(typeof(EncounterType)))
+        Rules rules = new Rules();
+
+        MapGenerator mapGenerator = new MapGenerator();
+        ulong seed = 12345; // Example seed
+        GenerationResult result = mapGenerator.GenerateMap(actSpec, rules, seed);
+
+        if (result.Audits.IsValid)
         {
-            availableEncounters[type] = GameDataRegistry.GetAllEncounters().Where(e => e.type == type && !e.isElite).ToList();
+            _currentMapGraph = result.Graph;
+            ConvertMapGraphToMapGraphData(result); // Pass result to get subSeeds
+            Debug.Log("Map generated successfully!");
         }
-        List<EncounterSO> availableEliteEncounters = GameDataRegistry.GetAllEncounters().Where(e => e.isElite).ToList();
-
-        EncounterSO bossEncounter = GameDataRegistry.GetEncounter("enc_boss");
-        if (bossEncounter == null)
+        else
         {
-            Debug.LogError("Boss encounter (enc_boss) not found in GameDataRegistry!");
-            return;
-        }
-
-        int lastShopColumn = -_runConfig.shopEveryN; // Initialize to force shop early
-        int lastPortColumn = -_runConfig.portEveryN; // Initialize to force port early
-        int lastEliteColumn = -_runConfig.eliteEveryN; // Initialize to force elite early
-
-        // Generate nodes data
-        for (int i = 0; i < mapLength; i++)
-        {
-            int nodesInColumn = (i == 0 || i == mapLength - 1) ? 1 : Random.Range(nodesPerColumnRange.x, nodesPerColumnRange.y + 1);
-            _mapNodes.Add(new List<MapNodeData>());
-
-            bool forceShop = (i - lastShopColumn >= _runConfig.shopEveryN) && (i < mapLength - 1); // Don't force shop on boss column
-            bool forcePort = (i - lastPortColumn >= _runConfig.portEveryN) && (i < mapLength - 1); // Don't force port on boss column
-            bool forceElite = (i - lastEliteColumn >= _runConfig.eliteEveryN) && (i < mapLength - 2); // Don't force elite on boss column or column before boss
-
-            for (int j = 0; j < nodesInColumn; j++)
-            {
-                EncounterType selectedType;
-                bool isEliteNode = false;
-
-                if (i == 0) // First node is always a battle (or a fixed start node type)
-                {
-                    selectedType = EncounterType.Battle;
-                }
-                else if (i == mapLength - 1) // Last node is always the boss
-                {
-                    selectedType = EncounterType.Boss;
-                }
-                else if (forceElite && availableEliteEncounters.Any())
-                {
-                    selectedType = EncounterType.Battle; // Elites are a type of battle
-                    isEliteNode = true;
-                    forceElite = false; // Only force one elite per column
-                    lastEliteColumn = i;
-                }
-                else if (forceShop)
-                {
-                    selectedType = EncounterType.Shop;
-                    forceShop = false; // Only force one shop per column
-                    lastShopColumn = i;
-                }
-                else if (forcePort)
-                {
-                    selectedType = EncounterType.Port;
-                    forcePort = false; // Only force one port per column
-                    lastPortColumn = i;
-                }
-                else
-                {
-                    selectedType = GetRandomEncounterType(encounterProbabilities);
-                }
-
-                EncounterSO encounterSO = null;
-                if (selectedType == EncounterType.Boss)
-                {
-                    encounterSO = bossEncounter;
-                }
-                else if (isEliteNode)
-                {
-                    encounterSO = availableEliteEncounters[Random.Range(0, availableEliteEncounters.Count)];
-                }
-                else if (availableEncounters.ContainsKey(selectedType) && availableEncounters[selectedType].Any())
-                {
-                    if (selectedType == EncounterType.Event)
-                    {
-                        // Filter events by min/max floor
-                        List<EncounterSO> validEvents = availableEncounters[selectedType]
-                            .Where(e => i >= e.minFloor && i <= e.maxFloor)
-                            .ToList();
-                        if (validEvents.Any())
-                        {
-                            encounterSO = validEvents[Random.Range(0, validEvents.Count)];
-                        }
-                        else
-                        {
-                            Debug.LogWarning($"No valid Event encounter found for floor {i}. Falling back to Battle.");
-                            selectedType = EncounterType.Battle; // Fallback
-                            encounterSO = availableEncounters[selectedType][Random.Range(0, availableEncounters[selectedType].Count)];
-                        }
-                    }
-                    else
-                    {
-                        encounterSO = availableEncounters[selectedType][Random.Range(0, availableEncounters[selectedType].Count)];
-                    }
-                }
-
-                if (encounterSO == null)
-                {
-                    Debug.LogWarning($"No {selectedType} encounter found. Falling back to Battle.");
-                    encounterSO = availableEncounters[EncounterType.Battle].FirstOrDefault();
-                    if (encounterSO == null)
-                    {
-                        Debug.LogError("No Battle encounter found. Cannot generate map.");
-                        return;
-                    }
-                }
-
-                _mapNodes[i].Add(new MapNodeData { encounter = encounterSO, columnIndex = i, rowIndex = j, isElite = isEliteNode, iconPath = encounterSO.iconPath, tooltipText = encounterSO.tooltipText });
-            }
-        }
-
-        // Connect nodes data (Slay the Spire inspired)
-        for (int i = 0; i < mapLength - 1; i++)
-        {
-            List<MapNodeData> currentColumn = _mapNodes[i];
-            List<MapNodeData> nextColumn = _mapNodes[i + 1];
-
-            // Ensure every node in the next column has at least one incoming connection
-            foreach (MapNodeData nextNode in nextColumn)
-            {
-                bool isConnected = false;
-                foreach (MapNodeData currentNode in currentColumn)
-                {
-                    if (currentNode.nextNodeIndices.Contains(nextColumn.IndexOf(nextNode)))
-                    {
-                        isConnected = true;
-                        break;
-                    }
-                }
-
-                if (!isConnected)
-                {
-                    // Connect from a random node in the current column
-                    MapNodeData randomCurrentNode = currentColumn[Random.Range(0, currentColumn.Count)];
-                    if (!randomCurrentNode.nextNodeIndices.Contains(nextColumn.IndexOf(nextNode)))
-                    {
-                        randomCurrentNode.nextNodeIndices.Add(nextColumn.IndexOf(nextNode));
-                    }
-                }
-            }
-
-            // Ensure every node in the current column has at least one outgoing connection
-            foreach (MapNodeData currentNode in currentColumn)
-            {
-                if (!currentNode.nextNodeIndices.Any())
-                {
-                    // Connect to a random node in the next column
-                    MapNodeData randomNextNode = nextColumn[Random.Range(0, nextColumn.Count)];
-                    currentNode.nextNodeIndices.Add(nextColumn.IndexOf(randomNextNode));
-                }
-
-                // Add more random connections (branching)
-                int additionalConnections = Random.Range(0, 2); // 0 or 1 additional connection
-                for (int k = 0; k < additionalConnections; k++)
-                {
-                    MapNodeData randomCurrentNode = currentColumn[Random.Range(0, currentColumn.Count)];
-                    int randomNextNodeIndex = Random.Range(0, nextColumn.Count);
-                    if (!randomCurrentNode.nextNodeIndices.Contains(randomNextNodeIndex))
-                    {
-                        randomCurrentNode.nextNodeIndices.Add(randomNextNodeIndex);
-                    }
-                }
-            }
+            Debug.LogError($"Map generation failed: {string.Join(", ", result.Audits.Violations)}");
+            _currentMapGraph = null;
         }
     }
 
-    private EncounterType GetRandomEncounterType(List<EncounterProbability> probabilities)
+    private void ConvertMapGraphToMapGraphData(GenerationResult result)
     {
-        int totalWeight = probabilities.Sum(p => p.weight);
-        int randomNumber = Random.Range(0, totalWeight);
+        _mapGraphData = new MapGraphData();
+        _mapGraphData.rows = result.Graph.Nodes.Max(n => n.Row) + 1; // Assuming rows are 0-indexed
+        _mapGraphData.nodes = new List<MapGraphData.Node>();
+        _mapGraphData.edges = new List<MapGraphData.Edge>();
 
-        foreach (var prob in probabilities)
+        // Populate MapGraphData.nodes
+        foreach (var node in _currentMapGraph.Nodes)
         {
-            if (randomNumber < prob.weight)
+            _mapGraphData.nodes.Add(new MapGraphData.Node
             {
-                return prob.type;
-            }
-            randomNumber -= prob.weight;
+                id = node.Id,
+                row = node.Row,
+                col = node.Col,
+                type = node.Type.ToString(), // Convert NodeType enum to string
+                tags = new List<string>() // Populate tags if needed from MapGraph or EncounterSO
+            });
         }
-        return probabilities.Last().type; // Fallback
-    }
 
-    [System.Serializable]
-    private class EncounterProbability
-    {
-        public EncounterType type;
-        public int weight;
-    }
-
-    private void PrecomputeReachabilityCache()
-    {
-        foreach (var column in _mapNodes)
+        // Populate MapGraphData.edges
+        foreach (var edge in _currentMapGraph.Edges)
         {
-            foreach (var node in column)
+            _mapGraphData.edges.Add(new MapGraphData.Edge
             {
-                node.reachableNodeIndices = CalculateReachableNodes(node);
-            }
+                fromId = edge.FromId,
+                toId = edge.ToId
+            });
         }
-    }
 
-    private List<int> CalculateReachableNodes(MapNodeData startNode)
-    {
-        HashSet<int> reachable = new HashSet<int>();
-        Queue<MapNodeData> queue = new Queue<MapNodeData>();
-
-        queue.Enqueue(startNode);
-        reachable.Add(startNode.GetUniqueNodeId()); // Assuming a method to get a unique ID for the node
-
-        while (queue.Any())
+        // Populate subSeeds and constants
+        _mapGraphData.subSeeds = new MapGraphData.SubSeeds
         {
-            MapNodeData currentNode = queue.Dequeue();
+            decorations = result.SubSeeds.Decorations // Assuming Decorations is available in SubSeeds
+        };
 
-            // Check if there's a next column
-            if (currentNode.columnIndex + 1 < _mapNodes.Count)
+        _mapGraphData.constants = new MapGraphData.Constants
+        {
+            rowHeight = 160f, // Placeholder, tune as needed
+            laneWidth = 140f, // Placeholder, tune as needed
+            mapPaddingX = 80f, // Placeholder, tune as needed
+            mapPaddingY = 80f, // Placeholder, tune as needed
+            minHorizontalSeparation = 70f, // Placeholder, tune as needed
+            jitter = 18f // Placeholder, tune as needed
+        };
+
+        // Now, convert to List<List<MapNodeData>> for GameSession and MapPanel
+        _convertedMapNodes = new List<List<MapNodeData>>();
+
+        // Initialize columns
+        for (int i = 0; i < _mapGraphData.rows; i++)
+        {
+            _convertedMapNodes.Add(new List<MapNodeData>());
+        }
+
+        foreach (var node in _currentMapGraph.Nodes)
+        {
+            MapNodeData mapNode = new MapNodeData
             {
-                List<MapNodeData> nextColumn = _mapNodes[currentNode.columnIndex + 1];
-                foreach (int nextNodeIndex in currentNode.nextNodeIndices)
+                columnIndex = node.Row,
+                rowIndex = node.Col,
+                nodeType = (NodeType)Enum.Parse(typeof(NodeType), node.Type.ToString()), // Convert string to NodeType enum
+                nextNodeIndices = new List<int>(),
+                reachableNodeIndices = new List<int>()
+            };
+
+            // Determine EncounterSO based on NodeType
+            EncounterSO encounter = null;
+            switch (mapNode.nodeType)
+            {
+                case NodeType.Battle:
+                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && !e.isElite);
+                    break;
+                case NodeType.Elite:
+                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && e.isElite); // Placeholder for Elite
+                    break;
+                case NodeType.Boss:
+                    encounter = GameDataRegistry.GetEncounter("enc_boss"); // Assuming a specific boss encounter
+                    break;
+                case NodeType.Shop:
+                    encounter = GameDataRegistry.GetEncounter("enc_shop"); // Assuming a specific shop encounter
+                    break;
+                case NodeType.Event:
+                    encounter = GameDataRegistry.GetEncounter("enc_event"); // Assuming a specific event encounter
+                    break;
+                case NodeType.Unknown:
+                    encounter = GameDataRegistry.GetEncounter("enc_unknown"); // Assuming a specific unknown encounter
+                    break;
+                default:
+                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && !e.isElite); // Default to Battle
+                    break;
+            }
+
+            if (encounter != null)
+            {
+                mapNode.encounter = encounter;
+                mapNode.iconPath = encounter.iconPath;
+                mapNode.tooltipText = encounter.tooltipText;
+                mapNode.isElite = encounter.isElite;
+            }
+            else
+            {
+                Debug.LogWarning($"Could not find a suitable encounter for node type {mapNode.nodeType}.");
+            }
+
+            _convertedMapNodes[node.Row].Add(mapNode);
+        }
+
+        // Now, populate nextNodeIndices for each node
+        foreach (var edge in _currentMapGraph.Edges)
+        {
+            // Find the actual Node objects using FromId and ToId
+            var fromNode = _currentMapGraph.Nodes.FirstOrDefault(n => n.Id == edge.FromId);
+            var toNode = _currentMapGraph.Nodes.FirstOrDefault(n => n.Id == edge.ToId);
+
+            if (fromNode != null && toNode != null)
+            {
+                // Find the source MapNodeData in _convertedMapNodes
+                MapNodeData sourceMapNodeData = _convertedMapNodes[fromNode.Row].FirstOrDefault(n => n.rowIndex == fromNode.Col);
+                if (sourceMapNodeData != null)
                 {
-                    if (nextNodeIndex >= 0 && nextNodeIndex < nextColumn.Count)
-                    {
-                        MapNodeData nextNode = nextColumn[nextNodeIndex];
-                        if (reachable.Add(nextNode.GetUniqueNodeId()))
-                        {
-                            queue.Enqueue(nextNode);
-                        }
-                    }
+                    // Add the rowIndex of the destination node to nextNodeIndices
+                    sourceMapNodeData.nextNodeIndices.Add(toNode.Col);
                 }
             }
         }
-        return reachable.ToList();
     }
+
+    // Removed unused methods:
+    // GetRandomEncounterType
+    // EncounterProbability
+    // PrecomputeReachabilityCache
+    // CalculateReachableNodes
 }

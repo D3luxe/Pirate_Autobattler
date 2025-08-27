@@ -21,7 +21,7 @@ public static class GameSession
             // currentEncounterNode and currentEncounterId will be set when entering first encounter
             playerShipState = new ShipState(startingShip).ToSerializable(),
             inventoryItems = new List<SerializableItemInstance>(),
-            mapNodes = MapManager.Instance.GetMapNodes(), // Save the generated map
+            mapNodes = MapManager.Instance.GetConvertedMapNodes(), // Save the generated map
             randomSeed = (ulong)System.DateTime.Now.Ticks, // Use ulong for seed and System.DateTime.Now.Ticks for initial randomness
             rerollsThisShop = 0 // Initialize reroll count
         };
@@ -60,7 +60,7 @@ public static class GameSession
         }
 
         // Reconstruct map in MapManager
-        MapManager.Instance.SetMapNodes(CurrentRunState.mapNodes);
+        // MapManager.Instance.SetMapNodes(CurrentRunState.mapNodes);
     }
 
     public static void EndBattle(bool playerWon, RunConfigSO config, ShipState currentEnemyShipState = null)
