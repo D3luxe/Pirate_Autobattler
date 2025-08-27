@@ -138,14 +138,16 @@ namespace PirateRoguelike.UI
                     Debug.Log($"Currently equipped item at {toSlotId}: {equippedItem?.Def.displayName ?? "NULL"}");
                     if (equippedItem != null)
                     {
-                        // If occupied, unequip current item and add to inventory
-                        Debug.Log($"Equipment slot {toSlotId} is occupied. Unequipping {equippedItem.Def.displayName} to inventory.");
-                        GameSession.PlayerShip.RemoveEquippedAt(toSlotId); // Use RemoveEquippedAt
-                        GameSession.Inventory.AddItemAt(equippedItem, fromSlotId); // Use AddItemAt to put it back in the original inventory slot
+                        // If occupied, swap items
+                        Debug.Log($"Equipment slot {toSlotId} is occupied. Swapping {itemToEquip.Def.displayName} with {equippedItem.Def.displayName}.");
+                        GameSession.PlayerShip.SetEquippedAt(toSlotId, itemToEquip); // Equip new item
+                        GameSession.Inventory.SetItemAt(fromSlotId, equippedItem); // Put old equipped item into inventory
                     }
-                    
-                    GameSession.PlayerShip.SetEquippedAt(toSlotId, itemToEquip); // Use SetEquippedAt
-                    GameSession.Inventory.RemoveItemAt(fromSlotId); // Use RemoveItemAt
+                    else
+                    {
+                        GameSession.PlayerShip.SetEquippedAt(toSlotId, itemToEquip); // Equip new item
+                        GameSession.Inventory.RemoveItemAt(fromSlotId); // Remove new item from inventory
+                    }
 
                     Debug.Log($"After equip: Equipped slot {toSlotId} has {GameSession.PlayerShip.GetEquippedItem(toSlotId)?.Def.displayName ?? "NULL"}");
                     Debug.Log($"After equip: Inventory slot {fromSlotId} has {GameSession.Inventory.GetItemAt(fromSlotId)?.Def.displayName ?? "NULL"}");

@@ -20,6 +20,7 @@ public class ShipState
     private List<StatModifier> _activeStatModifiers; // List of active stat modifiers
 
     public event Action OnHealthChanged;
+    public event Action OnEquipmentChanged;
 
     public ShipState(ShipSO definition)
     {
@@ -167,6 +168,8 @@ public class ShipState
     {
         if (indexA < 0 || indexA >= Equipped.Length || indexB < 0 || indexB >= Equipped.Length) return;
         (Equipped[indexA], Equipped[indexB]) = (Equipped[indexB], Equipped[indexA]);
+        OnEquipmentChanged?.Invoke();
+        Debug.Log("ShipState: OnEquipmentChanged invoked from SwapEquipment.");
     }
 
     public void RemoveEquippedAt(int index)
@@ -174,6 +177,8 @@ public class ShipState
         if (index >= 0 && index < Equipped.Length)
         {
             Equipped[index] = null;
+            OnEquipmentChanged?.Invoke();
+            Debug.Log("ShipState: OnEquipmentChanged invoked from RemoveEquippedAt.");
         }
     }
 
@@ -182,6 +187,8 @@ public class ShipState
         if (index >= 0 && index < Equipped.Length)
         {
             Equipped[index] = item;
+            OnEquipmentChanged?.Invoke();
+            Debug.Log("ShipState: OnEquipmentChanged invoked from SetEquippedAt.");
         }
     }
 
