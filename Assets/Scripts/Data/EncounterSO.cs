@@ -11,6 +11,11 @@ public class EncounterSO : ScriptableObject
     public bool isElite; // Is this an elite encounter?
     public int eliteRewardDepthBonus; // How many floors deeper to roll rewards for elites
 
+    [Header("UI")]
+    public string iconPath; // Path to the icon sprite for this encounter
+    [TextArea(3, 5)]
+    public string tooltipText; // Text for the tooltip when hovering over this encounter
+
     [Header("Battle")]
     public List<EnemySO> enemies;
 

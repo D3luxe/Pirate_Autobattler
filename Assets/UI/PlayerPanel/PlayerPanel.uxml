@@ -14,22 +14,22 @@
             </ui:VisualElement>
             <ui:VisualElement name="right-column" style="position: absolute; top: 119px; left: 756px; width: 200px; height: 220px;">
                 <ui:VisualElement name="counters-container" style="width: 153px; height: 135px;">
-                    <ui:VisualElement name="Gold" style="position: absolute; top: 0; left: 0; width: 153px; height: 40px;">
+                    <ui:VisualElement name="Gold" style="position: absolute; top: 0; left: 0; width: 153px; height: 40px; background-image: url(&quot;project://database/Assets/Art/UI/LabelBackground.png?fileID=2800000&amp;guid=0fa2da96e6ea12842a38562d15c70f6e&amp;type=3#LabelBackground&quot;);">
                         <ui:VisualElement name="gold-counter" class="hud-counter">
                             <ui:Image name="gold-icon" class="hud-counter__icon" style="width: 40px; height: 40px; position: absolute; top: 0; left: 16px;" />
-                            <ui:Label name="gold-label" text="0" class="hud-counter__label" style="position: absolute; left: 63px; height: 40px; width: 50px; color: rgb(192, 139, 0); -unity-text-align: middle-left; font-size: 20px; text-shadow: 2px 1px 0 rgb(0, 0, 0);" />
+                            <ui:Label name="gold-label" text="0" class="hud-counter__label" style="position: absolute; left: 63px; height: 40px; width: 50px; color: rgb(192, 139, 0); -unity-text-align: middle-left; font-size: 20px; text-shadow: 2px 1px 0 rgb(0, 0, 0); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; top: 0;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement name="Lives" style="position: absolute; top: 45px; left: 0; width: 153px; height: 40px;">
+                    <ui:VisualElement name="Lives" style="position: absolute; top: 45px; left: 0; width: 153px; height: 40px; background-image: url(&quot;project://database/Assets/Art/UI/LabelBackground.png?fileID=2800000&amp;guid=0fa2da96e6ea12842a38562d15c70f6e&amp;type=3#LabelBackground&quot;);">
                         <ui:VisualElement name="lives-counter" class="hud-counter">
                             <ui:Image name="lives-icon" class="hud-counter__icon" style="width: 27px; height: 25px; position: absolute; top: 6px; left: 22px;" />
-                            <ui:Label name="lives-label" text="0" class="hud-counter__label" style="position: absolute; left: 63px; width: 52px; height: 40px; -unity-text-align: middle-left; font-size: 20px; color: rgb(176, 4, 4); text-shadow: 2px 1px 0 rgb(0, 0, 0);" />
+                            <ui:Label name="lives-label" text="0" class="hud-counter__label" style="position: absolute; left: 63px; width: 52px; height: 40px; -unity-text-align: middle-left; font-size: 20px; color: rgb(176, 4, 4); text-shadow: 2px 1px 0 rgb(0, 0, 0); top: 0;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement name="Depth" style="position: absolute; top: 90px; left: 0; width: 153px; height: 40px;">
+                    <ui:VisualElement name="Depth" style="position: absolute; top: 90px; left: 0; width: 153px; height: 40px; background-image: url(&quot;project://database/Assets/Art/UI/LabelBackground.png?fileID=2800000&amp;guid=0fa2da96e6ea12842a38562d15c70f6e&amp;type=3#LabelBackground&quot;);">
                         <ui:VisualElement name="depth-counter" class="hud-counter">
                             <ui:Image name="depth-icon" class="hud-counter__icon" style="width: 32px; height: 32px; position: absolute; top: 3px; left: 18px;" />
-                            <ui:Label name="depth-label" text="0" class="hud-counter__label" style="width: 52px; height: 40px; position: absolute; left: 63px; -unity-text-align: middle-left; color: rgb(178, 178, 178); font-size: 20px; text-shadow: 2px 1px 0 rgb(0, 0, 0);" />
+                            <ui:Label name="depth-label" text="0" class="hud-counter__label" style="width: 52px; height: 40px; position: absolute; left: 63px; -unity-text-align: middle-left; color: rgb(178, 178, 178); font-size: 20px; text-shadow: 2px 1px 0 rgb(0, 0, 0); top: 0;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -45,6 +45,7 @@
                     </ui:Button>
                 </ui:VisualElement>
             </ui:VisualElement>
+            <ui:Button name="MapToggle" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; position: absolute; top: 287px; left: 351px; background-image: url(&quot;project://database/Assets/Art/UI/MapIcon.png?fileID=2800000&amp;guid=47a9c3492655fde41a8905dd0720f226&amp;type=3#MapIcon&quot;); width: 45px; height: 45px;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

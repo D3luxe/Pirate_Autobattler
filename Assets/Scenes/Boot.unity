@@ -149,8 +149,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameInitializer
   runManagerPrefab: {fileID: 267340672772548500, guid: c02c5abe98fd53745b74a25bc562d39c, type: 3}
-  inventoryUIPrefab: {fileID: 6780893868646407780, guid: 9b514626f13a6ac4b9ebe42718667a01, type: 3}
-  mapManagerPrefab: {fileID: 5280767250319595147, guid: 28e27271814713a4281cb30dc2ae41cd, type: 3}
 --- !u!4 &260597548
 Transform:
   m_ObjectHideFlags: 0

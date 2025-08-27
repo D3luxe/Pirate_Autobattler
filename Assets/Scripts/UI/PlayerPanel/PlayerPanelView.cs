@@ -21,7 +21,7 @@ namespace PirateRoguelike.UI
         private List<VisualElement> _equipmentSlotElements = new List<VisualElement>();
         private List<VisualElement> _inventorySlotElements = new List<VisualElement>();
         private Label _goldLabel, _livesLabel, _depthLabel;
-        private Button _pauseButton, _settingsButton, _battleSpeedButton;
+        private Button _pauseButton, _settingsButton, _battleSpeedButton, _mapToggleButton;
         private Image _battleSpeedIcon;
 
         public PlayerPanelView(VisualElement root, VisualTreeAsset slotTemplate, PlayerUIThemeSO theme)
@@ -52,6 +52,7 @@ namespace PirateRoguelike.UI
             _settingsButton = _root.Q<Button>("settings-button");
             _battleSpeedButton = _root.Q<Button>("battle-speed-button");
             _battleSpeedIcon = _battleSpeedButton.Q<Image>();
+            _mapToggleButton = _root.Q<Button>("map-toggle-button");
         }
 
         private void RegisterCallbacks()
@@ -59,6 +60,10 @@ namespace PirateRoguelike.UI
             _pauseButton.clicked += () => PlayerPanelEvents.OnPauseClicked?.Invoke();
             _settingsButton.clicked += () => PlayerPanelEvents.OnSettingsClicked?.Invoke();
             _battleSpeedButton.clicked += ToggleBattleSpeed;
+            if (_mapToggleButton != null) // Add null check
+            {
+                _mapToggleButton.clicked += () => PlayerPanelEvents.OnMapToggleClicked?.Invoke();
+            }
         }
 
         public void BindInitialData(IPlayerPanelData data)

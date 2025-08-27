@@ -48,6 +48,7 @@ public class MapManager : MonoBehaviour
         if (_isMapGenerated) return;
         GenerateMapData();
         _isMapGenerated = true;
+        PrecomputeReachabilityCache();
     }
 
     void GenerateMapData()
@@ -174,7 +175,7 @@ public class MapManager : MonoBehaviour
                     }
                 }
 
-                _mapNodes[i].Add(new MapNodeData { encounter = encounterSO, columnIndex = i, rowIndex = j, isElite = isEliteNode });
+                _mapNodes[i].Add(new MapNodeData { encounter = encounterSO, columnIndex = i, rowIndex = j, isElite = isEliteNode, iconPath = encounterSO.iconPath, tooltipText = encounterSO.tooltipText });
             }
         }
 
@@ -254,5 +255,48 @@ public class MapManager : MonoBehaviour
     {
         public EncounterType type;
         public int weight;
+    }
+
+    private void PrecomputeReachabilityCache()
+    {
+        foreach (var column in _mapNodes)
+        {
+            foreach (var node in column)
+            {
+                node.reachableNodeIndices = CalculateReachableNodes(node);
+            }
+        }
+    }
+
+    private List<int> CalculateReachableNodes(MapNodeData startNode)
+    {
+        HashSet<int> reachable = new HashSet<int>();
+        Queue<MapNodeData> queue = new Queue<MapNodeData>();
+
+        queue.Enqueue(startNode);
+        reachable.Add(startNode.GetUniqueNodeId()); // Assuming a method to get a unique ID for the node
+
+        while (queue.Any())
+        {
+            MapNodeData currentNode = queue.Dequeue();
+
+            // Check if there's a next column
+            if (currentNode.columnIndex + 1 < _mapNodes.Count)
+            {
+                List<MapNodeData> nextColumn = _mapNodes[currentNode.columnIndex + 1];
+                foreach (int nextNodeIndex in currentNode.nextNodeIndices)
+                {
+                    if (nextNodeIndex >= 0 && nextNodeIndex < nextColumn.Count)
+                    {
+                        MapNodeData nextNode = nextColumn[nextNodeIndex];
+                        if (reachable.Add(nextNode.GetUniqueNodeId()))
+                        {
+                            queue.Enqueue(nextNode);
+                        }
+                    }
+                }
+            }
+        }
+        return reachable.ToList();
     }
 }

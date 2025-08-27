@@ -22,9 +22,10 @@ public static class GameSession
             playerShipState = new ShipState(startingShip).ToSerializable(),
             inventoryItems = new List<SerializableItemInstance>(),
             mapNodes = MapManager.Instance.GetMapNodes(), // Save the generated map
-            randomSeed = (uint)UnityEngine.Random.Range(0, int.MaxValue),
+            randomSeed = (ulong)System.DateTime.Now.Ticks, // Use ulong for seed and System.DateTime.Now.Ticks for initial randomness
             rerollsThisShop = 0 // Initialize reroll count
         };
+        UnityEngine.Random.InitState((int)CurrentRunState.randomSeed); // Initialize Unity's random with the main seed
         Economy = new EconomyService(config, CurrentRunState);
         Inventory = new Inventory(config.inventorySize);
         PlayerShip = new ShipState(startingShip);

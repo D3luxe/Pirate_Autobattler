@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="MapContainer" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Art/UI/MapBackground.png?fileID=2800000&amp;guid=bd96be6edcea709419b9deb02593db59&amp;type=3#MapBackground&quot;); -unity-slice-type: sliced; -unity-background-scale-mode: scale-to-fit; -unity-slice-left: 0; -unity-slice-top: 0; -unity-slice-right: 0; -unity-slice-bottom: 0; width: auto; position: relative;">
+        <ui:VisualElement name="MapNodes" style="flex-grow: 1; position: absolute; width: 1362px; height: 992px; top: 45px; left: 273px;" />
+        <ui:VisualElement name="MapLines" style="flex-grow: 1; position: absolute; align-self: center; width: 1362px; height: 992px; top: 45px; left: 273px;" />
+    </ui:VisualElement>
+</ui:UXML>

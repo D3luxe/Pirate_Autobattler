@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
@@ -53,9 +52,15 @@ namespace PirateRoguelike.UI
     {
         [SerializeField] private PlayerUIThemeSO _theme;
         [SerializeField] private VisualTreeAsset _slotTemplate;
+        [SerializeField] private MapPanel _mapPanel;
 
         private PlayerPanelView _panelView;
         private PlayerPanelDataViewModel _viewModel = new PlayerPanelDataViewModel();
+
+        public void SetMapPanel(MapPanel mapPanel)
+        {
+            _mapPanel = mapPanel;
+        }
 
         public void Initialize()
         {
@@ -74,6 +79,7 @@ namespace PirateRoguelike.UI
 
             // Subscribe to UI events
             PlayerPanelEvents.OnSlotDropped += HandleSlotDropped;
+            PlayerPanelEvents.OnMapToggleClicked += HandleMapToggleClicked;
 
             // Initial data bind
             _panelView.BindInitialData(_viewModel);
@@ -92,6 +98,7 @@ namespace PirateRoguelike.UI
             }
 
             PlayerPanelEvents.OnSlotDropped -= HandleSlotDropped;
+            PlayerPanelEvents.OnMapToggleClicked -= HandleMapToggleClicked;
         }
 
         // --- Event Handlers ---
@@ -109,7 +116,7 @@ namespace PirateRoguelike.UI
             //Debug.Log("PlayerPanelController: HandleInventoryChanged called.");
             _panelView.UpdatePlayerInventory(_viewModel.InventorySlots);
         }
-                        private void HandleSlotDropped(int fromSlotId, SlotContainerType fromContainer, int toSlotId, SlotContainerType toContainer)
+        private void HandleSlotDropped(int fromSlotId, SlotContainerType fromContainer, int toSlotId, SlotContainerType toContainer)
         {
             //Debug.Log($"HandleSlotDropped: From {fromContainer} slot {fromSlotId} to {toContainer} slot {toSlotId}");
 
@@ -184,6 +191,18 @@ namespace PirateRoguelike.UI
             else
             {
                 //Debug.LogWarning($"Unhandled slot drop: From {fromContainer} to {toContainer}");
+            }
+        }
+
+        private void HandleMapToggleClicked()
+        {
+            if (_mapPanel.IsVisible())
+            {
+                _mapPanel.Hide();
+            }
+            else
+            {
+                _mapPanel.Show();
             }
         }
     }

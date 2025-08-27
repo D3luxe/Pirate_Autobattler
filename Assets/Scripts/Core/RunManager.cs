@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using PirateRoguelike.Data;
 using PirateRoguelike.UI; // Import the UI namespace
+using UnityEngine.UIElements;
 
 public class RunManager : MonoBehaviour
 {
@@ -12,10 +13,12 @@ public class RunManager : MonoBehaviour
     [SerializeField] private RunConfigSO runConfig;
     [SerializeField] private ShipSO debugStartingShip; // For testing
     [SerializeField] private GameObject playerPanelPrefab; // NEW: Player Panel UI
-    [SerializeField] private GameObject mapManagerPrefab;
+    [SerializeField] private GameObject mapPanelPrefab; // NEW: Map Panel UI Prefab
     [SerializeField] private GameObject rewardUIPrefab;
+    [SerializeField] private GameObject mapManagerPrefab;
 
     private PlayerPanelController _playerPanelController;
+    private MapPanel _mapPanel;
 
     void Awake()
     {
@@ -26,6 +29,25 @@ public class RunManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // Instantiate MapManager
+        if (mapManagerPrefab != null)
+        {
+            Instantiate(mapManagerPrefab, transform);
+            // Generate map data immediately after MapManager is instantiated
+            if (MapManager.Instance != null)
+            {
+                MapManager.Instance.GenerateMapIfNeeded();
+            }
+            else
+            {
+                Debug.LogError("MapManager Instance is null after instantiation!");
+            }
+        }
+        else
+        {
+            Debug.LogError("MapManager Prefab is not assigned in RunManager!");
+        }
 
         // Instantiate PlayerPanel UI
         if (playerPanelPrefab != null)
@@ -38,13 +60,21 @@ public class RunManager : MonoBehaviour
             Debug.LogError("PlayerPanel Prefab is not assigned in RunManager!");
         }
 
-        if (mapManagerPrefab != null)
+        // Instantiate MapPanel UI from prefab
+        if (mapPanelPrefab != null)
         {
-            Instantiate(mapManagerPrefab, transform);
+            GameObject mapPanelInstance = Instantiate(mapPanelPrefab, transform);
+            _mapPanel = mapPanelInstance.GetComponent<MapPanel>();
+            // The UIDocument reference will now be handled by the prefab setup
         }
         else
         {
-            Debug.LogError("MapManager Prefab is not assigned in RunManager!");
+            Debug.LogError("MapPanel Prefab is not assigned in RunManager!");
+        }
+
+        if (_playerPanelController != null && _mapPanel != null)
+        {
+            _playerPanelController.SetMapPanel(_mapPanel);
         }
 
         if (rewardUIPrefab != null)
@@ -91,14 +121,6 @@ public class RunManager : MonoBehaviour
         {
             OnRunSceneLoaded();
         }
-        else
-        {
-            // Hide the map when we are not in the Run scene
-            if (MapUI.Instance != null)
-            {
-                MapUI.Instance.gameObject.SetActive(false);
-            }
-        }
     }
 
     private void OnRunSceneLoaded()
@@ -110,21 +132,9 @@ public class RunManager : MonoBehaviour
             // RewardUI logic remains for now
         }
 
-        // The new PlayerPanelController handles its own updates via events,
-        // so no specific re-initialization is needed here.
-
         if (MapManager.Instance != null)
         {
             MapManager.Instance.GenerateMapIfNeeded();
-            if (MapUI.Instance != null)
-            {
-                MapUI.Instance.gameObject.SetActive(true);
-                MapUI.Instance.RenderMap(MapManager.Instance.GetMapNodes());
-            }
-            else
-            {
-                Debug.LogError("MapUI Instance is null!");
-            }
         }
         else
         {
@@ -141,4 +151,6 @@ public class RunManager : MonoBehaviour
         }
     }
 }
+
+
 

@@ -10,6 +10,7 @@ namespace PirateRoguelike.UI
         public static Action OnPauseClicked;
         public static Action OnSettingsClicked;
         public static Action<int> OnBattleSpeedChanged;
+        public static Action OnMapToggleClicked;
 
         // Slot Interaction Events
         public static Action<int> OnSlotClicked;

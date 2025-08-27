@@ -47,5 +47,6 @@ MonoBehaviour:
   runConfig: {fileID: 11400000, guid: 20c85d27094dac045b8bde7a8c53baba, type: 2}
   debugStartingShip: {fileID: 11400000, guid: 14f3e203ca43f504091a5df9e105e479, type: 2}
   playerPanelPrefab: {fileID: 6940418046087843524, guid: bcf83ad999425f54da9e52316e3c4b89, type: 3}
-  mapManagerPrefab: {fileID: 5280767250319595147, guid: 28e27271814713a4281cb30dc2ae41cd, type: 3}
+  mapPanelPrefab: {fileID: 6386911918127072378, guid: ad18e79558b8f9d409586eb0ab994690, type: 3}
   rewardUIPrefab: {fileID: 4782130974891231969, guid: 63fb0a46f00834d4b8bdea2eb7118b0d, type: 3}
+  mapManagerPrefab: {fileID: 5280767250319595147, guid: 28e27271814713a4281cb30dc2ae41cd, type: 3}
