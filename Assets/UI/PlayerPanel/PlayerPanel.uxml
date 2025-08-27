@@ -1,0 +1,47 @@
+
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Define templates for reusable components -->
+    <ui:Template name="ShipPanelTemplate" src="ShipPanel.uxml" />
+    <ui:Template name="SlotTemplate" src="Slot.uxml" />
+
+    <!-- Main Panel -->
+    <ui:VisualElement name="player-panel" class="player-panel">
+
+        <!-- Left Side: Ship and Equipment -->
+        <ui:VisualElement name="left-column" class="player-panel__left-column">
+            <ui:Instance template="ShipPanelTemplate" name="ship-panel-instance" />
+            <ui:VisualElement name="equipment-bar" class="equipment-bar" />
+        </ui:VisualElement>
+
+        <!-- Right Side: Counters and Controls -->
+        <ui:VisualElement name="right-column" class="player-panel__right-column">
+            <ui:VisualElement name="hud-counters" class="hud-counters">
+                <ui:VisualElement name="gold-counter" class="hud-counter">
+                    <ui:Image name="gold-icon" class="hud-counter__icon" />
+                    <ui:Label name="gold-label" text="0" class="hud-counter__label" />
+                </ui:VisualElement>
+                <ui:VisualElement name="lives-counter" class="hud-counter">
+                    <ui:Image name="lives-icon" class="hud-counter__icon" />
+                    <ui:Label name="lives-label" text="0" class="hud-counter__label" />
+                </ui:VisualElement>
+                <ui:VisualElement name="depth-counter" class="hud-counter">
+                    <ui:Image name="depth-icon" class="hud-counter__icon" />
+                    <ui:Label name="depth-label" text="0" class="hud-counter__label" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="controls-row" class="controls-row">
+                <ui:Button name="pause-button" class="control-button">
+                    <ui:Image name="pause-icon" />
+                </ui:Button>
+                <ui:Button name="settings-button" class="control-button">
+                    <ui:Image name="settings-icon" />
+                </ui:Button>
+                <ui:Button name="battle-speed-button" class="control-button">
+                    <ui:Image name="battle-speed-icon" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

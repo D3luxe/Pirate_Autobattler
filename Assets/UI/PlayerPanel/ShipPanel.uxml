@@ -1,0 +1,12 @@
+
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="ship-panel" class="ship-panel">
+        <ui:Image name="ship-sprite" class="ship-panel__sprite" />
+        <ui:Label name="ship-name" class="ship-panel__name" />
+        <ui:VisualElement name="hp-bar" class="hp-bar">
+            <ui:VisualElement name="hp-bar__background" class="hp-bar__background">
+                <ui:VisualElement name="hp-bar__foreground" class="hp-bar__foreground" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

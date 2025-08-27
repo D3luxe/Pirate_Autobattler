@@ -118,9 +118,6 @@ MonoBehaviour:
   _inventorySlotsParent: {fileID: 6042296458460698079}
   _equipmentSlotsParent: {fileID: 4453105438481094845}
   _inventorySlotPrefab: {fileID: 8721307890538367218, guid: bbb1ab2574e35644194cf943fe5b062e, type: 3}
-  _equipmentSlots:
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!223 &5826847777650228456
 Canvas:
   m_ObjectHideFlags: 0

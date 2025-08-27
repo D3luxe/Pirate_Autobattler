@@ -1,0 +1,9 @@
+
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="slot" class="slot">
+        <ui:VisualElement name="rarity-frame" class="slot__rarity-frame" />
+        <ui:Image name="icon" class="slot__icon" />
+        <ui:VisualElement name="cooldown-overlay" class="slot__cooldown-overlay" />
+        <ui:Label name="slot-id-label" class="slot__id-label" />
+    </ui:VisualElement>
+</ui:UXML>

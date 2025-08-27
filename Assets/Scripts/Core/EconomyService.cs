@@ -1,7 +1,11 @@
+using System;
 using UnityEngine;
 
 public class EconomyService
 {
+    public static event Action<int> OnGoldChanged;
+    public static event Action<int> OnLivesChanged;
+
     public int Gold { get; private set; }
     public int Lives { get; private set; }
 
@@ -17,14 +21,13 @@ public class EconomyService
             Gold = runState.gold;
             Lives = runState.playerLives;
             _rerollsThisShop = runState.rerollsThisShop;
-            // _freeRerollAvailable is not saved, it's transient per shop visit
         }
         else
         {
             Gold = config.startingGold;
             Lives = config.startingLives;
-            _rerollsThisShop = 0;
         }
+        // Initial values are not broadcast with events, UI should read them on load.
     }
 
     public void SaveToRunState(RunState runState)
@@ -42,19 +45,31 @@ public class EconomyService
     public void AddGold(int amount)
     {
         Gold = Mathf.Min(Gold + amount, 999);
+        OnGoldChanged?.Invoke(Gold);
     }
+
     public bool TrySpendGold(int amount)
     {
         if (Gold >= amount)
         {
             Gold -= amount;
+            OnGoldChanged?.Invoke(Gold);
             return true;
         }
         return false;
     }
 
-    public void AddLives(int amount) => Lives += amount;
-    public void LoseLife() => Lives--;
+    public void AddLives(int amount)
+    {
+        Lives += amount;
+        OnLivesChanged?.Invoke(Lives);
+    }
+
+    public void LoseLife()
+    {
+        Lives--;
+        OnLivesChanged?.Invoke(Lives);
+    }
 
     public int GetCurrentRerollCost()
     {
@@ -70,6 +85,7 @@ public class EconomyService
         _rerollsThisShop++;
         _freeRerollAvailable = false; // Free reroll used
     }
+
     public void ResetRerollCount()
     {
         _rerollsThisShop = 0;

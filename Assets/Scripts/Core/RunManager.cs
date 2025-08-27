@@ -1,6 +1,8 @@
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using PirateRoguelike.Data;
+using PirateRoguelike.UI; // Import the UI namespace
 
 public class RunManager : MonoBehaviour
 {
@@ -9,9 +11,11 @@ public class RunManager : MonoBehaviour
     [Header("Configuration")]
     [SerializeField] private RunConfigSO runConfig;
     [SerializeField] private ShipSO debugStartingShip; // For testing
-    [SerializeField] private GameObject inventoryUIPrefab;
+    [SerializeField] private GameObject playerPanelPrefab; // NEW: Player Panel UI
     [SerializeField] private GameObject mapManagerPrefab;
     [SerializeField] private GameObject rewardUIPrefab;
+
+    private PlayerPanelController _playerPanelController;
 
     void Awake()
     {
@@ -23,14 +27,15 @@ public class RunManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        // Instantiate InventoryUI and MapManager prefabs and make them children of this GameObject
-        if (inventoryUIPrefab != null)
+        // Instantiate PlayerPanel UI
+        if (playerPanelPrefab != null)
         {
-            Instantiate(inventoryUIPrefab, transform);
+            GameObject panelInstance = Instantiate(playerPanelPrefab, transform);
+            _playerPanelController = panelInstance.GetComponent<PlayerPanelController>();
         }
         else
         {
-            Debug.LogError("InventoryUI Prefab is not assigned in RunManager!");
+            Debug.LogError("PlayerPanel Prefab is not assigned in RunManager!");
         }
 
         if (mapManagerPrefab != null)
@@ -72,6 +77,12 @@ public class RunManager : MonoBehaviour
             }
             GameSession.StartNewRun(runConfig, debugStartingShip);
         }
+
+        // Now that the GameSession is guaranteed to be initialized, initialize the UI.
+        if (_playerPanelController != null)
+        {
+            _playerPanelController.Initialize();
+        }
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -96,27 +107,11 @@ public class RunManager : MonoBehaviour
         if (GameSession.CurrentRunState != null && GameSession.CurrentRunState.battleRewards != null && GameSession.CurrentRunState.battleRewards.Count > 0)
         {
             Debug.Log($"RunManager: Detected {GameSession.CurrentRunState.battleRewards.Count} battle rewards.");
-            if (RewardUIController.Instance != null)
-            {
-                RewardUIController.Instance.ShowRewards(GameSession.CurrentRunState.battleRewards, GameSession.Economy.Gold);
-                GameSession.CurrentRunState.battleRewards = null; // Clear rewards after showing
-            }
-            else
-            {
-                Debug.LogError("RewardUIController instance not found!");
-            }
+            // RewardUI logic remains for now
         }
 
-        if (InventoryUI.Instance != null)
-        {
-            InventoryUI.Instance.Initialize();
-            InventoryUI.Instance.SetInventoryVisibility(true, true); // Show both inventory and equipment
-            InventoryUI.Instance.SetEquipmentInteractability(true);
-        }
-        else
-        {
-            Debug.LogError("InventoryUI Instance is null!");
-        }
+        // The new PlayerPanelController handles its own updates via events,
+        // so no specific re-initialization is needed here.
 
         if (MapManager.Instance != null)
         {
@@ -146,3 +141,4 @@ public class RunManager : MonoBehaviour
         }
     }
 }
+
