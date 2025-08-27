@@ -15,7 +15,6 @@ public class MapPanel : MonoBehaviour
     private VisualElement _mapNodesContainer;
     private VisualElement _mapLinesContainer;
     private VisualElement _pannableMapContent;
-    private VisualElement _mapBackgroundSprite;
     private List<List<MapNodeData>> _mapNodes; // Make mapNodes a class member
 
     private bool _isDragging = false;
@@ -29,7 +28,13 @@ public class MapPanel : MonoBehaviour
         _mapNodesContainer = _root.Q<VisualElement>("MapNodes");
         _mapLinesContainer = _root.Q<VisualElement>("MapLines");
         _pannableMapContent = _root.Q<VisualElement>("PannableMapContent");
-        _mapBackgroundSprite = _root.Q<VisualElement>("MapBackgroundSprite");
+
+        _pannableMapContent.RegisterCallback<PointerDownEvent>(OnPointerDown);
+        _pannableMapContent.RegisterCallback<PointerMoveEvent>(OnPointerMove);
+        _pannableMapContent.RegisterCallback<PointerUpEvent>(OnPointerUp);
+
+        GenerateMapVisuals();
+    }
 
         _pannableMapContent.RegisterCallback<PointerDownEvent>(OnPointerDown);
         _pannableMapContent.RegisterCallback<PointerMoveEvent>(OnPointerMove);
@@ -199,7 +204,11 @@ public class MapPanel : MonoBehaviour
                 maxNodeTop = 10f + (_mapNodes.Count - 1 - 0) * (NODE_HEIGHT + VERTICAL_PADDING);
             }
             float totalMapContentHeight = maxNodeTop + NODE_HEIGHT + 10f; // Add node height and some bottom offset
-            _mapBackgroundSprite.style.height = totalMapContentHeight + 150f;
+            _pannableMapContent.style.height = totalMapContentHeight + 150f;
+
+            Debug.Log($"MapPanel Debug: maxNodeTop: {maxNodeTop}");
+            Debug.Log($"MapPanel Debug: totalMapContentHeight (nodes only): {totalMapContentHeight}");
+            Debug.Log($"MapPanel Debug: _pannableMapContent.style.height: {_pannableMapContent.style.height.value.ToString()}");
 
         });
     }
