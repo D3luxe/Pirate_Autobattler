@@ -56,6 +56,7 @@ namespace PirateRoguelike.UI
 
         private PlayerPanelView _panelView;
         private PlayerPanelDataViewModel _viewModel = new PlayerPanelDataViewModel();
+        private Button _mapToggleButton;
 
         public void SetMapPanel(MapView mapView)
         {
@@ -66,6 +67,16 @@ namespace PirateRoguelike.UI
         {
             var root = GetComponent<UIDocument>().rootVisualElement;
             _panelView = new PlayerPanelView(root, _slotTemplate, _theme);
+
+            // Get reference to the MapToggle button
+            _mapToggleButton = root.Q<Button>("MapToggle");
+            if (_mapToggleButton == null) Debug.LogError("Button 'MapToggle' not found in UXML.");
+
+            // Register click event
+            if (_mapToggleButton != null)
+            {
+                _mapToggleButton.clicked += OnMapToggleButtonClicked;
+            }
 
             // Subscribe to game events
             EconomyService.OnGoldChanged += HandleGoldChanged;
@@ -99,6 +110,11 @@ namespace PirateRoguelike.UI
 
             PlayerPanelEvents.OnSlotDropped -= HandleSlotDropped;
             PlayerPanelEvents.OnMapToggleClicked -= HandleMapToggleClicked;
+
+            if (_mapToggleButton != null)
+            {
+                _mapToggleButton.clicked -= OnMapToggleButtonClicked;
+            }
         }
 
         // --- Event Handlers ---
@@ -204,6 +220,13 @@ namespace PirateRoguelike.UI
             {
                 _mapView.Show();
             }
+        }
+
+        // Implement OnMapToggleButtonClicked() Method
+        private void OnMapToggleButtonClicked()
+        {
+            // Publish the event to toggle map visibility
+            GameEvents.RequestMapToggle();
         }
     }
 }

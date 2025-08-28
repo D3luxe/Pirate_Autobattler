@@ -28,6 +28,26 @@
     overflow: hidden;
 }
 
+.close-button {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
+    z-index: 100;
+    top: 10px;
+    right: auto;
+    -unity-text-align: middle-right;
+}
+
+.close-button:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
 .map-content-container {
     width: 60%;
     flex-grow: 1;

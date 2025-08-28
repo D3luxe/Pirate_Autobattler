@@ -94,17 +94,7 @@ public static class GameSession
     {
         // Save current state before processing battle outcome and loading new scene
         Economy.SaveToRunState(CurrentRunState);
-        CurrentRunState.playerShipState = PlayerShip.ToSerializable();
-
-        List<SerializableItemInstance> inventorySerializable = new List<SerializableItemInstance>();
-        foreach (var item in Inventory.Items)
-        {
-            if (item != null)
-            {
-                inventorySerializable.Add(item.ToSerializable());
-            }
-        }
-        CurrentRunState.inventoryItems = inventorySerializable;
+        UpdateCurrentRunStateForSaving(); // Call the new update method
 
         // If in battle, save enemy state
         if (currentEnemyShipState != null)
@@ -178,5 +168,20 @@ public static class GameSession
         SaveManager.SaveRun(CurrentRunState);
 
         // The scene loading is now handled within the if/else for win/loss
+    }
+
+    public static void UpdateCurrentRunStateForSaving()
+    {
+        CurrentRunState.playerShipState = PlayerShip.ToSerializable();
+
+        List<SerializableItemInstance> inventorySerializable = new List<SerializableItemInstance>();
+        foreach (var item in Inventory.Items)
+        {
+            if (item != null)
+            {
+                inventorySerializable.Add(item.ToSerializable());
+            }
+        }
+        CurrentRunState.inventoryItems = inventorySerializable;
     }
 }

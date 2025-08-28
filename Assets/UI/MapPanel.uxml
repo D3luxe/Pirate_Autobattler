@@ -1,5 +1,6 @@
 <UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/MapView.uss?fileID=7433441132597879392&amp;guid=5d1ce1f7234762a4982274686ccb2b0d&amp;type=3#MapView" />
+    <ui:Button name="CloseButton" text="CLOSE" class="close-button" style="position: absolute; align-self: center; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 15px; padding-bottom: 0; padding-left: 0; left: auto; top: 15%; translate: 600px 0; width: 200px;" />
     <ui:ScrollView name="MapScroll" class="map-scroll">
         <ui:VisualElement name="MapContentContainer" class="map-content-container">
             <ui:VisualElement name="ScrollTopRoll" class="scroll-top-roll" />

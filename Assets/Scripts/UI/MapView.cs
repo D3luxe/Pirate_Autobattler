@@ -11,6 +11,7 @@ public sealed class MapView : MonoBehaviour
     public StyleSheet uss;
 
     private VisualElement _root;
+    private Button _closeButton;
 
     [System.Serializable]
     public class EncounterIconMapping
@@ -36,6 +37,9 @@ public sealed class MapView : MonoBehaviour
     public float dashLength = 10f;
     public float gapLength = 5f;
     public float curvePadding = 20f;
+
+    public float centeringOffset = 0f; // New serialized field for fine-tuning centering
+    private float _previousCenteringOffset = 0f; // Store previous value for OnValidate
 
     private const float nodeHalfHeight = 28f; // From map-node height in USS
     private const float DragThreshold = 20f;
@@ -77,6 +81,20 @@ public sealed class MapView : MonoBehaviour
         _root.Clear();
         uxml.CloneTree(_root);
         _root.styleSheets.Add(uss);
+
+        // Get reference to the new close button
+        _closeButton = _root.Q<Button>("CloseButton");
+        if (_closeButton == null) Debug.LogError("Button 'CloseButton' not found in UXML.");
+
+        // Register close button click event
+        if (_closeButton != null)
+        {
+            _closeButton.clicked += OnCloseButtonClicked;
+            _closeButton.BringToFront(); // Add this line
+        }
+
+        // Subscribe to the map toggle event
+        GameEvents.OnMapToggleRequested += ToggleMapVisibility;
 
         scroll = _root.Q<ScrollView>("MapScroll");
         if (scroll == null) Debug.LogError("ScrollView 'MapScroll' not found in UXML.");
@@ -253,6 +271,15 @@ public sealed class MapView : MonoBehaviour
             MapManager.Instance.OnMapDataUpdated -= HandleMapDataUpdated;
         }
         GameSession.OnPlayerNodeChanged -= UpdateNodeVisualStates;
+
+        // Unregister close button event
+        if (_closeButton != null)
+        {
+            _closeButton.clicked -= OnCloseButtonClicked;
+        }
+
+        // Unsubscribe from the map toggle event
+        GameEvents.OnMapToggleRequested -= ToggleMapVisibility;
     }
 
     private void HandleMapDataUpdated()
@@ -280,6 +307,7 @@ public sealed class MapView : MonoBehaviour
 
         LayoutAndRender();
         UpdateNodeVisualStates();
+        PerformAutoScroll();
     }
 
     float AvgParentX(MapGraphData.Node n)
@@ -395,33 +423,7 @@ public sealed class MapView : MonoBehaviour
     public void Show()
     {
         _root.style.display = DisplayStyle.Flex;
-
-        // Auto-scroll to player's current position or to the bottom
-        if (GameSession.CurrentRunState != null && GameSession.CurrentRunState.mapGraphData != null)
-        {
-            // Calculate max scroll Y based on content height
-            float maxScrollY = scroll.contentContainer.resolvedStyle.height - scroll.resolvedStyle.height;
-            maxScrollY = Mathf.Max(0, maxScrollY); // Ensure it's not negative
-
-            string currentEncounterId = GameSession.CurrentRunState.currentEncounterId;
-            if (!string.IsNullOrEmpty(currentEncounterId) && nodeById.ContainsKey(currentEncounterId))
-            {
-                // Player is at an encounter, scroll to that node
-                Vector2 playerNodePos = visualNodePositions[currentEncounterId];
-                float scrollViewHeight = scroll.resolvedStyle.height;
-                float targetScrollY = playerNodePos.y - (scrollViewHeight / 2f);
-
-                // Clamp the targetScrollY to ensure it's within valid scroll limits
-                targetScrollY = Mathf.Clamp(targetScrollY, 0, maxScrollY);
-
-                scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, targetScrollY);
-            }
-            else
-            {
-                // No current encounter, scroll to the very bottom
-                scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, maxScrollY);
-            }
-        }
+        _root.schedule.Execute(() => PerformAutoScroll()).Every(10).Until(() => scroll.contentContainer.resolvedStyle.height > 0);
     }
 
     public void Hide()
@@ -432,6 +434,49 @@ public sealed class MapView : MonoBehaviour
     public bool IsVisible()
     {
         return _root.style.display == DisplayStyle.Flex;
+    }
+
+    private void PerformAutoScroll()
+    {
+        Debug.Log($"PerformAutoScroll() called. GameSession.CurrentRunState: {(GameSession.CurrentRunState != null ? "NOT NULL" : "NULL")}, mapGraphData: {(GameSession.CurrentRunState?.mapGraphData != null ? "NOT NULL" : "NULL")}");
+
+        // Auto-scroll to player's current position or to the bottom
+        if (GameSession.CurrentRunState != null && GameSession.CurrentRunState.mapGraphData != null)
+        {
+             
+
+            // Calculate max scroll Y based on content height
+            float maxScrollY = scroll.contentContainer.resolvedStyle.height - scroll.resolvedStyle.height;
+            maxScrollY = Mathf.Max(0, maxScrollY); // Ensure it's not negative
+            Debug.Log($"Max Scroll Y: {maxScrollY}");
+
+            string currentEncounterId = GameSession.CurrentRunState.currentEncounterId;
+            Debug.Log($"Current Encounter ID: {currentEncounterId}");
+
+            if (!string.IsNullOrEmpty(currentEncounterId) && nodeById.ContainsKey(currentEncounterId))
+            {
+                // Player is at an encounter, scroll to that node
+                Vector2 playerNodePos = visualNodePositions[currentEncounterId];
+                float scrollViewHeight = scroll.resolvedStyle.height;
+                float targetScrollY = playerNodePos.y - (scrollViewHeight / 2f) + centeringOffset;
+
+                // Clamp the targetScrollY to ensure it's within valid scroll limits
+                targetScrollY = Mathf.Clamp(targetScrollY, 0, maxScrollY);
+
+                scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, targetScrollY);
+                Debug.Log($"Scrolling to player node. Player Node Pos Y: {playerNodePos.y}, Target Scroll Y: {targetScrollY}, Centering Offset: {centeringOffset}");
+            }
+            else
+            {
+                // No current encounter, scroll to the very bottom
+                scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, maxScrollY);
+                Debug.Log($"No current encounter. Scrolling to bottom. Target Scroll Y: {maxScrollY}");
+            }
+        }
+        else
+        {
+            Debug.Log("Auto-scroll skipped: GameSession.CurrentRunState or mapGraphData is null.");
+        }
     }
 
     private void UpdateNodeVisualStates()
@@ -672,11 +717,37 @@ public sealed class MapView : MonoBehaviour
         }
     }
 
+    // Implement OnCloseButtonClicked() Method
+    private void OnCloseButtonClicked()
+    {
+        Hide();
+    }
+
+    // Implement ToggleMapVisibility() Method
+    private void ToggleMapVisibility()
+    {
+        if (IsVisible())
+        {
+            Hide();
+        }
+        else
+        {
+            Show();
+        }
+    }
+
 #if UNITY_EDITOR
     void OnValidate()
     {
         if (Application.isPlaying && _root != null)
         {
+            // If only centeringOffset changed, don't trigger re-layout
+            if (centeringOffset != _previousCenteringOffset)
+            {
+                _previousCenteringOffset = centeringOffset;
+                return;
+            }
+
             UnityEditor.EditorApplication.delayCall += () =>
             {
                 if (this != null && Application.isPlaying)
@@ -686,6 +757,7 @@ public sealed class MapView : MonoBehaviour
                 }
             };
         }
+        _previousCenteringOffset = centeringOffset;
     }
 #endif
 }

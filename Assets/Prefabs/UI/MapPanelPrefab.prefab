@@ -94,3 +94,4 @@ MonoBehaviour:
   dashLength: 10
   gapLength: 5
   curvePadding: 20
+  centeringOffset: 250

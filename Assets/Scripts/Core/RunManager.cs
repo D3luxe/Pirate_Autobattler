@@ -129,6 +129,7 @@ public class RunManager : MonoBehaviour
     {
         if (GameSession.CurrentRunState != null)
         {
+            GameSession.UpdateCurrentRunStateForSaving(); // Update the run state with current inventory and equipped items
             SaveManager.SaveRun(GameSession.CurrentRunState);
             Debug.Log("Game saved via hotkey!");
         }
