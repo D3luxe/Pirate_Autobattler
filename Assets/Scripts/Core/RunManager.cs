@@ -200,6 +200,16 @@ public class RunManager : MonoBehaviour
         {
             Debug.LogError("GameSession.Economy is null!");
         }
+
+        // Call Show() on the MapView to trigger auto-scrolling
+        if (_mapView != null)
+        {
+            _mapView.Show();
+        }
+        else
+        {
+            Debug.LogError("MapView instance is null in OnRunSceneLoaded!");
+        }
     }
 }
 

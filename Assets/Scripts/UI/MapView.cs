@@ -395,6 +395,33 @@ public sealed class MapView : MonoBehaviour
     public void Show()
     {
         _root.style.display = DisplayStyle.Flex;
+
+        // Auto-scroll to player's current position or to the bottom
+        if (GameSession.CurrentRunState != null && GameSession.CurrentRunState.mapGraphData != null)
+        {
+            // Calculate max scroll Y based on content height
+            float maxScrollY = scroll.contentContainer.resolvedStyle.height - scroll.resolvedStyle.height;
+            maxScrollY = Mathf.Max(0, maxScrollY); // Ensure it's not negative
+
+            string currentEncounterId = GameSession.CurrentRunState.currentEncounterId;
+            if (!string.IsNullOrEmpty(currentEncounterId) && nodeById.ContainsKey(currentEncounterId))
+            {
+                // Player is at an encounter, scroll to that node
+                Vector2 playerNodePos = visualNodePositions[currentEncounterId];
+                float scrollViewHeight = scroll.resolvedStyle.height;
+                float targetScrollY = playerNodePos.y - (scrollViewHeight / 2f);
+
+                // Clamp the targetScrollY to ensure it's within valid scroll limits
+                targetScrollY = Mathf.Clamp(targetScrollY, 0, maxScrollY);
+
+                scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, targetScrollY);
+            }
+            else
+            {
+                // No current encounter, scroll to the very bottom
+                scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, maxScrollY);
+            }
+        }
     }
 
     public void Hide()
