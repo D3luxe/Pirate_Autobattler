@@ -10,6 +10,10 @@ public static class GameSession
     public static Inventory Inventory { get; set; }
     public static ShipState PlayerShip { get; set; }
 
+    // Flags for loading saved games
+    public static bool ShouldLoadSavedGame { get; set; } = false;
+    public static RunState SavedRunStateToLoad { get; set; } = null;
+
     public static event Action OnPlayerNodeChanged; // New event
 
     public static void InvokeOnPlayerNodeChanged()
@@ -40,7 +44,10 @@ public static class GameSession
             randomSeed = (ulong)System.DateTime.Now.Ticks, // Use ulong for seed and System.DateTime.Now.Ticks for initial randomness
             rerollsThisShop = 0 // Initialize reroll count
         };
-        UnityEngine.Random.InitState((int)CurrentRunState.randomSeed); // Initialize Unity's random with the main seed
+        Debug.Log("Starting a new run. RNG seed: " + CurrentRunState.randomSeed.ToString());
+        // Convert ulong seed to int for Unity's Random.InitState by XORing upper and lower 32 bits
+        int unitySeed = (int)(CurrentRunState.randomSeed & 0xFFFFFFFF) ^ (int)(CurrentRunState.randomSeed >> 32);
+        UnityEngine.Random.InitState(unitySeed); // Initialize Unity's random with the main seed
         Economy = new EconomyService(config, CurrentRunState);
         Inventory = new Inventory(config.inventorySize);
         PlayerShip = new ShipState(startingShip);
@@ -67,6 +74,10 @@ public static class GameSession
 
         PlayerShip = new ShipState(CurrentRunState.playerShipState);
 
+        Debug.Log("Loading a run. RNG seed: " + CurrentRunState.randomSeed.ToString());
+        // Convert ulong seed to int for Unity's Random.InitState by XORing upper and lower 32 bits
+        int unitySeed = (int)(CurrentRunState.randomSeed & 0xFFFFFFFF) ^ (int)(CurrentRunState.randomSeed >> 32);
+        UnityEngine.Random.InitState(unitySeed);
         // Reconstruct enemy ship if in battle
         if (CurrentRunState.enemyShipState != null)
         {

@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using PirateRoguelike.Data;
 using PirateRoguelike.UI; // Import the UI namespace
 using UnityEngine.UIElements;
+using UnityEngine.InputSystem; // NEW: Input System namespace
 
 public class RunManager : MonoBehaviour
 {
@@ -20,6 +21,8 @@ public class RunManager : MonoBehaviour
     private PlayerPanelController _playerPanelController;
     private MapView _mapView;
 
+    private InputAction _saveHotkeyAction; // NEW: Input Action for save hotkey
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -29,6 +32,10 @@ public class RunManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // NEW: Initialize save hotkey action
+        _saveHotkeyAction = new InputAction("SaveGame", type: InputActionType.Button, binding: "<Keyboard>/s");
+        _saveHotkeyAction.performed += OnSaveHotkeyPerformed;
 
         // Instantiate MapManager
         if (mapManagerPrefab != null)
@@ -89,12 +96,37 @@ public class RunManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    void OnEnable()
+    {
+        _saveHotkeyAction.Enable(); // NEW: Enable the input action
+    }
+
+    void OnDisable()
+    {
+        _saveHotkeyAction.Disable(); // NEW: Disable the input action
+    }
+
     void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        _saveHotkeyAction.performed -= OnSaveHotkeyPerformed; // NEW: Unsubscribe from event
+        _saveHotkeyAction.Dispose(); // NEW: Dispose the input action
         if (Instance == this) // Only reset if this is the persistent instance
         {
             GameSession.EndRun();
+        }
+    }
+
+    private void OnSaveHotkeyPerformed(InputAction.CallbackContext context)
+    {
+        if (GameSession.CurrentRunState != null)
+        {
+            SaveManager.SaveRun(GameSession.CurrentRunState);
+            Debug.Log("Game saved via hotkey!");
+        }
+        else
+        {
+            Debug.LogWarning("Cannot save: No active run state.");
         }
     }
 

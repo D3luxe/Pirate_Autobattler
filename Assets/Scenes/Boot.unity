@@ -149,6 +149,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameInitializer
   runManagerPrefab: {fileID: 267340672772548500, guid: c02c5abe98fd53745b74a25bc562d39c, type: 3}
+  runConfig: {fileID: 11400000, guid: 20c85d27094dac045b8bde7a8c53baba, type: 2}
+  debugStartingShip: {fileID: 11400000, guid: 14f3e203ca43f504091a5df9e105e479, type: 2}
 --- !u!4 &260597548
 Transform:
   m_ObjectHideFlags: 0
