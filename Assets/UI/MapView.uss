@@ -1,0 +1,105 @@
+.map-canvas {
+    position: relative;
+    width: 100%;
+    height: 6000px; /* This will be adjusted by C# */
+}
+
+.edge-layer {
+    position: absolute;
+    inset: 0;
+    picking-mode: ignore;
+}
+
+.map-node {
+    position: absolute;
+    width: 56px;   /* Example size */
+    height: 56px;  /* Example size */
+    border-radius: 50%; /* Makes it circular */
+    background-color: #808080; /* Grey color for all nodes by default */
+    border-width: 2px;
+    border-color: #FFFFFF;
+}
+
+/* Node State Styles */
+.map-node.node-visited {
+    background-color: #616161; /* Darker grey for visited nodes */
+    border-color: #424242;
+}
+
+.map-node.node-current {
+    background-color: #FFC107; /* Amber for current node */
+    border-color: #FF9800;
+    border-width: 4px;
+}
+
+.map-node.node-available {
+    background-color: #8BC34A; /* Light green for available nodes */
+    border-color: #689F38;
+}
+
+.map-node.node-locked {
+    opacity: 0.5; /* Dimmed for locked nodes */
+    background-color: #BDBDBD; /* Lighter grey */
+    border-color: #9E9E9E;
+}
+
+.player-indicator {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-color: yellow;
+    border-radius: 50%;
+    border-width: 3px;
+    border-color: gold;
+    z-index: 100; /* Ensure it's on top of nodes */
+}
+
+/* Example type-specific colors - add more as needed */
+.map-node.type-battle {
+    background-color: #4CAF50; /* Green */
+}
+
+.map-node.type-elite {
+    background-color: #FF5722; /* Orange */
+}
+
+.map-node.type-port {
+    background-color: #2196F3; /* Blue */
+}
+
+.map-node.type-shop {
+    background-color: #9C27B0; /* Purple */
+}
+
+.map-node.type-treasure {
+    background-color: #FFEB3B; /* Yellow */
+}
+
+.map-node.type-event {
+    background-color: #607D8B; /* Blue Grey */
+}
+
+.map-node.type-unknown {
+    background-color: #9E9E9E; /* Dark Grey */
+}
+
+.map-node.type-boss {
+    background-color: #F44336; /* Red */
+}
+
+/* Tag-specific styles */
+.map-node.tag-boss-preview {
+    border-color: #FFD700; /* Gold border for boss preview */
+    border-width: 4px;
+}
+
+.map-node.tag-burning-elite {
+    background-color: #FF4500; /* OrangeRed for burning elite */
+    border-color: #FFD700;
+    border-width: 3px;
+}
+
+.map-node.tag-meta-key {
+    border-color: #00FFFF; /* Cyan border for meta key */
+    border-width: 3px;
+}

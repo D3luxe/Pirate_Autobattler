@@ -52,14 +52,14 @@ namespace PirateRoguelike.UI
     {
         [SerializeField] private PlayerUIThemeSO _theme;
         [SerializeField] private VisualTreeAsset _slotTemplate;
-        [SerializeField] private MapPanel _mapPanel;
+        private MapView _mapView;
 
         private PlayerPanelView _panelView;
         private PlayerPanelDataViewModel _viewModel = new PlayerPanelDataViewModel();
 
-        public void SetMapPanel(MapPanel mapPanel)
+        public void SetMapPanel(MapView mapView)
         {
-            _mapPanel = mapPanel;
+            _mapView = mapView;
         }
 
         public void Initialize()
@@ -196,13 +196,13 @@ namespace PirateRoguelike.UI
 
         private void HandleMapToggleClicked()
         {
-            if (_mapPanel.IsVisible())
+            if (_mapView.IsVisible())
             {
-                _mapPanel.Hide();
+                _mapView.Hide();
             }
             else
             {
-                _mapPanel.Show();
+                _mapView.Show();
             }
         }
     }

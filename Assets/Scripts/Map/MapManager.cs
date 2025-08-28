@@ -1,13 +1,15 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using PirateRoguelike.Data;
 using Pirate.MapGen; // Added for MapGraph, NodeType, ActSpec, Rules, MapGenerator, GenerationResult
-using System; // Added for Enum.Parse
 
 public class MapManager : MonoBehaviour
 {
     public static MapManager Instance { get; private set; }
+
+    public event Action OnMapDataUpdated; // New event
 
     public int mapLength = 15;
     public Vector2Int nodesPerColumnRange = new Vector2Int(2, 4);
@@ -71,6 +73,7 @@ public class MapManager : MonoBehaviour
             _currentMapGraph = result.Graph;
             ConvertMapGraphToMapGraphData(result); // Pass result to get subSeeds
             Debug.Log("Map generated successfully!");
+            OnMapDataUpdated?.Invoke(); // Invoke the event after map data is updated
         }
         else
         {
@@ -95,7 +98,7 @@ public class MapManager : MonoBehaviour
                 row = node.Row,
                 col = node.Col,
                 type = node.Type.ToString(), // Convert NodeType enum to string
-                tags = new List<string>() // Populate tags if needed from MapGraph or EncounterSO
+                tags = node.Tags
             });
         }
 

@@ -10,6 +10,13 @@ public static class GameSession
     public static Inventory Inventory { get; set; }
     public static ShipState PlayerShip { get; set; }
 
+    public static event Action OnPlayerNodeChanged; // New event
+
+    public static void InvokeOnPlayerNodeChanged()
+    {
+        OnPlayerNodeChanged?.Invoke();
+    }
+
     // Called at the start of a new run
     public static void StartNewRun(RunConfigSO config, ShipSO startingShip)
     {
@@ -21,7 +28,7 @@ public static class GameSession
             // currentEncounterNode and currentEncounterId will be set when entering first encounter
             playerShipState = new ShipState(startingShip).ToSerializable(),
             inventoryItems = new List<SerializableItemInstance>(),
-            mapNodes = MapManager.Instance.GetConvertedMapNodes(), // Save the generated map
+            mapGraphData = MapManager.Instance.GetMapGraphData(), // Save the generated map
             randomSeed = (ulong)System.DateTime.Now.Ticks, // Use ulong for seed and System.DateTime.Now.Ticks for initial randomness
             rerollsThisShop = 0 // Initialize reroll count
         };

@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 493935044622113448}
   - component: {fileID: 1353816575538340023}
-  - component: {fileID: 8867493353875155946}
+  - component: {fileID: 4338046608132235485}
   m_Layer: 0
   m_Name: MapPanelPrefab
   m_TagString: Untagged
@@ -56,7 +56,7 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!114 &8867493353875155946
+--- !u!114 &4338046608132235485
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -65,9 +65,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 6386911918127072378}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ee2250d0b0e7a744ae2ad5349a8fc1d, type: 3}
+  m_Script: {fileID: 11500000, guid: 755800a5dcfc8fe439ccfe09e5b5057c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MapPanel
-  mapPanelAsset: {fileID: 9197481963319205126, guid: 131cc073b5614264c96e2aff081d0821, type: 3}
-  nodeButtonAsset: {fileID: 9197481963319205126, guid: 930dc29b07d5d3e41a90a83845327c33, type: 3}
-  mapBackgroundSprite: {fileID: 21300000, guid: bd96be6edcea709419b9deb02593db59, type: 3}
+  m_EditorClassIdentifier: Assembly-CSharp::MapView
+  uxml: {fileID: 9197481963319205126, guid: 131cc073b5614264c96e2aff081d0821, type: 3}
+  uss: {fileID: 7433441132597879392, guid: 5d1ce1f7234762a4982274686ccb2b0d, type: 3}
+  rowHeight: 160
+  laneWidth: 140
+  jitter: 18
+  padX: 80
+  padY: 80
+  minSep: 70

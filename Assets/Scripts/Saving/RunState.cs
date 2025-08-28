@@ -14,7 +14,7 @@ public class RunState
     public SerializableShipState playerShipState;
     public SerializableShipState enemyShipState; // For saving battle state
     public List<SerializableItemInstance> inventoryItems;
-    public List<List<MapNodeData>> mapNodes; // Full map data
+    public MapGraphData mapGraphData; // Full map data
     public ulong randomSeed;
     public SubSeeds subSeeds; // Persist sub-seeds for deterministic replays
     public PityState pityState; // Persist pity state for Unknown node resolution

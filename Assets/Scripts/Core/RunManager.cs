@@ -13,12 +13,12 @@ public class RunManager : MonoBehaviour
     [SerializeField] private RunConfigSO runConfig;
     [SerializeField] private ShipSO debugStartingShip; // For testing
     [SerializeField] private GameObject playerPanelPrefab; // NEW: Player Panel UI
-    [SerializeField] private GameObject mapPanelPrefab; // NEW: Map Panel UI Prefab
+    [SerializeField] private GameObject mapViewPrefab; // NEW: Map View UI Prefab
     [SerializeField] private GameObject rewardUIPrefab;
     [SerializeField] private GameObject mapManagerPrefab;
 
     private PlayerPanelController _playerPanelController;
-    private MapPanel _mapPanel;
+    private MapView _mapView;
 
     void Awake()
     {
@@ -60,21 +60,21 @@ public class RunManager : MonoBehaviour
             Debug.LogError("PlayerPanel Prefab is not assigned in RunManager!");
         }
 
-        // Instantiate MapPanel UI from prefab
-        if (mapPanelPrefab != null)
+        // Instantiate MapView UI from prefab
+        if (mapViewPrefab != null)
         {
-            GameObject mapPanelInstance = Instantiate(mapPanelPrefab, transform);
-            _mapPanel = mapPanelInstance.GetComponent<MapPanel>();
+            GameObject mapViewInstance = Instantiate(mapViewPrefab, transform);
+            _mapView = mapViewInstance.GetComponent<MapView>();
             // The UIDocument reference will now be handled by the prefab setup
         }
         else
         {
-            Debug.LogError("MapPanel Prefab is not assigned in RunManager!");
+            Debug.LogError("MapView Prefab is not assigned in RunManager!");
         }
 
-        if (_playerPanelController != null && _mapPanel != null)
+        if (_playerPanelController != null && _mapView != null)
         {
-            _playerPanelController.SetMapPanel(_mapPanel);
+            _playerPanelController.SetMapPanel(_mapView);
         }
 
         if (rewardUIPrefab != null)

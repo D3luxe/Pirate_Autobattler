@@ -1,8 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
-  <ScrollView name="MapScroll" horizontal-scroller-visibility="Hidden">
-    <VisualElement name="MapCanvas" class="map-canvas">
-      <VisualElement name="EdgeLayer" class="edge-layer"/>
+  <ui:ScrollView name="MapScroll" horizontal-scroller-visibility="Hidden">
+    <ui:VisualElement name="MapCanvas" class="map-canvas">
+      <ui:VisualElement name="EdgeLayer" class="edge-layer"/>
+      <ui:VisualElement name="PlayerIndicator" class="player-indicator"/>
       <!-- Node elements are created at runtime -->
-    </VisualElement>
-  </ScrollView>
+    </ui:VisualElement>
+  </ui:ScrollView>
 </ui:UXML>
