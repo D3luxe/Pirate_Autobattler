@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using PirateRoguelike.Data;
+using Pirate.MapGen; // NEW: Added for MapGraphData
 
 public static class GameSession
 {
@@ -40,7 +41,7 @@ public static class GameSession
             // currentEncounterNode and currentEncounterId will be set when entering first encounter
             playerShipState = new ShipState(startingShip).ToSerializable(),
             inventoryItems = new List<SerializableItemInstance>(),
-            mapGraphData = MapManager.Instance.GetMapGraphData(), // Save the generated map
+            mapGraphData = new MapGraphData(), // Initialize with an empty MapGraphData
             randomSeed = (ulong)System.DateTime.Now.Ticks, // Use ulong for seed and System.DateTime.Now.Ticks for initial randomness
             rerollsThisShop = 0 // Initialize reroll count
         };

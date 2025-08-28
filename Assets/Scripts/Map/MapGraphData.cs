@@ -12,6 +12,12 @@ namespace Pirate.MapGen
         public SubSeeds subSeeds;
         public Constants constants;
 
+        public MapGraphData()
+        {
+            nodes = new List<Node>();
+            edges = new List<Edge>();
+        }
+
         [Serializable]
         public class Node
         {

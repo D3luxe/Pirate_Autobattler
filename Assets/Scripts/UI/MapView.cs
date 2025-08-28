@@ -260,13 +260,22 @@ public sealed class MapView : MonoBehaviour
                 continue;
             }
 
-            // Adjust start and end points to be at the bottom/top of the node visual element
-            // Assuming node elements are 56x56 as per USS gist
-            Vector2 a = fromPos + new Vector2(0, 28); // Bottom center of from node
-            Vector2 b = toPos - new Vector2(0, 28);   // Top center of to node
+            // Adjust start and end points to be at the top/bottom of the node visual element
+            // Assuming node elements are 56x56, but adding a small offset for visual clarity
+            float nodeHalfHeight = 28f; // Half of 56px node height
+            float curvePadding = 10f; // Distance from node edge for curve start/end
 
-            Vector2 c1 = a - new Vector2(0, 0.4f * rowHeight);
-            Vector2 c2 = b + new Vector2(0, 0.4f * rowHeight);
+            // P0 (start point 'a'): Just outside the top of fromNode
+            Vector2 a = fromPos - new Vector2(0, nodeHalfHeight + curvePadding);
+
+            // P3 (end point 'b'): Just outside the bottom of toNode
+            Vector2 b = toPos + new Vector2(0, nodeHalfHeight + curvePadding);
+
+            // P1 (control point 'c1'): Pulls curve upwards from 'a'
+            // P2 (control point 'c2'): Pulls curve upwards towards 'b'
+            float controlPointStrength = 0.5f; // Multiplier for vertical distance of control points
+            Vector2 c1 = a - new Vector2(0, controlPointStrength * rowHeight);
+            Vector2 c2 = b - new Vector2(0, controlPointStrength * rowHeight);
 
             p2d.BeginPath();
             p2d.MoveTo(a);
@@ -423,6 +432,8 @@ public sealed class MapView : MonoBehaviour
         }
 
         // 2. Validate Valid Edge
+        Debug.Log($"Checking path from {currentPlayerNode.id} to {clickedNode.id}");
+        Debug.Log($"Available edges: {string.Join(", ", GameSession.CurrentRunState.mapGraphData.edges.Select(e => $"{e.fromId}->{e.toId}"))}");
         bool hasValidEdge = GameSession.CurrentRunState.mapGraphData.edges.Any(e => e.fromId == currentPlayerNode.id && e.toId == clickedNode.id);
         if (!hasValidEdge)
         {

@@ -45,4 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapManager
   mapLength: 15
-  nodesPerColumnRange: {x: 2, y: 5}
+  nodesPerColumnRange: {x: 2, y: 4}

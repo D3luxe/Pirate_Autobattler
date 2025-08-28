@@ -43,17 +43,17 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    public void GenerateMapIfNeeded()
+    public void GenerateMapIfNeeded(ulong seed)
     {
         if (_isMapGenerated) return;
-        GenerateMapData();
+        GenerateMapData(seed);
         _isMapGenerated = true;
         // PrecomputeReachabilityCache(); // Removed
     }
 
     private MapGraph _currentMapGraph; // Store the generated MapGraph
 
-    void GenerateMapData()
+    void GenerateMapData(ulong seed)
     {
         ActSpec actSpec = new ActSpec
         {
@@ -65,7 +65,6 @@ public class MapManager : MonoBehaviour
         Rules rules = new Rules();
 
         MapGenerator mapGenerator = new MapGenerator();
-        ulong seed = 12345; // Example seed
         GenerationResult result = mapGenerator.GenerateMap(actSpec, rules, seed);
 
         if (result.Audits.IsValid)
@@ -127,6 +126,9 @@ public class MapManager : MonoBehaviour
             minHorizontalSeparation = 70f, // Placeholder, tune as needed
             jitter = 18f // Placeholder, tune as needed
         };
+
+        // Assign the generated map data to GameSession
+        GameSession.CurrentRunState.mapGraphData = _mapGraphData;
 
         // Now, convert to List<List<MapNodeData>> for GameSession and MapPanel
         _convertedMapNodes = new List<List<MapNodeData>>();

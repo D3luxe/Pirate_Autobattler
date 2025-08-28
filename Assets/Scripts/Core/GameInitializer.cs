@@ -14,12 +14,6 @@ public class GameInitializer : MonoBehaviour
         // Initialize core systems
         AbilityManager.Initialize();
 
-        // Instantiate persistent UI and managers
-        if (runManagerPrefab != null && RunManager.Instance == null)
-        {
-            Instantiate(runManagerPrefab);
-        }
-
         // Determine whether to load a saved game or start a new one
         if (GameSession.ShouldLoadSavedGame)
         {
@@ -33,13 +27,17 @@ public class GameInitializer : MonoBehaviour
                 GameSession.LoadRun(GameSession.SavedRunStateToLoad, runConfig);
                 GameSession.ShouldLoadSavedGame = false; // Reset flag
                 GameSession.SavedRunStateToLoad = null; // Clear saved state
-                SceneManager.LoadScene("Run");
             }
             else
             {
-                Debug.LogError("GameInitializer: ShouldLoadSavedGame is true but SavedRunStateToLoad is null.");
+                Debug.LogError("GameInitializer: ShouldLoadSavedGame is true but SavedRunStateToLoad is null. Starting new game instead.");
                 // Fallback to starting a new game if saved state is missing
-                SceneManager.LoadScene("Run");
+                if (runConfig == null || debugStartingShip == null)
+                {
+                    Debug.LogError("GameInitializer: RunConfig or DebugStartingShip is not assigned for new game fallback!");
+                    return;
+                }
+                GameSession.StartNewRun(runConfig, debugStartingShip);
             }
         }
         else
@@ -51,8 +49,15 @@ public class GameInitializer : MonoBehaviour
                 return;
             }
             GameSession.StartNewRun(runConfig, debugStartingShip);
-            SceneManager.LoadScene("Run");
         }
+
+        // Instantiate persistent UI and managers *after* GameSession is initialized
+        if (runManagerPrefab != null && RunManager.Instance == null)
+        {
+            Instantiate(runManagerPrefab);
+        }
+
+        SceneManager.LoadScene("Run");
     }
 
     private void OnApplicationQuit()

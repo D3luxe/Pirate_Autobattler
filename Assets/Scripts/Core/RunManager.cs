@@ -44,7 +44,15 @@ public class RunManager : MonoBehaviour
             // Generate map data immediately after MapManager is instantiated
             if (MapManager.Instance != null)
             {
-                MapManager.Instance.GenerateMapIfNeeded();
+                // Pass the seed from GameSession to MapManager
+                if (GameSession.CurrentRunState != null)
+                {
+                    MapManager.Instance.GenerateMapIfNeeded(GameSession.CurrentRunState.randomSeed);
+                }
+                else
+                {
+                    Debug.LogError("GameSession.CurrentRunState is null in RunManager.Awake()! Cannot generate map with seed.");
+                }
             }
             else
             {
@@ -170,7 +178,14 @@ public class RunManager : MonoBehaviour
 
         if (MapManager.Instance != null)
         {
-            MapManager.Instance.GenerateMapIfNeeded();
+            if (GameSession.CurrentRunState != null)
+            {
+                MapManager.Instance.GenerateMapIfNeeded(GameSession.CurrentRunState.randomSeed);
+            }
+            else
+            {
+                Debug.LogError("GameSession.CurrentRunState is null in RunManager.OnRunSceneLoaded()! Cannot generate map with seed.");
+            }
         }
         else
         {
