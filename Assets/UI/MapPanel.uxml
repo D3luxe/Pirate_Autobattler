@@ -1,9 +1,15 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
-  <ui:ScrollView name="MapScroll" horizontal-scroller-visibility="Hidden">
-    <ui:VisualElement name="MapCanvas" class="map-canvas">
-      <ui:VisualElement name="EdgeLayer" class="edge-layer"/>
-      <ui:VisualElement name="PlayerIndicator" class="player-indicator"/>
-      <!-- Node elements are created at runtime -->
-    </ui:VisualElement>
-  </ui:ScrollView>
-</ui:UXML>
+<UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/MapView.uss?fileID=7433441132597879392&amp;guid=5d1ce1f7234762a4982274686ccb2b0d&amp;type=3#MapView" />
+    <ui:ScrollView name="MapScroll" class="map-scroll">
+        <ui:VisualElement name="MapContentContainer" class="map-content-container">
+            <ui:VisualElement name="ScrollTopRoll" class="scroll-top-roll" />
+            <ui:VisualElement name="ScrollCenter" class="scroll-center">
+                <ui:VisualElement name="MapCanvas" class="map-canvas" style="left: auto; right: auto; width: 100%; align-self: center; margin-left: 0%;">
+                    <ui:VisualElement name="EdgeLayer" class="edge-layer" style="left: 0; right: 0;" />
+                    <ui:VisualElement name="PlayerIndicator" class="player-indicator" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="ScrollBottomRoll" class="scroll-bottom-roll" />
+        </ui:VisualElement>
+    </ui:ScrollView>
+</UXML>

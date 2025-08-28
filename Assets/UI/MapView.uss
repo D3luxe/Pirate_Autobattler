@@ -1,7 +1,83 @@
+.unity-scroll-view__vertical-scroller {
+    display: none;
+}
+
+.scroll-background-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 0;
+}
+
+.map-scroll {
+    flex-grow: 1;
+}
+
+.map-content-container {
+    width: 60%;
+    flex-grow: 1; /* Allow it to take up vertical space */
+    align-self: center; /* Center horizontally within the ScrollView */
+    flex-direction: column; /* Stack children vertically */
+    position: relative; /* For absolute positioning of MapCanvas */
+}
+
+.scroll-top-roll,
+.scroll-center,
+.scroll-bottom-roll {
+    width: 100%; /* Now 100% of MapContentContainer */
+    background-image: url('/Assets/Art/parchment_scroll_sliced.png');
+    background-image-slice: 50 50 50 50;
+    background-repeat: stretch;
+    position: relative;
+    z-index: 0; /* Behind MapCanvas */
+}
+
+.scroll-top-roll {
+    height: 100px;
+}
+
+.scroll-bottom-roll {
+    height: 100px;
+}
+
+.scroll-center {
+    flex-grow: 1;
+    position: relative; /* Allow absolute positioning of children */
+}
+
+.map-canvas {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 6000px; /* This will be adjusted by C# */
+    z-index: 1; /* Ensure it's on top of the scroll background */
+}
+
+.scroll-top-roll {
+    height: 100px;
+}
+
+.scroll-bottom-roll {
+    height: 100px;
+}
+
+.scroll-center {
+    flex-grow: 1;
+}
+
 .map-canvas {
     position: relative;
     width: 100%;
     height: 6000px; /* This will be adjusted by C# */
+    z-index: 1; /* Ensure it's on top of the scroll background */
 }
 
 .edge-layer {
