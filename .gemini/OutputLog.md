@@ -1,4 +1,52 @@
-Assets\Scripts\UI\MapView.cs(256,18): error CS0111: Type 'MapView' already defines a member called 'Jitter' with the same parameter types
+First move to node: node_0_0
+UnityEngine.Debug:Log (object)
+MapView:OnNodeClicked (string) (at Assets/Scripts/UI/MapView.cs:508)
+MapView/<>c__DisplayClass36_0:<RenderNodesAndEdges>b__1 (UnityEngine.UIElements.ClickEvent) (at Assets/Scripts/UI/MapView.cs:231)
+UnityEngine.EventSystems.EventSystem:Update () (at ./Library/PackageCache/com.unity.ugui@423bc642aff1/Runtime/UGUI/EventSystem/EventSystem.cs:514)
 
-Assets\Scripts\UI\MapView.cs(260,27): error CS0111: Type 'MapView' already defines a member called 'GetEdgeRNG' with the same parameter types
+PlayerIndicator: Visible at 572.6243, 2911.732
+UnityEngine.Debug:Log (object)
+MapView:UpdateNodeVisualStates () (at Assets/Scripts/UI/MapView.cs:428)
+MapView:OnNodeClicked (string) (at Assets/Scripts/UI/MapView.cs:511)
+MapView/<>c__DisplayClass36_0:<RenderNodesAndEdges>b__1 (UnityEngine.UIElements.ClickEvent) (at Assets/Scripts/UI/MapView.cs:231)
+UnityEngine.EventSystems.EventSystem:Update () (at ./Library/PackageCache/com.unity.ugui@423bc642aff1/Runtime/UGUI/EventSystem/EventSystem.cs:514)
+
+ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+System.Collections.Generic.List`1[T].get_Item (System.Int32 index) (at <6460d52f11fa4eaeabfca1cf2e9eca8f>:0)
+UnityEngine.UIElements.StyleSheets.StylePropertyReader.GetValue (System.Int32 index) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.ComputedStyle.ApplyGlobalKeyword (UnityEngine.UIElements.StyleSheets.StylePropertyReader reader, UnityEngine.UIElements.ComputedStyle& parentStyle) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.ComputedStyle.ApplyProperties (UnityEngine.UIElements.StyleSheets.StylePropertyReader reader, UnityEngine.UIElements.ComputedStyle& parentStyle) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.ProcessMatchedRules (UnityEngine.UIElements.VisualElement element, System.Collections.Generic.List`1[T] matchingSelectors) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.TraverseRecursive (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.StyleSheets.HierarchyTraversal.Recurse (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.TraverseRecursive (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.StyleSheets.HierarchyTraversal.Recurse (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.TraverseRecursive (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.StyleSheets.HierarchyTraversal.Recurse (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.TraverseRecursive (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.StyleSheets.HierarchyTraversal.Recurse (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.TraverseRecursive (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.StyleSheets.HierarchyTraversal.Recurse (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.TraverseRecursive (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.StyleSheets.HierarchyTraversal.Recurse (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.TraverseRecursive (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.StyleSheets.HierarchyTraversal.Recurse (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.TraverseRecursive (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.StyleSheets.HierarchyTraversal.Recurse (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.TraverseRecursive (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.StyleSheets.HierarchyTraversal.Recurse (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdaterTraversal.TraverseRecursive (UnityEngine.UIElements.VisualElement element, System.Int32 depth) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.StyleSheets.HierarchyTraversal.Traverse (UnityEngine.UIElements.VisualElement element) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdater.ApplyStyles () (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeStyleUpdater.Update () (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VisualTreeUpdater.UpdateVisualTreePhase (UnityEngine.UIElements.VisualTreeUpdatePhase phase) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.Panel.ValidateLayout () (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.BaseRuntimePanel.Update () (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.RuntimePanel.Update () (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.UIElementsRuntimeUtility.UpdatePanels () (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.UIElementsRuntimeUtilityNative.UpdatePanels () (at <aae110a54f4e40afadedeea84895fc4b>:0)
+
+Assertion failed
+UnityEngine.UIElements.UIElementsRuntimeUtilityNative:RepaintPanels (bool)
 

@@ -12,6 +12,16 @@ public sealed class MapView : MonoBehaviour
 
     private VisualElement _root;
 
+    [System.Serializable]
+    public class EncounterIconMapping
+    {
+        public PirateRoguelike.Data.EncounterType type;
+        public Sprite icon;
+    }
+
+    public List<EncounterIconMapping> encounterIcons;
+    private Dictionary<PirateRoguelike.Data.EncounterType, Sprite> _iconLookup;
+
     [Header("Visual Compaction Settings")]
     public float contentWidth = 1000f;
     public float gutters = 50f;
@@ -31,7 +41,7 @@ public sealed class MapView : MonoBehaviour
     private const float DragThreshold = 5f;
 
     ScrollView scroll;
-    VisualElement canvas, edgeLayer, playerIndicator;
+    VisualElement canvas, edgeLayer, playerIndicator, scrollCenter;
 
     Dictionary<string, MapGraphData.Node> nodeById = new();
     private Dictionary<string, Vector2> visualNodePositions = new Dictionary<string, Vector2>();
@@ -62,12 +72,17 @@ public sealed class MapView : MonoBehaviour
             return;
         }
 
+        _iconLookup = encounterIcons.ToDictionary(mapping => mapping.type, mapping => mapping.icon);
+
         _root.Clear();
         uxml.CloneTree(_root);
         _root.styleSheets.Add(uss);
 
         scroll = _root.Q<ScrollView>("MapScroll");
         if (scroll == null) Debug.LogError("ScrollView 'MapScroll' not found in UXML.");
+
+        scrollCenter = _root.Q<VisualElement>("ScrollCenter");
+        if (scrollCenter == null) Debug.LogError("VisualElement 'ScrollCenter' not found in UXML.");
 
         canvas = _root.Q<VisualElement>("MapCanvas");
         if (canvas == null) Debug.LogError("VisualElement 'MapCanvas' not found in UXML.");
@@ -179,7 +194,17 @@ public sealed class MapView : MonoBehaviour
             var ve = new VisualElement();
             ve.name = n.id;
             ve.AddToClassList("map-node");
-            ve.AddToClassList($"type-{n.type.ToLower()}");
+
+            if (System.Enum.TryParse<PirateRoguelike.Data.EncounterType>(n.type, true, out var encounterType) && _iconLookup.TryGetValue(encounterType, out Sprite iconSprite))
+            {
+                ve.style.backgroundImage = new StyleBackground(iconSprite);
+            }
+            else
+            {
+                // Fallback to the old class-based color system if no icon is found
+                ve.AddToClassList($"type-{n.type.ToLower()}");
+            }
+
             foreach (var tag in n.tags)
             {
                 ve.AddToClassList($"tag-{tag.ToLower()}");
@@ -190,12 +215,12 @@ public sealed class MapView : MonoBehaviour
                 ve.AddToClassList("penultimate-row-node");
             }
 
-            if (n.type == Pirate.MapGen.NodeType.Treasure.ToString().ToLower() && n.row >= rows / 3 && n.row <= (2 * rows / 3))
+            if (n.type == "Treasure" && n.row >= rows / 3 && n.row <= (2 * rows / 3))
             {
                 ve.AddToClassList("qa-treasure-window");
             }
 
-            if (n.type == Pirate.MapGen.NodeType.Unknown.ToString().ToLower())
+            if (n.type == "Unknown")
             {
                 ve.tooltip = "Unknown Node - Tooltip Placeholder (Pity System Forecast Here)";
             }
@@ -217,6 +242,7 @@ public sealed class MapView : MonoBehaviour
 
         float maxY = nodes.Any() ? nodes.Max(n => visualNodePositions[n.id].y) : 0;
         canvas.style.height = padY * 2 + maxY + 300;
+        scrollCenter.style.height = canvas.style.height;
         edgeLayer.MarkDirtyRepaint();
     }
 
