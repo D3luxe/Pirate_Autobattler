@@ -1,4 +1,13 @@
+.unity-scroll-view__content-viewport {
+    overflow: hidden;
+}
+
 .unity-scroll-view__vertical-scroller {
+    display: none;
+    visibility: hidden;
+}
+
+.unity-scroll-view__horizontal-scroller {
     display: none;
 }
 
@@ -16,25 +25,42 @@
 
 .map-scroll {
     flex-grow: 1;
+    overflow: hidden;
 }
 
 .map-content-container {
     width: 60%;
-    flex-grow: 1; /* Allow it to take up vertical space */
-    align-self: center; /* Center horizontally within the ScrollView */
-    flex-direction: column; /* Stack children vertically */
-    position: relative; /* For absolute positioning of MapCanvas */
+    flex-grow: 1;
+    align-self: center;
+    flex-direction: column;
+    position: relative;
 }
 
-.scroll-top-roll,
-.scroll-center,
-.scroll-bottom-roll {
-    width: 100%; /* Now 100% of MapContentContainer */
-    background-image: url('/Assets/Art/parchment_scroll_sliced.png');
+.scroll-top-roll {
+    width: 100%;
+    background-image: url("project://database/Assets/Art/parchment_scroll_sliced.png?fileID=21300000&guid=0a9d777caae2021449334e9881ca992f&type=3#parchment_scroll_sliced");
     background-image-slice: 50 50 50 50;
     background-repeat: stretch;
     position: relative;
-    z-index: 0; /* Behind MapCanvas */
+    z-index: 0;
+}
+
+.scroll-center {
+    width: 100%;
+    background-image: url("project://database/Assets/Art/parchment_scroll_sliced.png?fileID=21300000&guid=0a9d777caae2021449334e9881ca992f&type=3#parchment_scroll_sliced");
+    background-image-slice: 50 50 50 50;
+    background-repeat: stretch;
+    position: relative;
+    z-index: 0;
+}
+
+.scroll-bottom-roll {
+    width: 100%;
+    background-image: url("project://database/Assets/Art/parchment_scroll_sliced.png?fileID=21300000&guid=0a9d777caae2021449334e9881ca992f&type=3#parchment_scroll_sliced");
+    background-image-slice: 50 50 50 50;
+    background-repeat: stretch;
+    position: relative;
+    z-index: 0;
 }
 
 .scroll-top-roll {
@@ -47,7 +73,7 @@
 
 .scroll-center {
     flex-grow: 1;
-    position: relative; /* Allow absolute positioning of children */
+    position: relative;
 }
 
 .map-canvas {
@@ -57,8 +83,8 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 6000px; /* This will be adjusted by C# */
-    z-index: 1; /* Ensure it's on top of the scroll background */
+    height: 6000px;
+    z-index: 1;
 }
 
 .edge-layer {
@@ -77,25 +103,22 @@
     background-size: cover;
     -unity-background-scale-mode: scale-to-fit;
     -unity-background-image-tint-color: white;
-    transition: opacity 0.2s ease-in-out,
-                -unity-background-image-tint-color 0.2s ease-in-out;
+    transition: opacity 0.2s ease-in-out, -unity-background-image-tint-color 0.2s ease-in-out;
 }
 
-/* State Styles using Tint and Opacity */
 .map-node.node-visited {
-    -unity-background-image-tint-color: rgb(150, 150, 150); /* Grey tint */
+    -unity-background-image-tint-color: rgb(150, 150, 150);
 }
 
 .map-node.node-current {
-    -unity-background-image-tint-color: #FFC107; /* Amber for current node */
+    -unity-background-image-tint-color: rgb(255, 193, 7);
 }
 
 .map-node.node-available {
-    /* Available nodes have normal tint */
 }
 
 .map-node.node-locked {
-    opacity: 0.5; /* Dimmed */
+    opacity: 0.5;
 }
 
 .map-node.node-hover-highlight {
@@ -112,61 +135,52 @@
     border-color: gold;
 }
 
-/* Fallback type-specific colors */
 .map-node.type-battle {
-    background-color: #4CAF50; /* Green */
+    background-color: rgb(76, 175, 80);
 }
 
 .map-node.type-elite {
-    background-color: #FF5722; /* Orange */
+    background-color: rgb(255, 87, 34);
 }
 
 .map-node.type-port {
-    background-color: #2196F3; /* Blue */
+    background-color: rgb(33, 150, 243);
 }
 
 .map-node.type-shop {
-    background-color: #9C27B0; /* Purple */
+    background-color: rgb(156, 39, 176);
 }
 
 .map-node.type-treasure {
-    background-color: #FFEB3B; /* Yellow */
+    background-color: rgb(255, 235, 59);
 }
 
 .map-node.type-event {
-    background-color: #607D8B; /* Blue Grey */
+    background-color: rgb(96, 125, 139);
 }
 
 .map-node.type-unknown {
-    background-color: #9E9E9E; /* Dark Grey */
+    background-color: rgb(158, 158, 158);
 }
 
 .map-node.type-boss {
-    background-color: #F44336; /* Red */
+    background-color: rgb(244, 67, 54);
 }
 
-
-/* Tag-specific styles */
 .map-node.tag-boss-preview {
-    /* Maybe add a subtle glow or animation here later */
 }
 
 .map-node.tag-burning-elite {
-    /* Maybe a red glow */
 }
 
 .map-node.tag-meta-key {
-    /* Maybe a blue glow */
 }
 
 .map-node.penultimate-row-node {
-    /* Special styling if needed */
 }
 
 .map-node.qa-treasure-window {
-    /* Special styling if needed */
 }
 
 .map-node.boss-preview-active {
-    /* Special styling if needed */
 }

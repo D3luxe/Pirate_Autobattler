@@ -38,7 +38,7 @@ public sealed class MapView : MonoBehaviour
     public float curvePadding = 20f;
 
     private const float nodeHalfHeight = 28f; // From map-node height in USS
-    private const float DragThreshold = 5f;
+    private const float DragThreshold = 20f;
 
     ScrollView scroll;
     VisualElement canvas, edgeLayer, playerIndicator, scrollCenter;
@@ -52,9 +52,9 @@ public sealed class MapView : MonoBehaviour
     System.Random decoRng;
     private Dictionary<string, VisualElement> nodeVisualElements = new Dictionary<string, VisualElement>();
     
-    private Vector2 _startMousePosition;
+    private Vector3 _startMousePosition;
     private Vector2 _startScrollOffset;
-    private bool _isDragging = false;
+    private bool _dragOccurredThisCycle;
 
     void Awake()
     {
@@ -321,8 +321,9 @@ public sealed class MapView : MonoBehaviour
                 continue;
             }
 
-            Vector2 a = fromPos - new Vector2(0, nodeHalfHeight + curvePadding);
-            Vector2 b = toPos + new Vector2(0, nodeHalfHeight + curvePadding);
+            Vector2 offset = new Vector2(0f, nodeHalfHeight + curvePadding);
+            Vector2 a = (Vector2)fromPos - offset;
+            Vector2 b = (Vector2)toPos + offset;
 
             float lineLength = Vector2.Distance(a, b);
 
@@ -490,20 +491,19 @@ public sealed class MapView : MonoBehaviour
 
     private void OnNodeClicked(string nodeId)
     {
-        if (_isDragging) return;
-
         if (GameSession.CurrentRunState == null || GameSession.CurrentRunState.mapGraphData == null)
         {
             Debug.LogWarning("GameSession or MapGraphData is not initialized.");
             return;
         }
 
+        string currentEncounterId = GameSession.CurrentRunState.currentEncounterId;
         MapGraphData.Node clickedNode = nodeById[nodeId];
         MapGraphData.Node currentPlayerNode = null;
 
-        if (GameSession.CurrentRunState.currentEncounterId != null && nodeById.ContainsKey(GameSession.CurrentRunState.currentEncounterId))
+        if (currentEncounterId != null && nodeById.ContainsKey(currentEncounterId))
         {
-            currentPlayerNode = nodeById[GameSession.CurrentRunState.currentEncounterId];
+            currentPlayerNode = nodeById[currentEncounterId];
         }
         else
         {
@@ -524,7 +524,7 @@ public sealed class MapView : MonoBehaviour
 
         if (clickedNode.row != currentPlayerNode.row + 1)
         {
-            Debug.Log($"Invalid move: Node {clickedNode.id} is not in the next row. Current row: {currentPlayerNode.row}, Clicked row: {clickedNode.row}");
+            Debug.Log($"Invalid move: Node {clickedNode.id} is not in the next row. Current row: {currentPlayerNode.row}, Clicked row: {clickedNode.id}");
             return;
         }
 
@@ -582,38 +582,67 @@ public sealed class MapView : MonoBehaviour
     
     private void OnPointerDown(PointerDownEvent evt)
     {
-        _startMousePosition = evt.localPosition;
-        _startScrollOffset = scroll.scrollOffset;
-        _isDragging = false;
+        // Perform a hit test to find the VisualElement at the pointer's position
+        VisualElement clickedElement = scroll.panel.Pick(evt.position);
+
+        bool clickedOnNode = false;
+        if (clickedElement != null)
+        {
+            // Check if the clickedElement is one of our map nodes
+            foreach (var entry in nodeVisualElements)
+            {
+                if (entry.Value == clickedElement)
+                {
+                    clickedOnNode = true;
+                    break;
+                }
+            }
+        }
+
+        if (clickedOnNode)
+        {
+            // If clicked on a node, do NOT capture pointer on ScrollView.
+            // Let the event propagate so the node's ClickEvent can fire.
+        }
+        else
+        {
+            // If not clicked on a node, capture pointer for ScrollView dragging.
+            _startMousePosition = evt.localPosition;
+            _startScrollOffset = scroll.scrollOffset;
+            _dragOccurredThisCycle = false; // Reset for new cycle
+            scroll.CapturePointer(evt.pointerId);
+        }
     }
 
     private void OnPointerMove(PointerMoveEvent evt)
     {
-        if (!_isDragging && (evt.pressedButtons & 1) == 1)
+        if (!scroll.HasPointerCapture(evt.pointerId))
         {
-            Vector2 localPosition = evt.localPosition;
-            if (Vector2.Distance(localPosition, _startMousePosition) > DragThreshold)
-            {
-                _isDragging = true;
-                scroll.CapturePointer(evt.pointerId);
-            }
+            return;
         }
 
-        if (_isDragging)
+        // Check if the mouse has moved beyond the drag threshold
+        // and if the left mouse button is still pressed (for robustness)
+        if ((evt.pressedButtons & 1) == 1 && Vector2.Distance((Vector2)evt.localPosition, (Vector2)_startMousePosition) > DragThreshold)
         {
-            Vector2 localPosition = evt.localPosition;
-            Vector2 delta = localPosition - _startMousePosition;
+            _dragOccurredThisCycle = true; // A drag has started
+
+            // Update scroll offset based on initial position and current delta
+            Vector2 delta = (Vector2)evt.localPosition - (Vector2)_startMousePosition;
             scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, _startScrollOffset.y - delta.y);
+
+            // Do NOT stop propagation here. Let the ClickEvent be generated.
+            // The OnNodeClicked method will check _dragOccurredThisCycle.
         }
     }
 
     private void OnPointerUp(PointerUpEvent evt)
     {
-        if (_isDragging)
+        // Release pointer capture
+        if (scroll.HasPointerCapture(evt.pointerId))
         {
             scroll.ReleasePointer(evt.pointerId);
         }
-        _isDragging = false;
     }
 
 #if UNITY_EDITOR

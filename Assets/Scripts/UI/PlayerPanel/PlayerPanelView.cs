@@ -18,6 +18,7 @@ namespace PirateRoguelike.UI
         private VisualElement _hpBarForeground;
         private VisualElement _equipmentBar;
         private VisualElement _inventoryContainer; // New
+        private VisualElement _mainContainer; // The actual panel background/container
         private List<VisualElement> _equipmentSlotElements = new List<VisualElement>();
         private List<VisualElement> _inventorySlotElements = new List<VisualElement>();
         private Label _goldLabel, _livesLabel, _depthLabel;
@@ -27,15 +28,19 @@ namespace PirateRoguelike.UI
         public PlayerPanelView(VisualElement root, VisualTreeAsset slotTemplate, PlayerUIThemeSO theme)
         {
             _root = root;
+            _root.BringToFront();
             _slotTemplate = slotTemplate;
             _theme = theme;
-            _root.pickingMode = PickingMode.Position; // Explicitly set picking mode
+            _root.pickingMode = PickingMode.Ignore; // Let clicks pass through the root container
             QueryElements();
             RegisterCallbacks();
         }
 
         private void QueryElements()
         {
+            _mainContainer = _root.Q("main-container");
+            if (_mainContainer != null) _mainContainer.pickingMode = PickingMode.Ignore;
+
             var shipPanelInstance = _root.Q("ship-panel-instance");
             _shipNameLabel = shipPanelInstance.Q<Label>("ship-name");
             _shipSpriteElement = shipPanelInstance.Q<Image>("ship-sprite");
