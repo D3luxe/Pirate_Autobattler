@@ -6,7 +6,10 @@
 
 .edge-layer {
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     picking-mode: ignore;
 }
 
@@ -51,7 +54,6 @@
     border-radius: 50%;
     border-width: 3px;
     border-color: gold;
-    z-index: 100; /* Ensure it's on top of nodes */
 }
 
 /* Example type-specific colors - add more as needed */
@@ -102,4 +104,30 @@
 .map-node.tag-meta-key {
     border-color: #00FFFF; /* Cyan border for meta key */
     border-width: 3px;
+}
+
+.map-node.node-hover-highlight {
+    border-color: #00FF00; /* Green border for hover highlight */
+    border-width: 4px;
+    transition: border-color 0.1s ease-in-out;
+}
+
+.map-node.penultimate-row-node {
+    border-color: #FF00FF; /* Magenta border for penultimate row */
+    border-width: 4px;
+    background-color: #8A2BE2; /* BlueViolet background */
+}
+
+.map-node.qa-treasure-window {
+    border-color: #FFFF00; /* Yellow border for QA treasure window */
+    border-width: 4px;
+    background-color: #DAA520; /* Goldenrod background */
+}
+
+.map-node.boss-preview-active {
+    border-color: #FF0000; /* Red border for active boss preview */
+    border-width: 5px;
+    background-color: #8B0000; /* DarkRed background */
+    scale: 1.2; /* Make it slightly larger */
+    transition: transform 0.2s ease-out;
 }

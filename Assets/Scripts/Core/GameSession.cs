@@ -17,6 +17,14 @@ public static class GameSession
         OnPlayerNodeChanged?.Invoke();
     }
 
+    public static void EndRun()
+    {
+        CurrentRunState = null;
+        Economy = null;
+        Inventory = null;
+        PlayerShip = null;
+    }
+
     // Called at the start of a new run
     public static void StartNewRun(RunConfigSO config, ShipSO startingShip)
     {

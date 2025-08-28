@@ -92,6 +92,10 @@ public class RunManager : MonoBehaviour
     void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        if (Instance == this) // Only reset if this is the persistent instance
+        {
+            GameSession.EndRun();
+        }
     }
 
     void Start()

@@ -137,6 +137,24 @@ public sealed class MapView : MonoBehaviour
                 ve.AddToClassList($"tag-{tag.ToLower()}");
             }
 
+            // Add class for penultimate row accentuation
+            if (rows > 1 && n.row == rows - 2)
+            {
+                ve.AddToClassList("penultimate-row-node");
+            }
+
+            // Add class for mid-act treasure QA overlay
+            if (n.type == Pirate.MapGen.NodeType.Treasure.ToString().ToLower() && n.row >= rows / 3 && n.row <= (2 * rows / 3))
+            {
+                ve.AddToClassList("qa-treasure-window");
+            }
+
+            // Add tooltip for unknown nodes
+            if (n.type == Pirate.MapGen.NodeType.Unknown.ToString().ToLower())
+            {
+                ve.tooltip = "Unknown Node - Tooltip Placeholder (Pity System Forecast Here)";
+            }
+
             var p = pos[n.id];
             // Adjust position to center the node element around its calculated (x,y)
             ve.style.left = p.x - (56f / 2f);
@@ -145,6 +163,8 @@ public sealed class MapView : MonoBehaviour
             canvas.Add(ve);
             nodeVisualElements[n.id] = ve; // Store reference to VisualElement
             ve.RegisterCallback<ClickEvent>(evt => OnNodeClicked(n.id));
+            ve.RegisterCallback<PointerEnterEvent>(evt => OnNodePointerEnter(n));
+            ve.RegisterCallback<PointerLeaveEvent>(evt => OnNodePointerLeave(n));
         }
 
         // Add player indicator to canvas after all nodes
@@ -338,6 +358,23 @@ public sealed class MapView : MonoBehaviour
                 // All other nodes are locked (e.g., future rows beyond next, or same row but not current)
                 ve.AddToClassList("node-locked");
             }
+
+            // Boss preview active state
+            if (node.type == Pirate.MapGen.NodeType.Boss.ToString().ToLower())
+            {
+                float bossNodeY = pos[node.id].y;
+                float scrollY = scroll.scrollOffset.y;
+                float previewThreshold = 200f; // Adjust this value as needed
+
+                if (bossNodeY - scrollY < previewThreshold)
+                {
+                    ve.AddToClassList("boss-preview-active");
+                }
+                else
+                {
+                    ve.RemoveFromClassList("boss-preview-active");
+                }
+            }
         }
     }
 
@@ -401,5 +438,45 @@ public sealed class MapView : MonoBehaviour
         GameSession.InvokeOnPlayerNodeChanged(); // Invoke event via public method
 
         // TODO: Trigger scene load or other game logic based on clickedNode.type
+    }
+
+    private void OnNodePointerEnter(MapGraphData.Node hoveredNode)
+    {
+        if (GameSession.CurrentRunState == null || GameSession.CurrentRunState.mapGraphData == null)
+        {
+            return; // Not ready to highlight
+        }
+
+        string currentEncounterId = GameSession.CurrentRunState.currentEncounterId;
+        MapGraphData.Node currentPlayerNode = null;
+        if (currentEncounterId != null && nodeById.ContainsKey(currentEncounterId))
+        {
+            currentPlayerNode = nodeById[currentEncounterId];
+        }
+
+        if (currentPlayerNode == null) return; // No current player node to determine reachability from
+
+        // Highlight only nodes in the next row that are reachable from the current player node
+        foreach (var node in nodes)
+        {
+            VisualElement ve = nodeVisualElements[node.id];
+            bool isReachable = (node.row == currentPlayerNode.row + 1) &&
+                               GameSession.CurrentRunState.mapGraphData.edges.Any(e => e.fromId == currentPlayerNode.id && e.toId == node.id);
+
+            if (isReachable)
+            {
+                ve.AddToClassList("node-hover-highlight");
+            }
+        }
+    }
+
+    private void OnNodePointerLeave(MapGraphData.Node hoveredNode)
+    {
+        // Remove highlight from all nodes
+        foreach (var node in nodes)
+        {
+            VisualElement ve = nodeVisualElements[node.id];
+            ve.RemoveFromClassList("node-hover-highlight");
+        }
     }
 }
