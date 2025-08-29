@@ -585,6 +585,7 @@ public sealed class MapView : MonoBehaviour
                 GameSession.CurrentRunState.currentEncounterId = clickedNode.id;
                 GameSession.CurrentRunState.currentColumnIndex = clickedNode.row;
                 UpdateNodeVisualStates();
+                GameSession.InvokeOnPlayerNodeChanged(); // Invoke for the first node as well
                 return;
             }
             else

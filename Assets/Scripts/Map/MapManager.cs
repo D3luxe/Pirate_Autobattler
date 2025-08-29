@@ -217,4 +217,23 @@ public class MapManager : MonoBehaviour
     // EncounterProbability
     // PrecomputeReachabilityCache
     // CalculateReachableNodes
+
+    public MapNodeData GetMapNodeData(string nodeId)
+    {
+        var graphNode = _mapGraphData.nodes.FirstOrDefault(n => n.id == nodeId);
+        if (graphNode == null)
+        {
+            Debug.LogError($"MapGraphData.Node with ID {nodeId} not found.");
+            return null;
+        }
+
+        // Assuming _convertedMapNodes is populated correctly and matches the structure of _mapGraphData.nodes
+        if (graphNode.row < _convertedMapNodes.Count && graphNode.col < _convertedMapNodes[graphNode.row].Count)
+        {
+            return _convertedMapNodes[graphNode.row].FirstOrDefault(n => n.columnIndex == graphNode.row && n.rowIndex == graphNode.col);
+        }
+        
+        Debug.LogError($"Converted MapNodeData not found for node ID {nodeId} at row {graphNode.row}, col {graphNode.col}.");
+        return null;
+    }
 }

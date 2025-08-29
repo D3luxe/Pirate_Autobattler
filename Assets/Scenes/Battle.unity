@@ -681,7 +681,7 @@ MonoBehaviour:
   enemyPanelController: {fileID: 521273920}
   playerShipSpawnPoint: {fileID: 663523472}
   enemyShipSpawnPoint: {fileID: 577502269}
-  shipViewPrefab: {fileID: 5710707288340327272, guid: 34ba9228b18926449899575b51102e38, type: 3}
+  shipStateViewPrefab: {fileID: 5710707288340327272, guid: 34ba9228b18926449899575b51102e38, type: 3}
   uiParentForShips: {fileID: 1859153147}
 --- !u!4 &1436587202
 Transform:
@@ -748,8 +748,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb767598e1c2bc34cb67292555ee55c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleUIController
-  playerShipView: {fileID: 0}
-  enemyShipView: {fileID: 0}
+  playerShipStateView: {fileID: 0}
+  enemyShipStateView: {fileID: 0}
   playerHealthText: {fileID: 0}
   playerGoldText: {fileID: 0}
   playerLivesText: {fileID: 0}

@@ -222,7 +222,7 @@ GameObject:
   - component: {fileID: 3283876395567874229}
   - component: {fileID: 1695290359911108906}
   - component: {fileID: 1580318631420680652}
-  - component: {fileID: 101469824399659842}
+  - component: {fileID: 8292737640322568941}
   m_Layer: 5
   m_Name: ShipViewPrefab
   m_TagString: Untagged
@@ -288,7 +288,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &101469824399659842
+--- !u!114 &8292737640322568941
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -297,12 +297,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5710707288340327272}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fe93c323394cfe4390bad7bbfd37a72, type: 3}
+  m_Script: {fileID: 11500000, guid: b24e78f23042ae44fb005d74f971cc99, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShipView
-  shipSprite: {fileID: 1580318631420680652}
-  healthBarSlider: {fileID: 7975427459840274271}
-  healthBarText: {fileID: 8766407055980058098}
+  m_EditorClassIdentifier: Assembly-CSharp::ShipStateView
+  shipSprite: {fileID: 0}
+  healthBarSlider: {fileID: 0}
+  healthBarText: {fileID: 0}
 --- !u!1 &6922311893946946698
 GameObject:
   m_ObjectHideFlags: 0

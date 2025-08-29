@@ -1,5 +1,6 @@
 using UnityEngine;
 using PirateRoguelike.Data;
+using Pirate.MapGen;
 
 public class BattleManager : MonoBehaviour
 {
@@ -33,12 +34,20 @@ public class BattleManager : MonoBehaviour
 
     private void SetupBattle()
     {
-        string encounterId = GameSession.CurrentRunState.currentEncounterId;
-        EncounterSO encounterData = GameDataRegistry.GetEncounter(encounterId);
+        string encounterNodeId = GameSession.CurrentRunState.currentEncounterId;
+        MapNodeData mapNodeData = MapManager.Instance.GetMapNodeData(encounterNodeId);
 
-        if (encounterData == null || (encounterData.type != EncounterType.Battle && encounterData.type != EncounterType.Boss))
+        if (mapNodeData == null || mapNodeData.encounter == null)
         {
-            Debug.LogError($"Invalid or non-battle encounter data found for this scene: {encounterId}");
+            Debug.LogError($"Encounter data not found for node: {encounterNodeId}.");
+            return;
+        }
+
+        EncounterSO encounterData = mapNodeData.encounter;
+
+        if (encounterData.type != EncounterType.Battle && encounterData.type != EncounterType.Boss)
+        {
+            Debug.LogError($"Invalid or non-battle encounter data found for this scene: {encounterNodeId}. Type: {encounterData.type}.");
             return;
         }
 
@@ -49,7 +58,7 @@ public class BattleManager : MonoBehaviour
         // Check if there are enemies defined for this encounter
         if (encounterData.enemies == null || encounterData.enemies.Count == 0)
         {
-            Debug.LogError($"Battle encounter '{encounterId}' has no enemies defined! Please assign EnemySOs to its 'Enemies' list.");
+            Debug.LogError($"Battle encounter '{encounterNodeId}' has no enemies defined! Please assign EnemySOs to its 'Enemies' list.");
             return; // Prevent crash
         }
 
