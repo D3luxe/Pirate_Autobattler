@@ -45,7 +45,8 @@ public class ShopManager : MonoBehaviour
     {
         _currentShopItems.Clear();
         int currentFloorIndex = GameSession.CurrentRunState != null ? GameSession.CurrentRunState.currentColumnIndex : 0;
-        List<RarityProbability> rarityProbabilities = GameDataRegistry.GetRarityProbabilitiesForFloor(currentFloorIndex);
+        int mapLength = MapManager.Instance != null ? MapManager.Instance.mapLength : 1; // Default to 1 to avoid division by zero if MapManager not found
+        List<RarityProbability> rarityProbabilities = GameDataRegistry.GetRarityProbabilitiesForFloor(currentFloorIndex, mapLength);
 
         List<ItemSO> availableItems = GameDataRegistry.GetAllItems();
         List<ItemSO> generatedItems = new List<ItemSO>();
@@ -67,6 +68,17 @@ public class ShopManager : MonoBehaviour
                     // Check for duplicates in current shop offerings
                     if (!generatedItems.Any(gi => gi.id == candidateItem.id))
                     {
+                        // --- UPGRADE EDGE CASE NOTE ---
+                        // If a player has an item of a certain ID but a higher rarity,
+                        // and that higher rarity is no longer available in the shop's current floor
+                        // based on rarity weights, the player might be unable to upgrade their item.
+                        // Consider a mechanism to ensure that if a player owns an item,
+                        // a version of that item (even if its rarity is "unavailable" by normal rules)
+                        // can still appear in the shop for upgrade purposes.
+                        // This might involve a separate "upgrade slot" or a special override
+                        // for owned item types.
+                        // --- END UPGRADE EDGE CASE NOTE ---
+
                         // Check for highest rarity owned rule
                         ItemInstance ownedItem = GameSession.Inventory.Items.FirstOrDefault(invItem => invItem != null && invItem.Def.id == candidateItem.id);
                         if (ownedItem != null && ownedItem.Def.rarity > candidateItem.rarity)
@@ -189,7 +201,8 @@ public class ShopManager : MonoBehaviour
     private void GenerateShopShip()
     {
         int currentFloorIndex = GameSession.CurrentRunState != null ? GameSession.CurrentRunState.currentColumnIndex : 0;
-        List<RarityProbability> rarityProbabilities = GameDataRegistry.GetRarityProbabilitiesForFloor(currentFloorIndex);
+        int mapLength = MapManager.Instance != null ? MapManager.Instance.mapLength : 1; // Default to 1 to avoid division by zero if MapManager not found
+        List<RarityProbability> rarityProbabilities = GameDataRegistry.GetRarityProbabilitiesForFloor(currentFloorIndex, mapLength);
 
         Rarity selectedRarity = Rarity.Bronze; // Default to Bronze
         if (rarityProbabilities.Any())

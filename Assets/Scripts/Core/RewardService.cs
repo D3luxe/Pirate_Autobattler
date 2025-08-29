@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class RewardService
 {
-    public static List<ItemSO> GenerateBattleRewards(int currentDepth, RunConfigSO config)
+    public static List<ItemSO> GenerateBattleRewards(int currentDepth, RunConfigSO config, int mapLength)
     {
         List<ItemSO> rewards = new List<ItemSO>();
         List<ItemSO> allAvailableItems = GameDataRegistry.GetAllItems();
@@ -16,28 +16,19 @@ public static class RewardService
             return rewards; // Return empty list if no items are available
         }
 
-        // Determine rarity probabilities for the current depth
-        FloorRaritySettings currentFloorRaritySettings = config.floorRaritySettings
-            .FirstOrDefault(s => currentDepth >= s.minFloorIndex && currentDepth <= s.maxFloorIndex);
+        // Determine rarity probabilities for the current depth using the new interpolated system
+        List<RarityProbability> rarityProbabilities = GameDataRegistry.GetRarityProbabilitiesForFloor(currentDepth, mapLength);
 
-        if (currentFloorRaritySettings == null)
+        if (rarityProbabilities == null || rarityProbabilities.Count == 0)
         {
-            Debug.LogWarning($"No FloorRaritySettings found for depth {currentDepth}. Using default probabilities.");
-            // Fallback to a default if no specific settings are found
-            currentFloorRaritySettings = new FloorRaritySettings
-            {
-                rarityProbabilities = new List<RarityProbability>
-                {
-                    new RarityProbability { rarity = Rarity.Bronze, weight = 80 },
-                    new RarityProbability { rarity = Rarity.Silver, weight = 20 }
-                }
-            };
+            Debug.LogWarning($"No rarity probabilities found for depth {currentDepth} after interpolation. Cannot generate rewards.");
+            return rewards;
         }
 
         // Generate 3 unique item rewards
         for (int i = 0; i < 3; i++)
         {
-            Rarity selectedRarity = GetRandomRarity(currentFloorRaritySettings.rarityProbabilities);
+            Rarity selectedRarity = GetRandomRarity(rarityProbabilities);
             List<ItemSO> itemsOfSelectedRarity = allAvailableItems.Where(item => item.rarity == selectedRarity && !rewards.Contains(item)).ToList();
 
             if (itemsOfSelectedRarity.Any())

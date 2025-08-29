@@ -10,9 +10,11 @@ namespace PirateRoguelike.Data
     {
         public Rarity rarity;
         public int weight;
+        public int floorAvailable; // New: The floor index from which this rarity becomes available
+        public int floorUnavailable = int.MaxValue; // New: The floor index from which this rarity becomes unavailable (exclusive)
     }
 
-    public enum EncounterType { Battle, Shop, Port, Event, Treasure, Boss }
+    public enum EncounterType { Battle, Elite, Shop, Port, Event, Treasure, Boss }
 
     public enum TriggerType { OnItemReady, OnAllyActivate, OnBattleStart, OnDamageDealt, OnDamageReceived, OnHeal, OnShieldGained, OnDebuffApplied, OnBuffApplied, OnTick }
     public enum ActionType { Buff, Damage, Heal, Shield, Debuff, StatChange, Meta, Burn, Poison, Stun }

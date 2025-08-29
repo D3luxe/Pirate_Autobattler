@@ -12,7 +12,7 @@ namespace Pirate.MapGen
         /// <param name="graph">The map graph to validate.</param>
         /// <param name="rules">The rules to validate against.</param>
         /// <returns>An AuditReport detailing any violations.</returns>
-        public AuditReport Validate(MapGraph graph, Rules rules)
+        public AuditReport Validate(MapGraph graph, RulesSO rules)
         {
             AuditReport report = new AuditReport { IsValid = true };
 
@@ -124,7 +124,7 @@ namespace Pirate.MapGen
         /// <param name="graph">The map graph.</param>
         /// <param name="rules">The rules containing the mid-act window definition.</param>
         /// <returns>True if a mid-act Treasure exists, false otherwise.</returns>
-        private bool HasMidActTreasure(MapGraph graph, Rules rules)
+        private bool HasMidActTreasure(MapGraph graph, RulesSO rules)
         {
             if (rules.Windows.MidTreasureRows == null || !rules.Windows.MidTreasureRows.Any()) return true; // No rule, so it's valid
 
@@ -144,7 +144,7 @@ namespace Pirate.MapGen
         /// <param name="graph">The map graph.</param>
         /// <param name="rules">The rules containing the count limits.</param>
         /// <returns>A list of violation messages.</returns>
-        private List<string> AreCountsWithinLimits(MapGraph graph, Rules rules)
+        private List<string> AreCountsWithinLimits(MapGraph graph, RulesSO rules)
         {
             List<string> violations = new List<string>();
             var nodeCounts = graph.Nodes.GroupBy(n => n.Type).ToDictionary(g => g.Key, g => g.Count());
@@ -171,7 +171,7 @@ namespace Pirate.MapGen
         /// <param name="graph">The map graph.</param>
         /// <param name="rules">The rules containing the spacing limits.</param>
         /// <returns>A list of violation messages.</returns>
-        private List<string> AreSpacingRulesRespected(MapGraph graph, Rules rules)
+        private List<string> AreSpacingRulesRespected(MapGraph graph, RulesSO rules)
         {
             List<string> violations = new List<string>();
 
@@ -223,7 +223,7 @@ namespace Pirate.MapGen
         /// <param name="graph">The map graph.</param>
         /// <param name="rules">The rules containing the EliteEarlyRowsCap.</param>
         /// <returns>True if the cap is respected, false otherwise.</returns>
-        private bool IsEliteEarlyRowsCapRespected(MapGraph graph, Rules rules)
+        private bool IsEliteEarlyRowsCapRespected(MapGraph graph, RulesSO rules)
         {
             if (rules.Spacing.EliteEarlyRowsCap <= 0) return true; // No cap, so it's respected
 

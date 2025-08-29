@@ -12,18 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f84a00e271d9c19408208332b3f5f0e4, type: 3}
   m_Name: RunConfiguration
   m_EditorClassIdentifier: Assembly-CSharp::RunConfigSO
-  mapLength: 15
-  enemyHealthMin: 1
-  enemyHealthMax: 100
   startingLives: 4
   startingGold: 10
-  rerollBaseCost: 2
-  rerollGrowth: 0
   inventorySize: 10
   rewardGoldPerWin: 5
-  shopEveryN: 3
-  portEveryN: 5
-  eliteEveryN: 5
+  rerollBaseCost: 2
+  rerollGrowth: 0
   floorRaritySettings:
   - minFloorIndex: 1
     maxFloorIndex: 3
@@ -63,3 +57,4 @@ MonoBehaviour:
       weight: 30
     - rarity: 3
       weight: 20
+  rules: {fileID: 11400000, guid: 60ec4d65eb839bf46bdb3c9958262f8d, type: 2}

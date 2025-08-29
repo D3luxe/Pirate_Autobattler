@@ -73,15 +73,17 @@ MonoBehaviour:
   encounterIcons:
   - type: 0
     icon: {fileID: 3352228046343151454, guid: 161aefab15e00d54d8efc13a21c8044c, type: 3}
-  - type: 1
-    icon: {fileID: -4786724353424990833, guid: c71be03a5e807074ab72da4851a468d9, type: 3}
   - type: 2
-    icon: {fileID: -2270217657116803017, guid: fca5cf9ec866c804892b7661cd6e0809, type: 3}
+    icon: {fileID: -4786724353424990833, guid: c71be03a5e807074ab72da4851a468d9, type: 3}
   - type: 3
-    icon: {fileID: -4921701424370083402, guid: 3ee1df741f9f3ea40a18bb2763810e7f, type: 3}
+    icon: {fileID: -2270217657116803017, guid: fca5cf9ec866c804892b7661cd6e0809, type: 3}
   - type: 4
-    icon: {fileID: 6468930929206040152, guid: 4e3dd86ae9ad6cd429c2819cc9209e63, type: 3}
+    icon: {fileID: -4921701424370083402, guid: 3ee1df741f9f3ea40a18bb2763810e7f, type: 3}
   - type: 5
+    icon: {fileID: 6468930929206040152, guid: 4e3dd86ae9ad6cd429c2819cc9209e63, type: 3}
+  - type: 6
+    icon: {fileID: 808789152308966786, guid: ec2361fcffa23b14cb2effeae677deee, type: 3}
+  - type: 1
     icon: {fileID: 808789152308966786, guid: ec2361fcffa23b14cb2effeae677deee, type: 3}
   contentWidth: 1000
   gutters: 50

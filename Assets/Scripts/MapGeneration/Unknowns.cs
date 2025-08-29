@@ -12,7 +12,7 @@ namespace Pirate.MapGen
             UnknownContext ctx,
             IRandomNumberGenerator rng,
             PityState currentPityState,
-            Rules rules)
+            RulesSO rules)
         {
             // 1) weights := start + pityAccumulated
             Dictionary<NodeType, int> currentWeights = new Dictionary<NodeType, int>();

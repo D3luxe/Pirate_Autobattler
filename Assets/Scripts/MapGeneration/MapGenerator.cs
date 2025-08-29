@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PirateRoguelike.Data; // Added for EncounterType
+using UnityEngine;
 
 namespace Pirate.MapGen
 {
@@ -18,7 +19,7 @@ namespace Pirate.MapGen
         /// <param name="seed">The seed for deterministic generation.</param>
         /// <param name="maxRepairIterations">Maximum attempts to repair the map if validation fails.</param>
         /// <returns>A GenerationResult containing the generated map and audit report.</returns>
-        public GenerationResult GenerateMap(ActSpec actSpec, Rules rules, ulong seed, int maxRepairIterations = 50)
+        public GenerationResult GenerateMap(ActSpec actSpec, RulesSO rules, ulong seed, int maxRepairIterations = 50)
         {
             GenerationResult result = new GenerationResult
             {
@@ -45,7 +46,7 @@ namespace Pirate.MapGen
 
             while (!audit.IsValid && currentRepairIteration < maxRepairIterations)
             {
-                Console.WriteLine($"Repairing map (iteration {currentRepairIteration + 1}/{maxRepairIterations})... Violations: {string.Join(", ", audit.Violations)}");
+                Debug.Log($"Repairing map (iteration {currentRepairIteration + 1}/{maxRepairIterations})... Violations: {string.Join(", ", audit.Violations)}");
 
                 // Prioritize critical violations
                 if (audit.Violations.Contains("No valid path from start to boss."))
@@ -210,12 +211,13 @@ namespace Pirate.MapGen
         /// <param name="actSpec">The act specification.</param>
         /// <param name="rules">The generation rules.</param>
         /// <param name="rng">The random number generator.</param>
-        public void ApplyTypingConstraints(MapGraph graph, ActSpec actSpec, Rules rules, IRandomNumberGenerator rng)
+        public void ApplyTypingConstraints(MapGraph graph, ActSpec actSpec, RulesSO rules, IRandomNumberGenerator rng)
         {
             // 1. Place Boss (already set in skeleton, but confirm/tag here)
             Node bossNode = graph.Nodes.FirstOrDefault(n => n.Row == actSpec.Rows - 1);
             if (bossNode != null)
             {
+                Debug.Log($"Assigning Boss to row {actSpec.Rows - 1}");
                 bossNode.Type = NodeType.Boss;
                 bossNode.Tags.Add("boss");
             }
@@ -244,7 +246,7 @@ namespace Pirate.MapGen
                 {
                     // This should ideally not happen if skeleton generation is robust
                     // Log a warning or handle as an error for validation phase
-                    Console.WriteLine($"Warning: No available nodes in pre-boss row {preBossRow} for Port.");
+                    Debug.Log($"Warning: No available nodes in pre-boss row {preBossRow} for Port.");
                 }
             }
 
@@ -269,7 +271,7 @@ namespace Pirate.MapGen
                 }
                 else
                 {
-                    Console.WriteLine("Warning: No available nodes in mid-treasure rows for Treasure.");
+                    Debug.Log("Warning: No available nodes in mid-treasure rows for Treasure.");
                 }
             }
 
@@ -394,11 +396,20 @@ namespace Pirate.MapGen
                 }
                 else
                 {
+                    Debug.LogWarning($"Node {node.Id} is being assigned as a Battle encounter. This is likely because all specific node types (Boss, Port, Treasure, Elite, Shop) have been placed, and the target count for Unknown nodes has been exhausted. Consider adjusting rules.Counts.Targets to include more non-Battle node types or Unknown nodes.");
                     node.Type = NodeType.Battle;
                     desiredCounts[NodeType.Battle]--;
                 }
                 placedNodeIds.Add(node.Id);
             }
+
+            // Debugging: Display final NodeType assignment for each node
+            Debug.Log("--- Final Node Type Assignments ---");
+            foreach (Node node in graph.Nodes.OrderBy(n => n.Row).ThenBy(n => n.Col))
+            {
+                Debug.Log($"Node ID: {node.Id}, Type: {node.Type}");
+            }
+            Debug.Log("-----------------------------------");
         }
     }
 }

@@ -207,6 +207,10 @@ public class RunManager : MonoBehaviour
                      if (_mapView != null) _mapView.Hide();
                     SceneManager.LoadScene("Battle"); // Assuming boss fights use the same scene
                     break;
+                case PirateRoguelike.Data.EncounterType.Elite:
+                     if (_mapView != null) _mapView.Hide();
+                    SceneManager.LoadScene("Battle"); // Elite fights also use the Battle scene
+                    break;
                 default:
                     Debug.LogWarning($"Unhandled encounter type: {encounterType}");
                     break;

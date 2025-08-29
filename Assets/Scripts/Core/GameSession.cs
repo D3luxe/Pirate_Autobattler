@@ -114,7 +114,8 @@ public static class GameSession
             Debug.Log($"Player won! Gold: {Economy.Gold}");
 
             // Generate item rewards
-            List<ItemSO> itemRewards = RewardService.GenerateBattleRewards(currentDepth, config);
+            int mapLength = MapManager.Instance != null ? MapManager.Instance.mapLength : 1; // Get mapLength from MapManager
+            List<ItemSO> itemRewards = RewardService.GenerateBattleRewards(currentDepth, config, mapLength);
             List<SerializableItemInstance> serializableItemRewards = new List<SerializableItemInstance>();
             foreach (var itemSO in itemRewards)
             {

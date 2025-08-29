@@ -62,10 +62,8 @@ public class MapManager : MonoBehaviour
             Branchiness = 0.5f
         };
 
-        Rules rules = new Rules();
-
         MapGenerator mapGenerator = new MapGenerator();
-        GenerationResult result = mapGenerator.GenerateMap(actSpec, rules, seed);
+        GenerationResult result = mapGenerator.GenerateMap(actSpec, _runConfig.rules, seed);
 
         if (result.Audits.IsValid)
         {
@@ -158,7 +156,7 @@ public class MapManager : MonoBehaviour
                     encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && !e.isElite);
                     break;
                 case NodeType.Elite:
-                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && e.isElite); // Placeholder for Elite
+                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Elite); // Now uses Elite type
                     break;
                 case NodeType.Boss:
                     encounter = GameDataRegistry.GetEncounter("enc_boss"); // Assuming a specific boss encounter

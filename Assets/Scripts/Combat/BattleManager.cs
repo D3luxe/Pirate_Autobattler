@@ -45,7 +45,7 @@ public class BattleManager : MonoBehaviour
 
         EncounterSO encounterData = mapNodeData.encounter;
 
-        if (encounterData.type != EncounterType.Battle && encounterData.type != EncounterType.Boss)
+        if (encounterData.type != EncounterType.Battle && encounterData.type != EncounterType.Boss && encounterData.type != EncounterType.Elite)
         {
             Debug.LogError($"Invalid or non-battle encounter data found for this scene: {encounterNodeId}. Type: {encounterData.type}.");
             return;
