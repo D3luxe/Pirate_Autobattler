@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class RewardService
 {
-    public static List<ItemSO> GenerateBattleRewards(int currentDepth, RunConfigSO config, int mapLength)
+    public static List<ItemSO> GenerateBattleRewards(int currentDepth, RunConfigSO config, int mapLength, bool isElite)
     {
         List<ItemSO> rewards = new List<ItemSO>();
         List<ItemSO> allAvailableItems = GameDataRegistry.GetAllItems();
@@ -17,7 +17,7 @@ public static class RewardService
         }
 
         // Determine rarity probabilities for the current depth using the new interpolated system
-        List<RarityProbability> rarityProbabilities = GameDataRegistry.GetRarityProbabilitiesForFloor(currentDepth, mapLength);
+        List<RarityWeight> rarityProbabilities = GameDataRegistry.GetRarityProbabilitiesForFloor(currentDepth, mapLength, isElite);
 
         if (rarityProbabilities == null || rarityProbabilities.Count == 0)
         {
@@ -56,7 +56,7 @@ public static class RewardService
         return rewards;
     }
 
-    private static Rarity GetRandomRarity(List<RarityProbability> probabilities)
+    private static Rarity GetRandomRarity(List<RarityWeight> probabilities)
     {
         int totalWeight = probabilities.Sum(p => p.weight);
         int randomNumber = Random.Range(0, totalWeight);

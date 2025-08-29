@@ -37,72 +37,84 @@ public static class GameDataRegistry
     public static List<ShipSO> GetAllShips() => _ships.Values.ToList();
     public static List<EncounterSO> GetAllEncounters() => _encounters.Values.ToList();
 
-    public static List<RarityProbability> GetRarityProbabilitiesForFloor(int floorIndex, int mapLength)
+    // NEW: Milestone-based rarity probability calculation
+    public static List<RarityWeight> GetRarityProbabilitiesForFloor(int floorIndex, int mapLength, bool isElite)
     {
         if (_runConfig == null)
         {
             Debug.LogError("RunConfigSO is null in GameDataRegistry. Cannot get rarity probabilities.");
-            return new List<RarityProbability>();
+            return new List<RarityWeight>();
+        }
+        if (_runConfig.rarityMilestones == null || !_runConfig.rarityMilestones.Any())
+        {
+            Debug.LogWarning("No rarity milestones defined in RunConfigSO. Returning default Bronze rarity.");
+            return new List<RarityWeight> { new RarityWeight { rarity = Rarity.Bronze, weight = 1 } };
         }
 
-        List<RarityProbability> interpolatedProbabilities = new List<RarityProbability>();
-
-        // Get all unique rarities from both start and end lists
-        var allRarities = _runConfig.startRarityProbabilities
-                                    .Select(rp => rp.rarity)
-                                    .Union(_runConfig.endRarityProbabilities.Select(rp => rp.rarity))
-                                    .Distinct();
-
-        foreach (Rarity rarity in allRarities)
+        int effectiveFloor = floorIndex;
+        if (isElite)
         {
-            // Get start and end RarityProbability for this rarity
-            RarityProbability startRP = _runConfig.startRarityProbabilities.FirstOrDefault(rp => rp.rarity == rarity);
-            RarityProbability endRP = _runConfig.endRarityProbabilities.FirstOrDefault(rp => rp.rarity == rarity);
+            // Clamp effective floor to the range of milestones
+            int firstMilestoneFloor = _runConfig.rarityMilestones.Min(m => m.floor);
+            int lastMilestoneFloor = _runConfig.rarityMilestones.Max(m => m.floor);
+            effectiveFloor = Mathf.Clamp(floorIndex + _runConfig.eliteModifier, firstMilestoneFloor, lastMilestoneFloor);
+        }
 
-            int startWeight = startRP != null ? startRP.weight : 0;
-            int endWeight = endRP != null ? endRP.weight : 0;
-            int floorAvailable = startRP != null ? startRP.floorAvailable : 0;
-            int floorUnavailable = startRP != null ? startRP.floorUnavailable : int.MaxValue; // Use floorUnavailable from startRP
+        // Find the two milestones that bracket the effectiveFloor
+        RarityMilestone milestoneFk = _runConfig.rarityMilestones
+            .Where(m => m.floor <= effectiveFloor)
+            .OrderByDescending(m => m.floor)
+            .FirstOrDefault();
 
-            // If current floor is before rarity is available OR at/after it becomes unavailable, weight is 0
-            if (floorIndex < floorAvailable || floorIndex >= floorUnavailable)
+        RarityMilestone milestoneFkPlus1 = _runConfig.rarityMilestones
+            .Where(m => m.floor >= effectiveFloor)
+            .OrderBy(m => m.floor)
+            .FirstOrDefault();
+
+        // Handle clamping outside range: floors < first milestone use the first row; floors > last milestone use the last row.
+        if (milestoneFk == null) // effectiveFloor is before the first milestone
+        {
+            milestoneFk = _runConfig.rarityMilestones.OrderBy(m => m.floor).First();
+            milestoneFkPlus1 = milestoneFk; // Use the first milestone's weights
+        }
+        else if (milestoneFkPlus1 == null) // effectiveFloor is after the last milestone
+        {
+            milestoneFkPlus1 = _runConfig.rarityMilestones.OrderByDescending(m => m.floor).First();
+            milestoneFk = milestoneFkPlus1; // Use the last milestone's weights
+        }
+
+        List<RarityWeight> interpolatedProbabilities = new List<RarityWeight>();
+        var allRarities = System.Enum.GetValues(typeof(Rarity)).Cast<Rarity>().ToList();
+
+        // If both milestones are the same (e.g., effectiveFloor is exactly a milestone, or clamped)
+        if (milestoneFk.floor == milestoneFkPlus1.floor)
+        {
+            foreach (Rarity rarity in allRarities)
             {
-                interpolatedProbabilities.Add(new RarityProbability { rarity = rarity, weight = 0, floorAvailable = floorAvailable, floorUnavailable = floorUnavailable });
-                continue;
+                int weight = milestoneFk.weights.FirstOrDefault(rw => rw.rarity == rarity)?.weight ?? 0;
+                interpolatedProbabilities.Add(new RarityWeight { rarity = rarity, weight = weight });
             }
+        }
+        else // Interpolate between two different milestones
+        {
+            float t = (float)(effectiveFloor - milestoneFk.floor) / (milestoneFkPlus1.floor - milestoneFk.floor);
 
-            // Calculate effective range for interpolation
-            int effectiveStartFloor = floorAvailable;
-            int effectiveEndFloor = floorUnavailable - 1; // Interpolate up to the floor *before* it becomes unavailable
-
-            // If the effective range is invalid or a single point, handle accordingly
-            if (effectiveEndFloor < effectiveStartFloor)
+            foreach (Rarity rarity in allRarities)
             {
-                // This means floorUnavailable is <= floorAvailable, so the rarity is never available for interpolation
-                interpolatedProbabilities.Add(new RarityProbability { rarity = rarity, weight = 0, floorAvailable = floorAvailable, floorUnavailable = floorUnavailable });
-                continue;
-            }
+                int weightFk = milestoneFk.weights.FirstOrDefault(rw => rw.rarity == rarity)?.weight ?? 0;
+                int weightFkPlus1 = milestoneFkPlus1.weights.FirstOrDefault(rw => rw.rarity == rarity)?.weight ?? 0;
 
-            float normalizedFloor = 0;
-            if (effectiveEndFloor > effectiveStartFloor) // If there's a range to interpolate over
-            {
-                normalizedFloor = (float)(floorIndex - effectiveStartFloor) / (effectiveEndFloor - effectiveStartFloor);
+                int interpolatedWeight = Mathf.RoundToInt(Mathf.Lerp(weightFk, weightFkPlus1, t));
+                interpolatedProbabilities.Add(new RarityWeight { rarity = rarity, weight = interpolatedWeight });
             }
-            else // If effectiveStartFloor == effectiveEndFloor (single floor availability)
-            {
-                normalizedFloor = 1; // It's the "end" of its very short effective life
-            }
-
-            float interpolationFactor = _runConfig.rarityInterpolationCurve.Evaluate(normalizedFloor);
-
-            int interpolatedWeight = Mathf.RoundToInt(Mathf.Lerp(startWeight, endWeight, interpolationFactor));
-            interpolatedProbabilities.Add(new RarityProbability { rarity = rarity, weight = interpolatedWeight, floorAvailable = floorAvailable, floorUnavailable = floorUnavailable });
         }
 
         // Ensure total weight is not zero to avoid division by zero errors later
         if (interpolatedProbabilities.Sum(rp => rp.weight) == 0 && interpolatedProbabilities.Any())
         {
             Debug.LogWarning($"Interpolated rarity probabilities for floor {floorIndex} resulted in zero total weight. This might lead to issues.");
+            // Fallback: if all weights are zero, return a default Bronze rarity
+            return new List<RarityWeight> { new RarityWeight { rarity = Rarity.Bronze, weight = 1 } };
         }
 
         return interpolatedProbabilities;

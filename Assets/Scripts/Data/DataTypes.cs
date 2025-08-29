@@ -6,12 +6,17 @@ namespace PirateRoguelike.Data
     public enum Rarity { Bronze, Silver, Gold, Diamond }
 
     [Serializable]
-    public class RarityProbability
+    public class RarityMilestone
+    {
+        public int floor;
+        public List<RarityWeight> weights;
+    }
+
+    [Serializable]
+    public class RarityWeight
     {
         public Rarity rarity;
         public int weight;
-        public int floorAvailable; // New: The floor index from which this rarity becomes available
-        public int floorUnavailable = int.MaxValue; // New: The floor index from which this rarity becomes unavailable (exclusive)
     }
 
     public enum EncounterType { Battle, Elite, Shop, Port, Event, Treasure, Boss }

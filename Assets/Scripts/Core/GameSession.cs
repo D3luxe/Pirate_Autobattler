@@ -115,7 +115,19 @@ public static class GameSession
 
             // Generate item rewards
             int mapLength = MapManager.Instance != null ? MapManager.Instance.mapLength : 1; // Get mapLength from MapManager
-            List<ItemSO> itemRewards = RewardService.GenerateBattleRewards(currentDepth, config, mapLength);
+            
+            // Determine if the current encounter was Elite
+            bool isEliteEncounter = false;
+            if (CurrentRunState.mapGraphData != null && !string.IsNullOrEmpty(CurrentRunState.currentEncounterId))
+            {
+                var currentNode = CurrentRunState.mapGraphData.nodes.Find(n => n.id == CurrentRunState.currentEncounterId);
+                if (currentNode != null && System.Enum.TryParse<PirateRoguelike.Data.EncounterType>(currentNode.type, true, out var encounterType))
+                {
+                    isEliteEncounter = (encounterType == PirateRoguelike.Data.EncounterType.Elite);
+                }
+            }
+
+            List<ItemSO> itemRewards = RewardService.GenerateBattleRewards(currentDepth, config, mapLength, isEliteEncounter);
             List<SerializableItemInstance> serializableItemRewards = new List<SerializableItemInstance>();
             foreach (var itemSO in itemRewards)
             {

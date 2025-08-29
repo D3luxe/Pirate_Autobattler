@@ -18,43 +18,46 @@ MonoBehaviour:
   rewardGoldPerWin: 5
   rerollBaseCost: 2
   rerollGrowth: 0
-  floorRaritySettings:
-  - minFloorIndex: 1
-    maxFloorIndex: 3
-    rarityProbabilities:
+  rarityMilestones:
+  - floor: 0
+    weights:
     - rarity: 0
       weight: 80
     - rarity: 1
       weight: 20
-  - minFloorIndex: 4
-    maxFloorIndex: 6
-    rarityProbabilities:
+    - rarity: 2
+      weight: 0
+    - rarity: 3
+      weight: 0
+  - floor: 5
+    weights:
     - rarity: 0
-      weight: 60
+      weight: 50
     - rarity: 1
       weight: 30
     - rarity: 2
+      weight: 20
+    - rarity: 3
+      weight: 0
+  - floor: 10
+    weights:
+    - rarity: 0
+      weight: 20
+    - rarity: 1
+      weight: 30
+    - rarity: 2
+      weight: 40
+    - rarity: 3
+      weight: 20
+  - floor: 15
+    weights:
+    - rarity: 0
+      weight: 0
+    - rarity: 1
       weight: 10
-  - minFloorIndex: 7
-    maxFloorIndex: 10
-    rarityProbabilities:
-    - rarity: 0
-      weight: 40
-    - rarity: 1
-      weight: 40
     - rarity: 2
-      weight: 15
+      weight: 40
     - rarity: 3
-      weight: 5
-  - minFloorIndex: 7
-    maxFloorIndex: 10
-    rarityProbabilities:
-    - rarity: 0
-      weight: 20
-    - rarity: 1
-      weight: 30
-    - rarity: 2
-      weight: 30
-    - rarity: 3
-      weight: 20
+      weight: 50
+  eliteModifier: 0
   rules: {fileID: 11400000, guid: 60ec4d65eb839bf46bdb3c9958262f8d, type: 2}

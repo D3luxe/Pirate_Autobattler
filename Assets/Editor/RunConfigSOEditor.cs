@@ -14,9 +14,8 @@ public class RunConfigSOEditor : Editor
     private SerializedProperty _rewardGoldPerWin;
     private SerializedProperty _rerollBaseCost;
     private SerializedProperty _rerollGrowth;
-    private SerializedProperty _startRarityProbabilities;
-    private SerializedProperty _endRarityProbabilities;
-    private SerializedProperty _rarityInterpolationCurve;
+    private SerializedProperty _rarityMilestones;
+    private SerializedProperty _eliteModifier;
     private SerializedProperty _rules;
 
     private void OnEnable()
@@ -27,9 +26,8 @@ public class RunConfigSOEditor : Editor
         _rewardGoldPerWin = serializedObject.FindProperty("rewardGoldPerWin");
         _rerollBaseCost = serializedObject.FindProperty("rerollBaseCost");
         _rerollGrowth = serializedObject.FindProperty("rerollGrowth");
-        _startRarityProbabilities = serializedObject.FindProperty("startRarityProbabilities");
-        _endRarityProbabilities = serializedObject.FindProperty("endRarityProbabilities");
-        _rarityInterpolationCurve = serializedObject.FindProperty("rarityInterpolationCurve");
+        _rarityMilestones = serializedObject.FindProperty("rarityMilestones");
+        _eliteModifier = serializedObject.FindProperty("eliteModifier");
         _rules = serializedObject.FindProperty("rules");
     }
 
@@ -47,11 +45,10 @@ public class RunConfigSOEditor : Editor
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Rarity Settings", EditorStyles.boldLabel);
 
-        DrawCombinedRarityProbabilitiesTable(_startRarityProbabilities, _endRarityProbabilities);
+        EditorGUILayout.PropertyField(_eliteModifier);
+        DrawRarityMilestoneTable(_rarityMilestones);
 
-        EditorGUILayout.PropertyField(_rarityInterpolationCurve);
-
-        DrawRarityInterpolationChart(); // NEW: Draw the chart
+        DrawRarityInterpolationChart();
 
         EditorGUILayout.Space();
         EditorGUILayout.PropertyField(_rules);
@@ -59,136 +56,127 @@ public class RunConfigSOEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
-    private void DrawCombinedRarityProbabilitiesTable(SerializedProperty startList, SerializedProperty endList)
+    
+
+    private void DrawRarityMilestoneTable(SerializedProperty rarityMilestonesProp)
     {
-        EditorGUILayout.LabelField("Rarity Weights", EditorStyles.miniBoldLabel);
+        EditorGUILayout.LabelField("Rarity Milestones", EditorStyles.boldLabel);
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
+        // Header row
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Rarity", EditorStyles.boldLabel, GUILayout.Width(80));
-        EditorGUILayout.LabelField("Floor Available", EditorStyles.boldLabel, GUILayout.Width(100));
-        EditorGUILayout.LabelField("Floor Unavailable", EditorStyles.boldLabel, GUILayout.Width(120)); // NEW COLUMN
-        EditorGUILayout.LabelField("Starting Weight", EditorStyles.boldLabel, GUILayout.Width(100));
-        EditorGUILayout.LabelField("Ending Weight", EditorStyles.boldLabel, GUILayout.Width(100));
-        EditorGUILayout.EndHorizontal();
-
-        // Ensure lists are initialized with all rarities
-        InitializeRarityList(startList);
-        InitializeRarityList(endList);
-
+        EditorGUILayout.LabelField("Floor", EditorStyles.boldLabel, GUILayout.Width(50));
         foreach (Rarity rarity in Enum.GetValues(typeof(Rarity)))
         {
+            EditorGUILayout.LabelField(rarity.ToString(), EditorStyles.boldLabel, GUILayout.Width(60));
+        }
+        EditorGUILayout.LabelField("", GUILayout.Width(40)); // For move buttons
+        EditorGUILayout.LabelField("", GUILayout.Width(20)); // For delete button
+        EditorGUILayout.EndHorizontal();
+
+        // Ensure all rarities are present in each milestone's weights list
+        for (int i = 0; i < rarityMilestonesProp.arraySize; i++)
+        {
+            SerializedProperty milestoneProp = rarityMilestonesProp.GetArrayElementAtIndex(i);
+            SerializedProperty weightsProp = milestoneProp.FindPropertyRelative("weights");
+            InitializeRarityWeightsForMilestone(weightsProp);
+        }
+
+        // Milestone rows
+        for (int i = 0; i < rarityMilestonesProp.arraySize; i++)
+        {
+            SerializedProperty milestoneProp = rarityMilestonesProp.GetArrayElementAtIndex(i);
+            SerializedProperty floorProp = milestoneProp.FindPropertyRelative("floor");
+            SerializedProperty weightsProp = milestoneProp.FindPropertyRelative("weights");
+
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(rarity.ToString(), GUILayout.Width(80));
+            EditorGUILayout.PropertyField(floorProp, GUIContent.none, GUILayout.Width(50));
 
-            // Get the RarityProbability entry for this rarity from the startList
-            SerializedProperty startEntry = FindOrCreateRarityEntry(startList, rarity);
-            SerializedProperty endEntry = FindOrCreateRarityEntry(endList, rarity);
-
-            if (startEntry != null && endEntry != null)
+            foreach (Rarity rarity in Enum.GetValues(typeof(Rarity)))
             {
-                // Floor Available
-                EditorGUILayout.PropertyField(startEntry.FindPropertyRelative("floorAvailable"), GUIContent.none, GUILayout.Width(100));
-                // Floor Unavailable
-                EditorGUILayout.PropertyField(startEntry.FindPropertyRelative("floorUnavailable"), GUIContent.none, GUILayout.Width(120)); // NEW FIELD
+                // Find the RarityWeight for this rarity
+                SerializedProperty rarityWeightProp = null;
+                for (int j = 0; j < weightsProp.arraySize; j++)
+                {
+                    SerializedProperty currentWeightProp = weightsProp.GetArrayElementAtIndex(j);
+                    if ((Rarity)currentWeightProp.FindPropertyRelative("rarity").enumValueIndex == rarity)
+                    {
+                        rarityWeightProp = currentWeightProp;
+                        break;
+                    }
+                }
 
-                // Starting Weight
-                EditorGUILayout.PropertyField(startEntry.FindPropertyRelative("weight"), GUIContent.none, GUILayout.Width(100));
-
-                // Ending Weight
-                EditorGUILayout.PropertyField(endEntry.FindPropertyRelative("weight"), GUIContent.none, GUILayout.Width(100));
+                if (rarityWeightProp != null)
+                {
+                    EditorGUILayout.PropertyField(rarityWeightProp.FindPropertyRelative("weight"), GUIContent.none, GUILayout.Width(60));
+                }
+                else
+                {
+                    EditorGUILayout.LabelField("N/A", GUILayout.Width(60)); // Should not happen if InitializeRarityWeightsForMilestone works
+                }
             }
-            else
+
+            // Move Up/Down buttons
+            if (GUILayout.Button("▲", GUILayout.Width(20)))
             {
-                EditorGUILayout.LabelField("Error", GUILayout.Width(300)); // Combined width for error
+                if (i > 0)
+                {
+                    rarityMilestonesProp.MoveArrayElement(i, i - 1);
+                }
+            }
+            if (GUILayout.Button("▼", GUILayout.Width(20)))
+            {
+                if (i < rarityMilestonesProp.arraySize - 1)
+                {
+                    rarityMilestonesProp.MoveArrayElement(i, i + 1);
+                }
             }
 
+            // Delete button
+            if (GUILayout.Button("-", GUILayout.Width(20)))
+            {
+                rarityMilestonesProp.DeleteArrayElementAtIndex(i);
+                break; // Exit loop after deleting to avoid issues with changed array size
+            }
             EditorGUILayout.EndHorizontal();
         }
 
-        // Calculate and display sums
-        int totalStartWeight = 0;
-        for (int i = 0; i < startList.arraySize; i++)
-        {
-            totalStartWeight += startList.GetArrayElementAtIndex(i).FindPropertyRelative("weight").intValue;
-        }
-
-        int totalEndWeight = 0;
-        for (int i = 0; i < endList.arraySize; i++)
-        {
-            totalEndWeight += endList.GetArrayElementAtIndex(i).FindPropertyRelative("weight").intValue;
-        }
-
         EditorGUILayout.Space();
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Total Weights:", EditorStyles.boldLabel, GUILayout.Width(200)); // Adjusted width for new column
-        EditorGUILayout.LabelField(totalStartWeight.ToString(), EditorStyles.boldLabel, GUILayout.Width(100));
-        EditorGUILayout.LabelField(totalEndWeight.ToString(), EditorStyles.boldLabel, GUILayout.Width(100));
-        EditorGUILayout.EndHorizontal();
-
+        if (GUILayout.Button("Add Milestone"))
+        {
+            rarityMilestonesProp.arraySize++;
+            SerializedProperty newMilestone = rarityMilestonesProp.GetArrayElementAtIndex(rarityMilestonesProp.arraySize - 1);
+            newMilestone.FindPropertyRelative("floor").intValue = 0; // Default floor
+            newMilestone.FindPropertyRelative("weights").ClearArray(); // Clear existing weights
+            InitializeRarityWeightsForMilestone(newMilestone.FindPropertyRelative("weights")); // Initialize with all rarities
+        }
 
         EditorGUILayout.EndVertical();
     }
 
-    private void InitializeRarityList(SerializedProperty listProperty)
+    // Helper to ensure all rarities have a RarityWeight entry in a milestone
+    private void InitializeRarityWeightsForMilestone(SerializedProperty weightsProp)
     {
-        // If the list is empty, add default entries for all rarities
-        if (listProperty.arraySize == 0)
+        foreach (Rarity rarity in Enum.GetValues(typeof(Rarity)))
         {
-            foreach (Rarity rarity in Enum.GetValues(typeof(Rarity)))
+            bool found = false;
+            for (int i = 0; i < weightsProp.arraySize; i++)
             {
-                listProperty.arraySize++;
-                SerializedProperty newEntry = listProperty.GetArrayElementAtIndex(listProperty.arraySize - 1);
+                SerializedProperty entry = weightsProp.GetArrayElementAtIndex(i);
+                if ((Rarity)entry.FindPropertyRelative("rarity").enumValueIndex == rarity)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                weightsProp.arraySize++;
+                SerializedProperty newEntry = weightsProp.GetArrayElementAtIndex(weightsProp.arraySize - 1);
                 newEntry.FindPropertyRelative("rarity").enumValueIndex = (int)rarity;
                 newEntry.FindPropertyRelative("weight").intValue = 0; // Default weight
-                newEntry.FindPropertyRelative("floorAvailable").intValue = 0; // Default floorAvailable
-                newEntry.FindPropertyRelative("floorUnavailable").intValue = int.MaxValue; // NEW DEFAULT
             }
         }
-        // Ensure all rarities are present in the list
-        else
-        {
-            foreach (Rarity rarity in Enum.GetValues(typeof(Rarity)))
-            {
-                bool found = false;
-                for (int i = 0; i < listProperty.arraySize; i++){
-                    SerializedProperty entry = listProperty.GetArrayElementAtIndex(i);
-                    if ((Rarity)entry.FindPropertyRelative("rarity").enumValueIndex == rarity)
-                    {
-                        found = true;
-                        // Ensure floorUnavailable is set for existing entries if it wasn't before
-                        if (entry.FindPropertyRelative("floorUnavailable") == null)
-                        {
-                            entry.FindPropertyRelative("floorUnavailable").intValue = int.MaxValue;
-                        }
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    listProperty.arraySize++;
-                    SerializedProperty newEntry = listProperty.GetArrayElementAtIndex(listProperty.arraySize - 1);
-                    newEntry.FindPropertyRelative("rarity").enumValueIndex = (int)rarity;
-                    newEntry.FindPropertyRelative("weight").intValue = 0; // Default weight
-                    newEntry.FindPropertyRelative("floorAvailable").intValue = 0; // Default floorAvailable
-                    newEntry.FindPropertyRelative("floorUnavailable").intValue = int.MaxValue; // NEW DEFAULT
-                }
-            }
-        }
-    }
-
-    private SerializedProperty FindOrCreateRarityEntry(SerializedProperty listProperty, Rarity rarity)
-    {
-        for (int i = 0; i < listProperty.arraySize; i++){
-            SerializedProperty entry = listProperty.GetArrayElementAtIndex(i);
-            if ((Rarity)entry.FindPropertyRelative("rarity").enumValueIndex == rarity)
-            {
-                return entry;
-            }
-        }
-        // This should ideally not be reached if InitializeRarityList is called correctly
-        Debug.LogError($"Rarity {rarity} not found in list. This should not happen.");
-        return null;
     }
 
     private void DrawRarityInterpolationChart()
@@ -197,7 +185,6 @@ public class RunConfigSOEditor : Editor
 
         // Get mapLength from MapManager.Instance.mapLength
         // In editor, MapManager.Instance might be null. Provide a default or a way to input.
-        // For now, let's use a default map length for visualization if MapManager is not available.
         int mapLength = 15; // Default for visualization
         if (MapManager.Instance != null)
         {
@@ -205,7 +192,6 @@ public class RunConfigSOEditor : Editor
         }
         else
         {
-            // Allow user to input a map length for visualization in editor
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Chart Visualization Settings", EditorStyles.boldLabel);
             mapLength = EditorGUILayout.IntField("Simulated Map Length", mapLength);
@@ -219,14 +205,8 @@ public class RunConfigSOEditor : Editor
         Rect chartRect = EditorGUILayout.GetControlRect(false, 200); // 200 pixels height for the chart
         EditorGUI.DrawRect(chartRect, new Color(0.1f, 0.1f, 0.1f, 1f)); // Background
 
-        // Get the actual RarityProbability lists from the RunConfigSO instance
-        List<RarityProbability> startProbabilities = runConfig.startRarityProbabilities;
-        List<RarityProbability> endProbabilities = runConfig.endRarityProbabilities;
-        AnimationCurve curve = runConfig.rarityInterpolationCurve;
-
-        // Create dictionaries for easier lookup
-        Dictionary<Rarity, RarityProbability> startRarityMap = startProbabilities.ToDictionary(rp => rp.rarity, rp => rp);
-        Dictionary<Rarity, RarityProbability> endRarityMap = endProbabilities.ToDictionary(rp => rp.rarity, rp => rp);
+        List<RarityMilestone> rarityMilestones = runConfig.rarityMilestones;
+        int eliteModifier = runConfig.eliteModifier;
 
         // Get all unique rarities
         var allRarities = System.Enum.GetValues(typeof(Rarity)).Cast<Rarity>().ToList();
@@ -236,40 +216,20 @@ public class RunConfigSOEditor : Editor
 
         for (int floor = 0; floor < mapLength; floor++)
         {
-            // Calculate interpolated weights for this floor
+            // Calculate interpolated weights for this floor using the GameDataRegistry logic
+            // We'll simulate the call to GetRarityProbabilitiesForFloor here for visualization
+            List<RarityWeight> normalRarityWeights = GetInterpolatedRarityWeights(rarityMilestones, floor, 0); // 0 elite modifier for normal
+            List<RarityWeight> eliteRarityWeights = GetInterpolatedRarityWeights(rarityMilestones, floor, eliteModifier); // With elite modifier
+
+            // For visualization, we'll show both normal and elite side-by-side or stacked
+            // For simplicity, let's just show the normal weights for now, or average them.
+            // A better visualization might involve two charts or a toggle.
+            // For this task, I'll just show the normal weights.
+
             Dictionary<Rarity, int> currentFloorWeights = new Dictionary<Rarity, int>();
             foreach (Rarity rarity in allRarities)
             {
-                startRarityMap.TryGetValue(rarity, out RarityProbability startRP);
-                endRarityMap.TryGetValue(rarity, out RarityProbability endRP);
-
-                int startWeight = startRP != null ? startRP.weight : 0;
-                int endWeight = endRP != null ? endRP.weight : 0;
-                int floorAvailable = startRP != null ? startRP.floorAvailable : 0;
-                int floorUnavailable = startRP != null ? startRP.floorUnavailable : int.MaxValue; // Get floorUnavailable
-
-                int interpolatedWeight = 0;
-                // Check if rarity is available on this floor based on floorAvailable and floorUnavailable
-                if (floor >= floorAvailable && floor < floorUnavailable)
-                {
-                    // Calculate effective range for interpolation
-                    int effectiveStartFloor = floorAvailable;
-                    int effectiveEndFloor = floorUnavailable - 1; // Interpolate up to the floor *before* it becomes unavailable
-
-                    float normalizedFloor = 0;
-                    if (effectiveEndFloor > effectiveStartFloor) // If there's a range to interpolate over
-                    {
-                        normalizedFloor = (float)(floor - effectiveStartFloor) / (effectiveEndFloor - effectiveStartFloor);
-                    }
-                    else // If effectiveStartFloor == effectiveEndFloor (single floor availability)
-                    {
-                        normalizedFloor = 1; // It's the "end" of its very short effective life
-                    }
-
-                    float interpolationFactor = curve.Evaluate(normalizedFloor);
-                    interpolatedWeight = Mathf.RoundToInt(Mathf.Lerp(startWeight, endWeight, interpolationFactor));
-                }
-                currentFloorWeights[rarity] = interpolatedWeight;
+                currentFloorWeights[rarity] = normalRarityWeights.FirstOrDefault(rw => rw.rarity == rarity)?.weight ?? 0;
             }
 
             int totalWeight = currentFloorWeights.Sum(w => w.Value);
@@ -299,6 +259,70 @@ public class RunConfigSOEditor : Editor
         }
 
         EditorGUILayout.EndVertical();
+    }
+
+    // Helper method to get interpolated rarity weights for visualization
+    private List<RarityWeight> GetInterpolatedRarityWeights(List<RarityMilestone> rarityMilestones, int floorIndex, int modifier)
+    {
+        if (rarityMilestones == null || !rarityMilestones.Any())
+        {
+            return new List<RarityWeight> { new RarityWeight { rarity = Rarity.Bronze, weight = 1 } };
+        }
+
+        int effectiveFloor = floorIndex;
+        if (modifier != 0)
+        {
+            int firstMilestoneFloor = rarityMilestones.Min(m => m.floor);
+            int lastMilestoneFloor = rarityMilestones.Max(m => m.floor);
+            effectiveFloor = Mathf.Clamp(floorIndex + modifier, firstMilestoneFloor, lastMilestoneFloor);
+        }
+
+        RarityMilestone milestoneFk = rarityMilestones
+            .Where(m => m.floor <= effectiveFloor)
+            .OrderByDescending(m => m.floor)
+            .FirstOrDefault();
+
+        RarityMilestone milestoneFkPlus1 = rarityMilestones
+            .Where(m => m.floor >= effectiveFloor)
+            .OrderBy(m => m.floor)
+            .FirstOrDefault();
+
+        if (milestoneFk == null) 
+        {
+            milestoneFk = rarityMilestones.OrderBy(m => m.floor).First();
+            milestoneFkPlus1 = milestoneFk; 
+        }
+        else if (milestoneFkPlus1 == null) 
+        {
+            milestoneFkPlus1 = rarityMilestones.OrderByDescending(m => m.floor).First();
+            milestoneFk = milestoneFkPlus1; 
+        }
+
+        List<RarityWeight> interpolatedWeights = new List<RarityWeight>();
+        var allRarities = System.Enum.GetValues(typeof(Rarity)).Cast<Rarity>().ToList();
+
+        if (milestoneFk.floor == milestoneFkPlus1.floor)
+        {
+            foreach (Rarity rarity in allRarities)
+            {
+                int weight = milestoneFk.weights.FirstOrDefault(rw => rw.rarity == rarity)?.weight ?? 0;
+                interpolatedWeights.Add(new RarityWeight { rarity = rarity, weight = weight });
+            }
+        }
+        else
+        {
+            float t = (float)(effectiveFloor - milestoneFk.floor) / (milestoneFkPlus1.floor - milestoneFk.floor);
+
+            foreach (Rarity rarity in allRarities)
+            {
+                int weightFk = milestoneFk.weights.FirstOrDefault(rw => rw.rarity == rarity)?.weight ?? 0;
+                int weightFkPlus1 = milestoneFkPlus1.weights.FirstOrDefault(rw => rw.rarity == rarity)?.weight ?? 0;
+
+                int interpolatedWeight = Mathf.RoundToInt(Mathf.Lerp(weightFk, weightFkPlus1, t));
+                interpolatedWeights.Add(new RarityWeight { rarity = rarity, weight = interpolatedWeight });
+            }
+        }
+        return interpolatedWeights;
     }
 
     private Color GetRarityColor(Rarity rarity)

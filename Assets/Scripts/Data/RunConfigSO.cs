@@ -16,9 +16,8 @@ public class RunConfigSO : ScriptableObject
     public float rerollGrowth;
 
     [Header("Rarity Settings")]
-    public List<RarityProbability> startRarityProbabilities;
-    public List<RarityProbability> endRarityProbabilities;
-    public AnimationCurve rarityInterpolationCurve = AnimationCurve.Linear(0, 0, 1, 1); // Default to linear interpolation
+    public List<RarityMilestone> rarityMilestones; // NEW
+    public int eliteModifier; // NEW
 
     public RulesSO rules; // Map generation rules
 }
