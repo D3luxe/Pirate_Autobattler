@@ -221,6 +221,74 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1001 &521273919
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 328891596240465623, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 328891596240465623, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 328891596240465623, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 328891596240465623, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 328891596240465623, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 328891596240465623, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 328891596240465623, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 328891596240465623, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 328891596240465623, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 328891596240465623, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7358223075806457191, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+      propertyPath: m_Name
+      value: EnemyPanel
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+--- !u!114 &521273920 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5859908670134484872, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+  m_PrefabInstance: {fileID: 521273919}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d31ec06cbacd8e4abfb69cf2b603761, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyPanelController
 --- !u!1 &577502268
 GameObject:
   m_ObjectHideFlags: 0
@@ -610,6 +678,7 @@ MonoBehaviour:
   combatController: {fileID: 600654220}
   tickService: {fileID: 600654221}
   battleUIController: {fileID: 1859153148}
+  enemyPanelController: {fileID: 521273920}
   playerShipSpawnPoint: {fileID: 663523472}
   enemyShipSpawnPoint: {fileID: 577502269}
   shipViewPrefab: {fileID: 5710707288340327272, guid: 34ba9228b18926449899575b51102e38, type: 3}
@@ -681,6 +750,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BattleUIController
   playerShipView: {fileID: 0}
   enemyShipView: {fileID: 0}
+  playerHealthText: {fileID: 0}
+  playerGoldText: {fileID: 0}
+  playerLivesText: {fileID: 0}
+  enemyHealthText: {fileID: 0}
+  battleLogText: {fileID: 0}
+  battleLogScrollRect: {fileID: 0}
+  speedToggleButton: {fileID: 0}
 --- !u!1 &2005231082
 GameObject:
   m_ObjectHideFlags: 0
@@ -770,3 +846,4 @@ SceneRoots:
   - {fileID: 2005231085}
   - {fileID: 1307981961}
   - {fileID: 123831426}
+  - {fileID: 521273919}

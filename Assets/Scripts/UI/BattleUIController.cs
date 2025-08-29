@@ -5,8 +5,8 @@ using UnityEngine.UI;
 public class BattleUIController : MonoBehaviour
 {
     [Header("Ship Views")]
-    [SerializeField] private ShipView playerShipView;
-    [SerializeField] private ShipView enemyShipView;
+    [SerializeField] private ShipStateView playerShipStateView;
+    [SerializeField] private ShipStateView enemyShipStateView;
 
     [Header("Player HUD")]
     [SerializeField] private TextMeshProUGUI playerHealthText;
@@ -26,10 +26,10 @@ public class BattleUIController : MonoBehaviour
     private InventoryUI _inventoryUI;
     private float _currentSpeed = 1f; // Default speed
 
-    public void Initialize(ShipView playerView, ShipView enemyView, InventoryUI inventoryUI)
+    public void Initialize(ShipStateView playerView, ShipStateView enemyView, InventoryUI inventoryUI)
     {
-        playerShipView = playerView;
-        enemyShipView = enemyView;
+        playerShipStateView = playerView;
+        enemyShipStateView = enemyView;
         _inventoryUI = inventoryUI;
 
         // Initial UI update
@@ -75,7 +75,7 @@ public class BattleUIController : MonoBehaviour
 
     public void UpdateEnemyHUD()
     {
-        if (enemyHealthText != null && enemyShipView != null && enemyShipView.ShipState != null) enemyHealthText.text = $"HP: {enemyShipView.ShipState.CurrentHealth}";
+        if (enemyHealthText != null && enemyShipStateView != null && enemyShipStateView.ShipState != null) enemyHealthText.text = $"HP: {enemyShipStateView.ShipState.CurrentHealth}";
     }
 
     public void AppendToBattleLog(string message)

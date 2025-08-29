@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -13,9 +12,7 @@ namespace PirateRoguelike.UI
         private int _battleSpeed = 1;
 
         // --- Queried Elements ---
-        private Label _shipNameLabel;
-        private Image _shipSpriteElement;
-        private VisualElement _hpBarForeground;
+        private ShipPanelView _shipPanelView;
         private VisualElement _equipmentBar;
         private VisualElement _inventoryContainer; // New
         private VisualElement _mainContainer; // The actual panel background/container
@@ -41,10 +38,7 @@ namespace PirateRoguelike.UI
             _mainContainer = _root.Q("main-container");
             if (_mainContainer != null) _mainContainer.pickingMode = PickingMode.Ignore;
 
-            var shipPanelInstance = _root.Q("ship-panel-instance");
-            _shipNameLabel = shipPanelInstance.Q<Label>("ship-name");
-            _shipSpriteElement = shipPanelInstance.Q<Image>("ship-sprite");
-            _hpBarForeground = shipPanelInstance.Q<VisualElement>("hp-bar__foreground");
+            _shipPanelView = new ShipPanelView(_root.Q("ship-panel-instance"));
 
             var topBar = _root.Q("top-bar");
             _equipmentBar = topBar.Q("equipment-bar");
@@ -74,17 +68,16 @@ namespace PirateRoguelike.UI
         public void BindInitialData(IPlayerPanelData data)
         {
             // Bind Ship Data
-            _shipNameLabel.text = data.ShipData.ShipName;
-            _shipSpriteElement.sprite = data.ShipData.ShipSprite;
-            UpdateHp(data.ShipData.CurrentHp, data.ShipData.MaxHp);
+            _shipPanelView.SetShipName(data.ShipData.ShipName);
+            _shipPanelView.SetShipSprite(data.ShipData.ShipSprite);
+            _shipPanelView.UpdateHealth(data.ShipData.CurrentHp, data.ShipData.MaxHp);
 
             // Bind HUD Data
             UpdateGold(data.HudData.Gold);
             UpdateLives(data.HudData.Lives);
             UpdateDepth(data.HudData.Depth);
-            
+
             // Set initial icons from theme
-                        // Set initial icons from theme
             _root.Q<Image>("gold-icon").sprite = _theme.goldIcon;
             _root.Q<Image>("lives-icon").sprite = _theme.livesIcon;
             _root.Q<Image>("depth-icon").sprite = _theme.depthIcon;
@@ -120,7 +113,7 @@ namespace PirateRoguelike.UI
                 slotElement.userData = slots[i]; // Store the entire ISlotViewData
                 container.Add(slotElement);
                 slotElementCache.Add(slotElement);
-                
+
                 slotElement.AddManipulator(new SlotManipulator(slots[i])); // Pass ISlotViewData to manipulator
 
                 BindSlot(slotElement, slots[i]);
@@ -167,8 +160,7 @@ namespace PirateRoguelike.UI
 
         public void UpdateHp(float current, float max)
         {
-            float percentage = (max > 0) ? (current / max) * 100f : 0f;
-            _hpBarForeground.style.width = new Length(percentage, LengthUnit.Percent);
+            _shipPanelView.UpdateHealth(current, max);
         }
 
         public void UpdateGold(int amount) => _goldLabel.text = amount.ToString();
@@ -188,5 +180,3 @@ namespace PirateRoguelike.UI
         }
     }
 }
-
-        

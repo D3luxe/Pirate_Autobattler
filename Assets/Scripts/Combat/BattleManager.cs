@@ -7,9 +7,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private CombatController combatController;
     [SerializeField] private TickService tickService;
     [SerializeField] private BattleUIController battleUIController;
+    [SerializeField] private EnemyPanelController enemyPanelController;
     [SerializeField] private Transform playerShipSpawnPoint;
     [SerializeField] private Transform enemyShipSpawnPoint;
-    [SerializeField] private GameObject shipViewPrefab;
+    [SerializeField] private GameObject shipStateViewPrefab;
     [SerializeField] private RectTransform uiParentForShips; // Add this: A RectTransform on the Canvas
 
     void Start()
@@ -42,7 +43,7 @@ public class BattleManager : MonoBehaviour
         }
 
         ShipState playerState = GameSession.PlayerShip;
-        
+
 
         // 3. Build the Enemy Ship state from the encounter data
         // Check if there are enemies defined for this encounter
@@ -55,28 +56,28 @@ public class BattleManager : MonoBehaviour
         EnemySO enemyDefinition = encounterData.enemies[0];
         ShipSO enemyShipSO = GameDataRegistry.GetShip(enemyDefinition.shipId);
         if (enemyShipSO == null)
-        {
+        { 
             Debug.LogError($"Could not find ship with ID: {enemyDefinition.shipId} for enemy {enemyDefinition.name}");
             return;
         }
         ShipState enemyState = new ShipState(enemyShipSO);
-        
+
 
         // Instantiate visual Ship prefabs for player and enemy as children of the UI Canvas
-        GameObject playerShipGO = Instantiate(shipViewPrefab, uiParentForShips);
+        GameObject playerShipGO = Instantiate(shipStateViewPrefab, uiParentForShips);
         playerShipGO.GetComponent<RectTransform>().anchoredPosition = playerShipSpawnPoint.localPosition;
-        ShipView playerShipView = playerShipGO.GetComponent<ShipView>();
-        playerShipView.Initialize(playerState);
+        ShipStateView playerShipStateView = playerShipGO.GetComponent<ShipStateView>();
+        playerShipStateView.Initialize(playerState);
 
-        GameObject enemyShipGO = Instantiate(shipViewPrefab, uiParentForShips);
+        GameObject enemyShipGO = Instantiate(shipStateViewPrefab, uiParentForShips);
         enemyShipGO.GetComponent<RectTransform>().anchoredPosition = enemyShipSpawnPoint.localPosition;
-        ShipView enemyShipView = enemyShipGO.GetComponent<ShipView>();
-        enemyShipView.Initialize(enemyState);
+        ShipStateView enemyShipStateView = enemyShipGO.GetComponent<ShipStateView>();
+        enemyShipStateView.Initialize(enemyState);
 
         // Initialize the BattleUIController
-        battleUIController.Initialize(playerShipView, enemyShipView, InventoryUI.Instance);
+        battleUIController.Initialize(playerShipStateView, enemyShipStateView, InventoryUI.Instance);
 
-        combatController.Init(playerState, enemyDefinition, tickService, battleUIController, playerShipView, enemyShipView);
+        combatController.Init(playerState, enemyDefinition, tickService, battleUIController, playerShipStateView, enemyShipStateView, enemyPanelController);
 
         Debug.Log($"Battle started: {playerState.Def.displayName} vs {enemyState.Def.displayName}");
     }

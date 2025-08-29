@@ -102,6 +102,7 @@ public class RunManager : MonoBehaviour
         }
 
         SceneManager.sceneLoaded += OnSceneLoaded;
+        GameSession.OnPlayerNodeChanged += HandlePlayerNodeChanged; // NEW: Subscribe to node change event
     }
 
     void OnEnable()
@@ -117,6 +118,7 @@ public class RunManager : MonoBehaviour
     void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        GameSession.OnPlayerNodeChanged -= HandlePlayerNodeChanged; // NEW: Unsubscribe from node change event
         _saveHotkeyAction.performed -= OnSaveHotkeyPerformed; // NEW: Unsubscribe from event
         _saveHotkeyAction.Dispose(); // NEW: Dispose the input action
         if (Instance == this) // Only reset if this is the persistent instance
@@ -157,6 +159,62 @@ public class RunManager : MonoBehaviour
         if (_playerPanelController != null)
         {
             _playerPanelController.Initialize();
+        }
+    }
+
+    private void HandlePlayerNodeChanged()
+    {
+        if (GameSession.CurrentRunState == null || string.IsNullOrEmpty(GameSession.CurrentRunState.currentEncounterId))
+        {
+            Debug.LogWarning("HandlePlayerNodeChanged called with invalid GameSession state.");
+            return;
+        }
+
+        var mapData = MapManager.Instance.GetMapGraphData();
+        if (mapData == null)
+        {
+            Debug.LogError("MapGraphData is null. Cannot handle node change.");
+            return;
+        }
+
+        var currentNode = mapData.nodes.Find(n => n.id == GameSession.CurrentRunState.currentEncounterId);
+        if (currentNode == null)
+        {
+            Debug.LogError($"Could not find node with ID: {GameSession.CurrentRunState.currentEncounterId}");
+            return;
+        }
+
+        if (System.Enum.TryParse<PirateRoguelike.Data.EncounterType>(currentNode.type, true, out var encounterType))
+        {
+            Debug.Log($"Player moved to node {currentNode.id} of type {encounterType}.");
+
+            switch (encounterType)
+            {
+                case PirateRoguelike.Data.EncounterType.Battle:
+                    // Before loading, hide the map to prevent it from overlapping the next scene
+                    if (_mapView != null) _mapView.Hide();
+                    SceneManager.LoadScene("Battle");
+                    break;
+                case PirateRoguelike.Data.EncounterType.Shop:
+                    if (_mapView != null) _mapView.Hide();
+                    SceneManager.LoadScene("Shop");
+                    break;
+                case PirateRoguelike.Data.EncounterType.Treasure:
+                    Debug.Log("Treasure encounter triggered. Implementation pending.");
+                    // Future: Grant rewards directly or show a simple reward UI
+                    break;
+                case PirateRoguelike.Data.EncounterType.Boss:
+                     if (_mapView != null) _mapView.Hide();
+                    SceneManager.LoadScene("Battle"); // Assuming boss fights use the same scene
+                    break;
+                default:
+                    Debug.LogWarning($"Unhandled encounter type: {encounterType}");
+                    break;
+            }
+        }
+        else
+        {
+            Debug.LogError($"Failed to parse encounter type: {currentNode.type}");
         }
     }
 

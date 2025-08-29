@@ -12,29 +12,32 @@ public class CombatController : MonoBehaviour
 
     private ITickService _tickService;
     private BattleUIController _battleUI; // Store a reference to the UI controller
+    private EnemyPanelController _enemyPanelController; // Reference to the enemy panel controller
     private float _battleDuration = 0f; // Track battle duration
     private bool _suddenDeathStarted = false;
     private float _suddenDeathDamage = 1f; // Initial sudden death damage
     private int _suddenDeathTickCount = 0; // Count ticks for doubling damage
 
     // Called to set up the battle
-    public void Init(ShipState player, EnemySO enemyDef, ITickService tickService, BattleUIController battleUI, ShipView playerShipView, ShipView enemyShipView)
+    public void Init(ShipState player, EnemySO enemyDef, ITickService tickService, BattleUIController battleUI, ShipStateView playerShipStateView, ShipStateView enemyShipStateView, EnemyPanelController enemyPanelController)
     {
         Player = player;
         Enemy = new ShipState(GameDataRegistry.GetShip(enemyDef.shipId)); // Create ShipState from EnemySO
         Enemy.Equipped = enemyDef.itemLoadout.Select(itemSO => new ItemInstance(itemSO)).ToArray(); // Set enemy's equipped items from its definition
         _tickService = tickService;
         _battleUI = battleUI; // Store the reference
+        _enemyPanelController = enemyPanelController; // Store the reference
 
         _tickService.OnTick += HandleTick;
         _tickService.StartTicking();
 
         // Initialize Views
-        playerShipView.Initialize(Player);
-        enemyShipView.Initialize(Enemy);
+        playerShipStateView.Initialize(Player);
+        enemyShipStateView.Initialize(Enemy);
 
         // Initialize BattleUI and subscribe to events
-        _battleUI.Initialize(playerShipView, enemyShipView, InventoryUI.Instance);
+        _battleUI.Initialize(playerShipStateView, enemyShipStateView, InventoryUI.Instance);
+        _enemyPanelController.Initialize(Enemy); // Initialize the enemy panel
         Player.OnHealthChanged += _battleUI.UpdatePlayerHUD; // Subscribe to player health changes
         Enemy.OnHealthChanged += _battleUI.UpdateEnemyHUD; // Subscribe to enemy health changes
 

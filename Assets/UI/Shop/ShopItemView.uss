@@ -1,0 +1,35 @@
+.shop-item-root {
+    width: 150px;
+    height: 200px;
+    background-color: #2a2a2a;
+    border-width: 2px;
+    border-color: #555555;
+    margin: 5px;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.item-icon {
+    width: 80px;
+    height: 80px;
+    background-color: #444444;
+    -unity-background-image-tint-color: white;
+}
+
+.item-name {
+    color: white;
+    font-size: 16px;
+    -unity-text-align: middle-center;
+}
+
+.item-price {
+    color: yellow;
+    font-size: 14px;
+}
+
+.buy-item-button {
+    background-color: #336699;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro; // Add this
 
-public class ShipView : MonoBehaviour
+public class ShipStateView : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Image shipSprite;

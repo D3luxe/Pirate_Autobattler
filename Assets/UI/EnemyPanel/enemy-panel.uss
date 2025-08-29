@@ -1,0 +1,64 @@
+:root {
+    --color-background: rgba(10, 20, 30, 0);
+    --color-foreground: rgb(239, 239, 239);
+    --color-hp: rgb(255, 68, 68);
+    --color-hp-background: rgb(68, 17, 17);
+    --color-cooldown: rgba(0, 0, 0, 0.7);
+    --color-rarity-bronze: rgb(205, 127, 50);
+    --color-rarity-silver: rgb(192, 192, 192);
+    --color-rarity-gold: rgb(255, 215, 0);
+    --color-rarity-diamond: rgb(185, 242, 255);
+}
+
+.enemy-panel {
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: rgba(10, 20, 30, 0);
+    padding: 10px;
+    align-self: center;
+}
+
+.ship-panel {
+    align-items: center;
+}
+
+.ship-panel__sprite {
+    width: 128px;
+    height: 128px;
+    background-color: transparent;
+    color: white;
+    scale: 1 1;
+}
+
+.ship-panel__name {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(239, 239, 239);
+}
+
+.hp-bar {
+    width: 150px;
+    height: 20px;
+    margin-top: 5px;
+}
+
+.hp-bar__background {
+    flex-grow: 1;
+    background-color: rgb(68, 17, 17);
+    border-radius: 5px;
+}
+
+.hp-bar__foreground {
+    flex-grow: 1;
+    background-color: rgb(255, 68, 68);
+    border-radius: 5px;
+    width: 50%;
+    transition: width 0.5s ease-in-out;
+}
+
+.equipment-bar {
+    justify-content: center;
+    margin-top: 10px;
+    width: 350px;
+}

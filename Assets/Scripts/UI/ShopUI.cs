@@ -1,36 +1,38 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using PirateRoguelike.Data;
-using TMPro; // Add this
+using UnityEngine.UIElements;
 using System.Collections;
 
 public class ShopUI : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Transform shopItemContainer; // Parent for shop item views
-    [SerializeField] private GameObject shopItemViewPrefab; // Prefab for a single item in shop
-    [SerializeField] private TextMeshProUGUI goldText; // Change this
-    [SerializeField] private TextMeshProUGUI rerollCostText; // Change this
-    [SerializeField] private Button rerollButton;
-    [SerializeField] private Button leaveShopButton;
-    [SerializeField] private TextMeshProUGUI messageText; // For displaying feedback messages
+    [SerializeField] private UIDocument uiDocument;
+    [SerializeField] private StyleSheet shopUss; // Assign this in the Inspector
+    [SerializeField] private VisualTreeAsset shopItemViewUxml; // Assign this in the Inspector
+    [SerializeField] private StyleSheet shopItemViewUss; // Assign this in the Inspector
+    [SerializeField] private VisualTreeAsset shipViewUxml; // Assign this in the Inspector
+    [SerializeField] private StyleSheet shipViewUss; // Assign this in the Inspector
+    private VisualElement _root;
+    private VisualElement _shopItemContainer;
+    private VisualElement _shopShipContainer;
+    private Label _goldLabel;
+    private Label _rerollCostLabel;
+    private Button _rerollButton;
+    private Button _leaveShopButton;
+    private Label _messageLabel;
 
     [Header("Ship Shop References")]
-    [SerializeField] private Transform shopShipContainer;
-    [SerializeField] private GameObject shopShipViewPrefab;
-    [SerializeField] private Button buyShipButton;
-    [SerializeField] private TextMeshProUGUI shipPriceText;
+    private Label _shipPriceLabel;
+    private Button _buyShipButton;
 
     private ShopManager _shopManager;
     private ShipSO _displayedShip;
 
     void Awake()
     {
-        rerollButton.onClick.AddListener(OnRerollClicked);
-        leaveShopButton.onClick.AddListener(OnLeaveShopClicked);
-        buyShipButton.onClick.AddListener(OnBuyShipClicked);
-        messageText.text = ""; // Clear message on start
+        _root = uiDocument.rootVisualElement;
+        _root.styleSheets.Add(shopUss);
     }
 
     public void SetShopManager(ShopManager manager)
@@ -41,19 +43,16 @@ public class ShopUI : MonoBehaviour
     public void DisplayShopItems(List<ItemSO> items)
     {
         // Clear existing items
-        foreach (Transform child in shopItemContainer)
-        {
-            Destroy(child.gameObject);
-        }
+        _shopItemContainer.Clear();
 
         // Display new items
         foreach (ItemSO itemSO in items)
         {
-            GameObject itemViewGO = Instantiate(shopItemViewPrefab, shopItemContainer);
-            ShopItemView itemView = itemViewGO.GetComponent<ShopItemView>();
-            // Create ItemInstance here
+            var itemView = new ShopItemViewUI();
+            itemView.Setup(shopItemViewUxml, shopItemViewUss);
             ItemInstance itemInstance = new ItemInstance(itemSO);
-            itemView.SetItem(itemInstance);
+            itemView.SetItem(itemInstance, _shopManager);
+            _shopItemContainer.Add(itemView);
         }
     }
 
@@ -62,44 +61,40 @@ public class ShopUI : MonoBehaviour
         _displayedShip = ship;
 
         // Clear existing ship
-        foreach (Transform child in shopShipContainer)
-        {
-            Destroy(child.gameObject);
-        }
+        _shopShipContainer.Clear();
 
         if (ship != null)
         {
-            GameObject shipViewGO = Instantiate(shopShipViewPrefab, shopShipContainer);
-            ShipView shipView = shipViewGO.GetComponent<ShipView>();
-            // Assuming ShipView can be initialized with a ShipSO for display purposes
-            // You might need to create a dummy ShipState or modify ShipView.Initialize to accept ShipSO directly
-            shipView.Initialize(new ShipState(ship)); 
+            var shipView = new ShipViewUI();
+            shipView.Setup(shipViewUxml, shipViewUss);
+            shipView.SetShip(ship);
+            _shopShipContainer.Add(shipView);
 
-            shipPriceText.text = $"{cost}g";
-            buyShipButton.interactable = true;
+            _shipPriceLabel.text = $"{cost}g";
+            _buyShipButton.SetEnabled(true);
         }
         else
         {
-            shipPriceText.text = "";
-            buyShipButton.interactable = false;
+            _shipPriceLabel.text = "";
+            _buyShipButton.SetEnabled(false);
         }
     }
 
     public void UpdatePlayerGold(int gold)
     {
-        goldText.text = $"Gold: {gold}";
+        _goldLabel.text = $"Gold: {gold}";
     }
 
     public void UpdateRerollCost(int cost)
     {
-        rerollCostText.text = $"Reroll ({cost}g)";
+        _rerollCostLabel.text = $"({cost}g)";
     }
 
     public void DisplayMessage(string message, float duration = 2f)
     {
-        if (messageText != null)
+        if (_messageLabel != null)
         {
-            messageText.text = message;
+            _messageLabel.text = message;
             StopAllCoroutines(); // Stop any previous message coroutines
             StartCoroutine(ClearMessageAfterDelay(duration));
         }
@@ -108,9 +103,9 @@ public class ShopUI : MonoBehaviour
     private IEnumerator ClearMessageAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        if (messageText != null)
+        if (_messageLabel != null)
         {
-            messageText.text = "";
+            _messageLabel.text = "";
         }
     }
 

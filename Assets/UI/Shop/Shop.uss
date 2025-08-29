@@ -1,0 +1,74 @@
+.shop-root {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-header {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 80%;
+    margin-bottom: 10px;
+}
+
+.gold-label,
+.message-label {
+    color: yellow;
+    font-size: 24px;
+}
+
+.shop-content {
+    flex-direction: row;
+    width: 80%;
+    flex-grow: 1;
+}
+
+.shop-section {
+    flex-grow: 1;
+    border-width: 2px;
+    border-color: gray;
+    margin: 5px;
+    padding: 10px;
+}
+
+.section-title {
+    color: white;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.item-container,
+.ship-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.reroll-section,
+.ship-buy-section {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.reroll-button,
+.buy-ship-button,
+.leave-shop-button {
+    background-color: #336699;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.reroll-cost-label,
+.ship-price-label {
+    color: white;
+    margin-left: 10px;
+}
+
+.shop-footer {
+    margin-top: 10px;
+}

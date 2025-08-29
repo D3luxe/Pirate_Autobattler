@@ -1,0 +1,32 @@
+<UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="ShopRoot" class="shop-root">
+        <ui:VisualElement name="Header" class="shop-header">
+            <ui:Label name="GoldLabel" text="Gold: 0" class="gold-label" />
+            <ui:Label name="MessageLabel" text="" class="message-label" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="ShopContent" class="shop-content">
+            <ui:VisualElement name="ItemShopSection" class="shop-section">
+                <ui:Label text="Items" class="section-title" />
+                <ui:VisualElement name="ShopItemContainer" class="item-container" />
+                <ui:VisualElement name="RerollSection" class="reroll-section">
+                    <ui:Button name="RerollButton" class="reroll-button" text="Reroll" />
+                    <ui:Label name="RerollCostLabel" text="(0g)" class="reroll-cost-label" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="ShipShopSection" class="shop-section">
+                <ui:Label text="Ships" class="section-title" />
+                <ui:VisualElement name="ShopShipContainer" class="ship-container" />
+                <ui:VisualElement name="ShipBuySection" class="ship-buy-section">
+                    <ui:Label name="ShipPriceLabel" text="" class="ship-price-label" />
+                    <ui:Button name="BuyShipButton" class="buy-ship-button" text="Buy Ship" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="Footer" class="shop-footer">
+            <ui:Button name="LeaveShopButton" class="leave-shop-button" text="Leave Shop" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</UXML>

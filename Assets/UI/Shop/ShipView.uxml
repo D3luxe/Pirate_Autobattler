@@ -1,0 +1,10 @@
+<UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="ShipViewRoot" class="ship-view-root">
+        <ui:VisualElement name="ShipIcon" class="ship-icon" />
+        <ui:Label name="ShipName" class="ship-name" text="Ship Name" />
+        <ui:VisualElement name="ShipStats" class="ship-stats">
+            <ui:Label name="HealthStat" class="stat-label" text="HP: 0" />
+            <!-- Add more stats as needed -->
+        </ui:VisualElement>
+    </ui:VisualElement>
+</UXML>
