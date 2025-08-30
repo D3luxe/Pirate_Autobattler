@@ -1,7 +1,5 @@
---- START OF FILE GEMINI.md ---
-
 -   **Snapshot:**
-    -   **Unity Version:** 2022.3.20f1 (Assumed)
+    -   **Unity Version:** 6000.2.0f1
     -   **Critical Packages:** `com.unity.inputsystem`, `com.unity.ui.builder`, `com.unity.uitoolkit`
     -   **Scenes in Build:** `MainMenu`, `Boot`, `Run`, `Battle`, `Summary`
     -   **ASMDEFs:** None in `Assets/Scripts`
@@ -73,36 +71,36 @@
 
 -   **Event Catalog:**
 
-    | Event Name | Publisher(s) (Class:Line) | Subscriber(s) (Class:Line) | Notes |
-    | :--------- | :-------------------------- | :--------------------------- | :---- |
-    | `OnTick` (TickService) | `TickService:38` | `CombatController:29` | Main driver for combat. |
-    | `OnBattleStart` | `CombatController:48` | `AbilityManager:48` | Signals battle start. |
-    | `OnSuddenDeathStarted` | `CombatController:74` | `BattleUIController:41` | Fired when sudden death begins. |
-    | `OnDamageReceived` | `ShipState:224` | `ShipView:18`, `AbilityManager:50` | Fired when ship takes damage. |
-    | `OnHeal` | `ShipState:239` | `ShipView:19`, `AbilityManager:51` | Fired when ship is healed. |
-    | `OnTick` (EventBus) | `CombatController:99` | `AbilityManager:52` | General combat tick update. |
-    | `OnHealthChanged` | `ShipState:102, 223, 238` | `CombatController:38, 39`, `ShipView:17`, `PlayerPanelController:87` | Direct C# event on `ShipState` for UI. |
-    | `OnEncounterEnd` | *None found* | *None found* | Unused in `EventBus`. |
-    | `OnItemReady` | `EventBus` | `AbilityManager` | Triggers item abilities. |
-    | `OnAllyActivate` | `EventBus` | *None found* | Unused in `EventBus`. |
-    | `OnDamageDealt` | `EventBus` | `AbilityManager:49` | Triggers abilities on damage dealt. |
-    | `OnShieldGained` | *None found* | *None found* | Unused in `EventBus`. |
-    | `OnDebuffApplied` | *None found* | *None found* | Unused in `EventBus`. |
-    | `OnBuffApplied` | *None found* | *None found* | Unused in `EventBus`. |
+| Event Name | Publisher(s) (Class:Line) | Subscriber(s) (Class:Line) | Notes |
+| :--- | :--- | :--- | :--- |
+| `OnTick` (TickService) | `TickService:38` | `CombatController:29` | Main driver for combat. |
+| `OnBattleStart` | `CombatController:48` | `AbilityManager:48` | Signals battle start. |
+| `OnSuddenDeathStarted` | `CombatController:74` | `BattleUIController:41` | Fired when sudden death begins. |
+| `OnDamageReceived` | `ShipState:224` | `ShipView:18`, `AbilityManager:50` | Fired when ship takes damage. |
+| `OnHeal` | `ShipState:239` | `ShipView:19`, `AbilityManager:51` | Fired when ship is healed. |
+| `OnTick` (EventBus) | `CombatController:99` | `AbilityManager:52` | General combat tick update. |
+| `OnHealthChanged` | `ShipState:102, 223, 238` | `CombatController:38, 39`, `ShipView:17`, `PlayerPanelController:87` | Direct C# event on `ShipState` for UI. |
+| `OnEncounterEnd` | *None found* | *None found* | Unused in `EventBus`. |
+| `OnItemReady` | `EventBus` | `AbilityManager` | Triggers item abilities. |
+| `OnAllyActivate` | `EventBus` | *None found* | Unused in `EventBus`. |
+| `OnDamageDealt` | `EventBus` | `AbilityManager:49` | Triggers abilities on damage dealt. |
+| `OnShieldGained` | *None found* | *None found* | Unused in `EventBus`. |
+| `OnDebuffApplied` | *None found* | *None found* | Unused in `EventBus`. |
+| `OnBuffApplied` | *None found* | *None found* | Unused in `EventBus`. |
 
 -   **Data Model:**
 
-    | SO Type | Path | Key Fields | Loading Mechanism |
-    | :------ | :--- | :--------- | :---------------- |
-    | `ItemSO` | `Assets/Resources/GameData/Items` | `id`, `displayName`, `sprite`, `abilities` | `Resources.LoadAll` (`GameDataRegistry`) |
-    | `ShipSO` | `Assets/Resources/GameData/Ships` | `id`, `displayName`, `shipSprite`, `baseHealth` | `Resources.LoadAll` (`GameDataRegistry`) |
-    | `EncounterSO` | `Assets/Resources/GameData/Encounters` | `id`, `encounterType`, `enemy` | `Resources.LoadAll` (`GameDataRegistry`) |
-    | `RunConfigSO` | `Assets/Resources/GameData` | `startingLives`, `startingGold`, `inventorySize` | `Resources.Load` (`GameDataRegistry`) |
-    | `AbilitySO` | `Assets/Resources/GameData/Abilities` | `displayName`, `Trigger`, `Actions` | Via other SOs (e.g., `ItemSO`) |
-    | `ActionSO` | `Assets/Resources/GameData/Actions` | (Abstract) | Via `AbilitySO` |
-    | `EffectSO` | `Assets/Resources/GameData/Effects` | `duration`, `tickAction` | Via `ActionSO` |
-    | `EnemySO` | `Assets/Resources/GameData/Enemies` | `id`, `shipId`, `itemLoadout` | Via `EncounterSO` |
-    | `PlayerUIThemeSO` | `Assets/UI/PlayerPanel` | `primaryColor`, `secondaryColor` | Assigned in Inspector |
+| SO Type | Path | Key Fields | Loading Mechanism |
+| :--- | :--- | :--- | :--- |
+| `ItemSO` | `Assets/Resources/GameData/Items` | `id`, `displayName`, `sprite`, `abilities` | `Resources.LoadAll` (`GameDataRegistry`) |
+| `ShipSO` | `Assets/Resources/GameData/Ships` | `id`, `displayName`, `shipSprite`, `baseHealth` | `Resources.LoadAll` (`GameDataRegistry`) |
+| `EncounterSO` | `Assets/Resources/GameData/Encounters` | `id`, `encounterType`, `enemy` | `Resources.LoadAll` (`GameDataRegistry`) |
+| `RunConfigSO` | `Assets/Resources/GameData` | `startingLives`, `startingGold`, `inventorySize` | `Resources.Load` (`GameDataRegistry`) |
+| `AbilitySO` | `Assets/Resources/GameData/Abilities` | `displayName`, `Trigger`, `Actions` | Via other SOs (e.g., `ItemSO`) |
+| `ActionSO` | `Assets/Resources/GameData/Actions` | (Abstract) | Via `AbilitySO` |
+| `EffectSO` | `Assets/Resources/GameData/Effects` | `duration`, `tickAction` | Via `ActionSO` |
+| `EnemySO` | `Assets/Resources/GameData/Enemies` | `id`, `shipId`, `itemLoadout` | Via `EncounterSO` |
+| `PlayerUIThemeSO` | `Assets/UI/PlayerPanel` | `primaryColor`, `secondaryColor` | Assigned in Inspector |
 
 -   **Content Health:**
     -   **`StreamingAssets/items.json`**: Present but unused; no code references. `ItemSO` ScriptableObjects are the authoritative source.
@@ -114,11 +112,11 @@
 
 -   **Risks & Recommendations:**
 
-    | Severity | Effort | Rationale | Recommendation |
-    | :------- | :----- | :-------- | :------------- |
-    | **High** | **M** | `GameSession`'s static global state hinders testability and complicates save/load. | Refactor `GameSession` into a non-static class/MonoBehaviour for improved testability and explicit data flow. |
-    | **Medium** | **S** | Direct UI updates (e.g., `CombatController`, `PlayerPanelController` subscribing to `ShipState`) tightly couple game logic and UI. | Introduce a data-binding/view-model layer to decouple UI from game logic. |
-    | **Low** | **S** | Unused `items.json` and `EventBus` events create codebase clutter and confusion. | Remove unused `items.json` and `EventBus` events to clean up the project. |
+| Severity | Effort | Rationale | Recommendation |
+| :--- | :--- | :--- | :--- |
+| **High** | **M** | `GameSession`'s static global state hinders testability and complicates save/load. | Refactor `GameSession` into a non-static class/MonoBehaviour for improved testability and explicit data flow. |
+| **Medium** | **S** | Direct UI updates (e.g., `CombatController`, `PlayerPanelController` subscribing to `ShipState`) tightly couple game logic and UI. | Introduce a data-binding/view-model layer to decouple UI from game logic. |
+| **Low** | **S** | Unused `items.json` and `EventBus` events create codebase clutter and confusion. | Remove unused `items.json` and `EventBus` events to clean up the project. |
 
 -   **Roadmap:**
     -   **Quick Wins:**

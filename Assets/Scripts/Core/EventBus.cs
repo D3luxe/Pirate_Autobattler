@@ -47,12 +47,11 @@ public static class EventBus
                     DispatchBattleStart(ctxBattleStart);
                 }
                 break;
-            case TriggerType.OnItemReady:
-                if (args.Length > 1 && args[0] is ItemInstance itemParam && args[1] is CombatContext ctxParam)
-                {
-                    DispatchItemReady(itemParam, ctxParam);
-                }
+            case TriggerType.OnEncounterEnd:
+                // This event is currently unused and has no specific dispatch logic here.
+                // DispatchEncounterEnd(); // If it were used, this would be the call.
                 break;
+            case TriggerType.OnItemReady:
             case TriggerType.OnAllyActivate:
                 if (args.Length > 1 && args[0] is ItemInstance itemAllyParam && args[1] is CombatContext ctxAllyParam)
                 {

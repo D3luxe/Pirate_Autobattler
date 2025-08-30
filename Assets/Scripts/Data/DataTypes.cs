@@ -21,7 +21,7 @@ namespace PirateRoguelike.Data
 
     public enum EncounterType { Battle, Elite, Shop, Port, Event, Treasure, Boss, Unknown }
 
-    public enum TriggerType { OnItemReady, OnAllyActivate, OnBattleStart, OnDamageDealt, OnDamageReceived, OnHeal, OnShieldGained, OnDebuffApplied, OnBuffApplied, OnTick }
+    public enum TriggerType { OnItemReady, OnAllyActivate, OnBattleStart, OnEncounterEnd, OnDamageDealt, OnDamageReceived, OnHeal, OnShieldGained, OnDebuffApplied, OnBuffApplied, OnTick }
     public enum ActionType { Buff, Damage, Heal, Shield, Debuff, StatChange, Meta, Burn, Poison, Stun }
 
     public enum StatType { Attack, Defense }

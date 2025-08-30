@@ -143,94 +143,156 @@ namespace Pirate.MapGen
         /// <returns>A MapGraph representing the skeleton of the map.</returns>
         public MapGraph GenerateSkeleton(ActSpec actSpec, IRandomNumberGenerator rng)
         {
+            if (actSpec.Columns % 2 == 0)
+            {
+                throw new ArgumentException($"Number of columns ({actSpec.Columns}) must be odd for boss node placement.");
+            }
+
             MapGraph graph = new MapGraph();
             graph.Rows = actSpec.Rows;
 
-            // 1. Create nodes for each column
+            // 1. Create nodes
             for (int r = 0; r < actSpec.Rows; r++)
             {
-                int nodesInRow = (r == 0 || r == actSpec.Rows - 1) ? 1 : (int)(rng.NextULong() % (ulong)(actSpec.Columns - 2)) + 2; // 2 to Columns-1 nodes for mid-rows
-                if (r == 0) nodesInRow = 1; // First row always 1 node
-                if (r == actSpec.Rows - 1) nodesInRow = 1; // Last row always 1 node (Boss)
-
-                for (int c = 0; c < nodesInRow; c++)
+                for (int c = 0; c < actSpec.Columns; c++)
                 {
-                    graph.Nodes.Add(new Node
-                    {
-                        Id = $"node_{r}_{c}",
-                        Row = r,
-                        Col = c,
-                        Type = NodeType.Unknown // Default to unknown for now, will be typed later
-                    });
+                    graph.Nodes.Add(new Node { Id = $"node_{r}_{c}", Row = r, Col = c, Type = NodeType.Unknown });
                 }
             }
 
-            // 2. Wire edges
-            for (int r = 0; r < actSpec.Rows - 1; r++)
-            {
-                List<Node> currentRowNodes = graph.Nodes.Where(n => n.Row == r).ToList();
-                List<Node> nextRowNodes = graph.Nodes.Where(n => n.Row == r + 1).ToList();
+            var allUsedNodeIds = new HashSet<string>();
+            var allUsedEdgeIds = new HashSet<string>();
+            var edgesByRow = new List<Tuple<int, int>>[actSpec.Rows - 1];
+            for (int i = 0; i < edgesByRow.Length; i++) edgesByRow[i] = new List<Tuple<int, int>>();
 
-                // Ensure every node in the next column has at least one incoming connection
-                foreach (Node nextNode in nextRowNodes)
+            var startCols = new int[6];
+            int pathsGenerated = 0;
+            const int MAX_TOTAL_RESTARTS = 500;
+            int totalRestarts = 0;
+
+            // 2. Generate 6 paths
+            while (pathsGenerated < 6)
+            {
+                if (totalRestarts > MAX_TOTAL_RESTARTS)
                 {
-                    bool isConnected = false;
-                    foreach (Node currentNode in currentRowNodes)
+                    Debug.LogError("Max total restarts exceeded. Aborting skeleton generation.");
+                    break;
+                }
+
+                var pathDecisionStack = new Stack<PathStep>();
+                
+                // Determine start column
+                int startCol;
+                if (pathsGenerated == 0) { startCol = (int)(rng.NextULong() % (ulong)actSpec.Columns); }
+                else if (pathsGenerated == 1) { do { startCol = (int)(rng.NextULong() % (ulong)actSpec.Columns); } while (startCol == startCols[0]); }
+                else { startCol = (int)(rng.NextULong() % (ulong)actSpec.Columns); }
+                if (pathsGenerated < startCols.Length) startCols[pathsGenerated] = startCol;
+
+                int currentCol = startCol;
+                int r = 0;
+                
+                bool pathFailed = false;
+
+                while (r < actSpec.Rows - 1)
+                {
+                    List<int> candidates = GetThreeNearestCandidates(currentCol, actSpec.Columns, rng);
+                    List<int> validCandidates = FilterCandidatesByCrossing(candidates, r, currentCol, edgesByRow[r]);
+
+                    if (r == actSpec.Rows - 2) // Pre-boss row
                     {
-                        // Check if an edge already exists (for re-runs or repair)
-                        if (graph.Edges.Any(e => e.FromId == currentNode.Id && e.ToId == nextNode.Id))
+                        int bossCol = actSpec.Columns / 2;
+                        if (validCandidates.Contains(bossCol)) { validCandidates = new List<int> { bossCol }; }
+                        else { validCandidates.Clear(); }
+                    }
+
+                    if (validCandidates.Any())
+                    {
+                        int chosenNextCol = validCandidates[(int)(rng.NextULong() % (ulong)validCandidates.Count)];
+                        
+                        pathDecisionStack.Push(new PathStep
                         {
-                            isConnected = true;
-                            break;
+                            Row = r,
+                            CurrentCol = currentCol,
+                            ChosenNextCol = chosenNextCol,
+                            RemainingCandidates = new List<int>(validCandidates.Where(c => c != chosenNextCol))
+                        });
+                        
+                        currentCol = chosenNextCol;
+                        r++;
+                    }
+                    else // No valid candidates, must backtrack
+                    {
+                        if (!pathDecisionStack.Any())
+                        {
+                            pathFailed = true;
+                            break; 
+                        }
+
+                        PathStep lastStep = null;
+                        do {
+                            if (!pathDecisionStack.Any()) {
+                                pathFailed = true;
+                                break;
+                            }
+                            lastStep = pathDecisionStack.Pop();
+                        } while (!lastStep.RemainingCandidates.Any());
+
+                        if (pathFailed || lastStep == null) break;
+
+                        // We found a step with alternatives. Restore state and retry.
+                        r = lastStep.Row;
+                        currentCol = lastStep.CurrentCol;
+                        
+                        int nextCandidate = lastStep.RemainingCandidates[0];
+                        lastStep.RemainingCandidates.RemoveAt(0);
+                        pathDecisionStack.Push(lastStep); // Push back with fewer candidates
+
+                        // Manually perform the next step
+                        pathDecisionStack.Push(new PathStep
+                        {
+                            Row = r,
+                            CurrentCol = currentCol,
+                            ChosenNextCol = nextCandidate,
+                            RemainingCandidates = new List<int>() // Will be generated if this fails
+                        });
+                        currentCol = nextCandidate;
+                        r++;
+                    }
+                }
+
+                if (pathFailed)
+                {
+                    totalRestarts++;
+                    Debug.Log($"Path {pathsGenerated + 1} failed and will be restarted. Total restarts: {totalRestarts}");
+                }
+                else // Path completed
+                {
+                    Debug.Log($"Path {pathsGenerated + 1} completed.");
+                    // Add nodes and edges from the completed path to the overall used sets
+                    var finalPath = new List<PathStep>(pathDecisionStack);
+                    finalPath.Reverse();
+
+                    // Add start node
+                    allUsedNodeIds.Add($"node_0_{startCol}");
+
+                    foreach(var step in finalPath)
+                    {
+                        allUsedNodeIds.Add($"node_{step.Row}_{step.CurrentCol}");
+                        allUsedNodeIds.Add($"node_{step.Row + 1}_{step.ChosenNextCol}");
+                        string edgeId = $"edge_{step.Row}_{step.CurrentCol}_{step.ChosenNextCol}";
+                        if(allUsedEdgeIds.Add(edgeId))
+                        {
+                            graph.Edges.Add(new Edge { Id = edgeId, FromId = $"node_{step.Row}_{step.CurrentCol}", ToId = $"node_{step.Row + 1}_{step.ChosenNextCol}" });
+                            edgesByRow[step.Row].Add(Tuple.Create(step.CurrentCol, step.ChosenNextCol));
                         }
                     }
-
-                    if (!isConnected)
-                    {
-                        // Connect from a random node in the current column
-                        Node randomCurrentNode = currentRowNodes[(int)(rng.NextULong() % (ulong)currentRowNodes.Count)];
-                        graph.Edges.Add(new Edge { FromId = randomCurrentNode.Id, ToId = nextNode.Id });
-                    }
-                }
-
-                // Ensure every node in the current column has at least one outgoing connection
-                foreach (Node currentNode in currentRowNodes)
-                {
-                    if (!graph.Edges.Any(e => e.FromId == currentNode.Id))
-                    {
-                        // Connect to a random node in the next column
-                        Node randomNextNode = nextRowNodes[(int)(rng.NextULong() % (ulong)nextRowNodes.Count)];
-                        graph.Edges.Add(new Edge { FromId = currentNode.Id, ToId = randomNextNode.Id });
-                    }
-
-                    // Add more random connections (branching) based on branchiness
-                    // branchiness is 0..1, representing target edges per node
-                    int targetConnections = (int)Math.Round(actSpec.Branchiness * nextRowNodes.Count);
-                    while (graph.Edges.Count(e => e.FromId == currentNode.Id) < targetConnections)
-                    {
-                        Node randomNextNode = nextRowNodes[(int)(rng.NextULong() % (ulong)nextRowNodes.Count)];
-                        if (!graph.Edges.Any(e => e.FromId == currentNode.Id && e.ToId == randomNextNode.Id))
-                        {
-                            graph.Edges.Add(new Edge { FromId = currentNode.Id, ToId = randomNextNode.Id });
-                        }
-                        // Prevent infinite loop if targetConnections is too high for available nextRowNodes
-                        if (graph.Edges.Count(e => e.FromId == currentNode.Id) == nextRowNodes.Count) break;
-                    }
+                    pathsGenerated++;
                 }
             }
 
-            // 3. Reserve the top row for Boss; mark top-1 as preBossPortEligible.
-            // This will be handled in Phase B (Typing Under Constraints) more explicitly.
-            // For now, ensure the last node is marked as Boss type.
-            Node bossNode = graph.Nodes.FirstOrDefault(n => n.Row == actSpec.Rows - 1);
-            if (bossNode != null)
-            {
-                bossNode.Type = NodeType.Boss;
-            }
-
-            // Ensure at least one valid path from start to boss (basic check, more robust validation in Phase C)
-            // This is implicitly handled by ensuring all nodes have in/out connections, but a dedicated pathfinding check is better.
-            // For now, we assume the connection logic ensures reachability.
+            // 3. Pruning
+            graph.Nodes.RemoveAll(n => !allUsedNodeIds.Contains(n.Id));
+            graph.Edges.RemoveAll(e => !allUsedEdgeIds.Contains(e.Id));
 
             return graph;
         }
@@ -268,6 +330,24 @@ namespace Pirate.MapGen
                 bossNode.Tags.Add("boss");
                 placedNodeIds.Add(bossNode.Id);
                 Debug.Log($"Assigned Boss to row {actSpec.Rows - 1}.");
+
+                // Ensure all nodes in the pre-boss row connect to the boss node
+                int preBossRow = actSpec.Rows - 2;
+                if (preBossRow >= 0)
+                {
+                    List<Node> preBossNodes = graph.Nodes.Where(n => n.Row == preBossRow).ToList();
+                    foreach (Node preBossNode in preBossNodes)
+                    {
+                        // Check if an edge already exists from preBossNode to bossNode
+                        if (!graph.Edges.Any(e => e.FromId == preBossNode.Id && e.ToId == bossNode.Id))
+                        {
+                            // Create and add the edge
+                            Edge newEdge = new Edge { Id = $"edge_{preBossNode.Row}_{preBossNode.Col}_{bossNode.Col}", FromId = preBossNode.Id, ToId = bossNode.Id };
+                            graph.Edges.Add(newEdge);
+                            Debug.Log($"Added missing edge from {preBossNode.Id} to {bossNode.Id}");
+                        }
+                    }
+                }
             }
 
             // 3. Fixed Row: Row R-1 = all Port (pre-boss rest row)
@@ -598,6 +678,72 @@ namespace Pirate.MapGen
             // If no default band is found, return an empty dictionary or throw an error
             Debug.LogError($"No generation odds defined for row {row} and no default band found. Returning empty odds.");
             return new SerializableDictionary<NodeType, int>();
+        }
+
+        /// <summary>
+        /// Helper method to get up to 3 nearest column indices, with random tie-breaking.
+        /// </summary>
+        private List<int> GetThreeNearestCandidates(int currentCol, int totalColumns, IRandomNumberGenerator rng)
+        {
+            List<int> candidates = new List<int>();
+
+            // Add current column
+            candidates.Add(currentCol);
+
+            // Add adjacent columns if they exist
+            if (currentCol > 0) candidates.Add(currentCol - 1);
+            if (currentCol < totalColumns - 1) candidates.Add(currentCol + 1);
+
+            // Sort by distance from currentCol, then randomly for ties
+            return candidates.OrderBy(c => Math.Abs(c - currentCol))
+                             .ThenBy(c => rng.NextULong())
+                             .Take(3)
+                             .ToList();
+        }
+
+        /// <summary>
+        /// Determines if two edges (r, a) -> (r+1, b) and (r, c) -> (r+1, d) cross.
+        /// </summary>
+        private bool CheckForCrossing(int a, int b, int c, int d)
+        {
+            // Edges (a,b) and (c,d) cross if (a < c and b > d) or (a > c and b < d)
+            return (a < c && b > d) || (a > c && b < d);
+        }
+
+        /// <summary>
+        /// Filters a list of candidate next columns based on crossing checks with existing edges.
+        /// </summary>
+        private List<int> FilterCandidatesByCrossing(List<int> candidates, int currentRow, int currentCol, List<Tuple<int, int>> existingEdgesInRow)
+        {
+            List<int> validCandidates = new List<int>();
+            foreach (int candidateNextCol in candidates)
+            {
+                bool crosses = false;
+                foreach (var existingEdge in existingEdgesInRow)
+                {
+                    if (CheckForCrossing(currentCol, candidateNextCol, existingEdge.Item1, existingEdge.Item2))
+                    {
+                        crosses = true;
+                        break;
+                    }
+                }
+                if (!crosses)
+                {
+                    validCandidates.Add(candidateNextCol);
+                }
+            }
+            return validCandidates;
+        }
+
+        /// <summary>
+        /// Struct to hold backtracking information for path generation.
+        /// </summary>
+        private class PathStep
+        {
+            public int Row;
+            public int CurrentCol;
+            public int ChosenNextCol;
+            public List<int> RemainingCandidates; // Candidates that were not chosen at this step
         }
     }
 }
