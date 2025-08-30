@@ -14,13 +14,16 @@ The process is divided into two main phases:
 
 ### Phase A: Skeleton Generation (`GenerateSkeleton`)
 
-1.  **Path Generation:** The system generates exactly 6 distinct paths from the top row to the bottom row.
-2.  **Path Rules:**
-    *   Paths are composed of nodes and edges connecting them between adjacent rows.
-    *   Edges are not allowed to cross visually between rows unless they share a common start or end node. This allows for clean splits and merges.
-    *   All paths are guaranteed to converge on the single Boss node in the final row. This is strictly enforced during generation.
-3.  **Internal Validation & Hardening:** The `GenerateSkeleton` method is self-contained and hardened. After generating the 6 paths, it performs an internal validation check to ensure that all of its own rules (especially the boss connection) have been met. If the generated skeleton is found to be invalid, it is discarded entirely, and the process restarts from scratch. This guarantees that `GenerateSkeleton` only ever outputs a 100% structurally valid graph.
-4.  **Pruning:** Once the 6 valid paths are established, all nodes and edges that are not part of this network are pruned from the graph.
+1.  **Initial Path Generation:** The system generates exactly 6 distinct paths from the top row to the bottom row. In this initial step, paths are allowed to connect to any node in the final row, and the backtracking algorithm is used to handle crossing violations for the main body of the map.
+
+2.  **Boss Row Consolidation:** After the 6 initial paths are created, a deterministic, forceful cleanup process ensures the final structure is correct:
+    *   **Rewiring:** All edges that lead into the final row are rewired to point to the single, central boss node.
+    *   **Pruning (Final Row):** All nodes in the final row, except for the central boss node, are deleted.
+    *   **Deduplication:** Any duplicate edges that were created as a result of the rewiring are merged, combining their path data.
+
+3.  **Main Pruning:** With the boss row consolidated, a final pruning pass removes any other nodes and edges that are not part of the 6 completed, rewired paths.
+
+This "generate-then-consolidate" approach is highly robust and guarantees that all 6 paths cleanly converge on the single boss node without complex or fragile pathfinding enforcement.
 
 ### Phase B: Typing & Decoration (`ApplyTypingConstraints`)
 

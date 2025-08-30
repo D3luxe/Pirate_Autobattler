@@ -39,6 +39,7 @@ public sealed class MapView : MonoBehaviour
     public float curvePadding = 20f;
 
     [Header("Path Debug Colors")]
+    public bool enablePathColorDebug = false;
     public Color[] pathColors = new Color[6] 
     {
         new Color(1, 0, 0, 0.5f), // Red
@@ -226,7 +227,7 @@ public sealed class MapView : MonoBehaviour
             ve.AddToClassList("map-node");
 
             // --- Path Color Debugging ---
-            if (n.PathIndices != null && n.PathIndices.Count > 0)
+            if (enablePathColorDebug && n.PathIndices != null && n.PathIndices.Count > 0)
             {
                 if (n.PathIndices.Count > 1)
                 {
@@ -373,7 +374,7 @@ public sealed class MapView : MonoBehaviour
         foreach (var e in edges)
         {
             // --- Path Color Debugging ---
-            if (e.PathIndices != null && e.PathIndices.Count > 0)
+            if (enablePathColorDebug && e.PathIndices != null && e.PathIndices.Count > 0)
             {
                 if (e.PathIndices.Count > 1)
                 {
@@ -489,7 +490,7 @@ public sealed class MapView : MonoBehaviour
 
     private void PerformAutoScroll()
     {
-        Debug.Log($"PerformAutoScroll() called. GameSession.CurrentRunState: {(GameSession.CurrentRunState != null ? "NOT NULL" : "NULL")}, mapGraphData: {(GameSession.CurrentRunState?.mapGraphData != null ? "NOT NULL" : "NULL")}");
+        //Debug.Log($"PerformAutoScroll() called. GameSession.CurrentRunState: {(GameSession.CurrentRunState != null ? "NOT NULL" : "NULL")}, mapGraphData: {(GameSession.CurrentRunState?.mapGraphData != null ? "NOT NULL" : "NULL")}");
 
         // Auto-scroll to player's current position or to the bottom
         if (GameSession.CurrentRunState != null && GameSession.CurrentRunState.mapGraphData != null)
@@ -499,10 +500,10 @@ public sealed class MapView : MonoBehaviour
             // Calculate max scroll Y based on content height
             float maxScrollY = scroll.contentContainer.resolvedStyle.height - scroll.resolvedStyle.height;
             maxScrollY = Mathf.Max(0, maxScrollY); // Ensure it's not negative
-            Debug.Log($"Max Scroll Y: {maxScrollY}");
+            ////Debug.Log($"Max Scroll Y: {maxScrollY}");
 
             string currentEncounterId = GameSession.CurrentRunState.currentEncounterId;
-            Debug.Log($"Current Encounter ID: {currentEncounterId}");
+            //Debug.Log($"Current Encounter ID: {currentEncounterId}");
 
             if (!string.IsNullOrEmpty(currentEncounterId) && nodeById.ContainsKey(currentEncounterId))
             {
@@ -515,18 +516,18 @@ public sealed class MapView : MonoBehaviour
                 targetScrollY = Mathf.Clamp(targetScrollY, 0, maxScrollY);
 
                 scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, targetScrollY);
-                Debug.Log($"Scrolling to player node. Player Node Pos Y: {playerNodePos.y}, Target Scroll Y: {targetScrollY}, Centering Offset: {centeringOffset}");
+                //Debug.Log($"Scrolling to player node. Player Node Pos Y: {playerNodePos.y}, Target Scroll Y: {targetScrollY}, Centering Offset: {centeringOffset}");
             }
             else
             {
                 // No current encounter, scroll to the very bottom
                 scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, maxScrollY);
-                Debug.Log($"No current encounter. Scrolling to bottom. Target Scroll Y: {maxScrollY}");
+                //Debug.Log($"No current encounter. Scrolling to bottom. Target Scroll Y: {maxScrollY}");
             }
         }
         else
         {
-            Debug.Log("Auto-scroll skipped: GameSession.CurrentRunState or mapGraphData is null.");
+            //Debug.Log("Auto-scroll skipped: GameSession.CurrentRunState or mapGraphData is null.");
         }
     }
 
@@ -553,12 +554,12 @@ public sealed class MapView : MonoBehaviour
             playerIndicator.style.top = playerPos.y - (40f / 2f);
             playerIndicator.style.display = DisplayStyle.Flex;
             playerIndicator.BringToFront();
-            Debug.Log($"PlayerIndicator: Visible at {playerPos.x}, {playerPos.y}");
+            //Debug.Log($"PlayerIndicator: Visible at {playerPos.x}, {playerPos.y}");
         }
         else
         {
             playerIndicator.style.display = DisplayStyle.None;
-            Debug.Log("PlayerIndicator: Hidden (no current node).");
+            //Debug.Log("PlayerIndicator: Hidden (no current node).");
         }
 
         foreach (var node in nodes)
@@ -639,7 +640,7 @@ public sealed class MapView : MonoBehaviour
         {
             if (clickedNode.row == 0)
             {
-                Debug.Log($"First move to node: {clickedNode.id}");
+                //Debug.Log($"First move to node: {clickedNode.id}");
                 GameSession.CurrentRunState.currentEncounterId = clickedNode.id;
                 GameSession.CurrentRunState.currentColumnIndex = clickedNode.row;
                 UpdateNodeVisualStates();

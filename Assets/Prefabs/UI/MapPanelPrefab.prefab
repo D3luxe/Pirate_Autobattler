@@ -88,14 +88,15 @@ MonoBehaviour:
   contentWidth: 1000
   gutters: 50
   maxRowSpan: 800
-  rowHeight: 200
+  rowHeight: 220
   padY: 80
   minSep: 200
-  jitterAmp: 0
+  jitterAmp: 50
   edgeWidth: 4
   dashLength: 10
   gapLength: 5
   curvePadding: 20
+  enablePathColorDebug: 0
   pathColors:
   - {r: 1, g: 0, b: 0, a: 0.5}
   - {r: 0, g: 1, b: 0, a: 0.5}

@@ -46,7 +46,7 @@ namespace Pirate.MapGen
 
             while (!audit.IsValid && currentRepairIteration < maxRepairIterations)
             {
-                Debug.Log($"Repairing map (iteration {currentRepairIteration + 1}/{maxRepairIterations})... Violations: {string.Join(", ", audit.Violations)}");
+                //Debug.Log($"Repairing map (iteration {currentRepairIteration + 1}/{maxRepairIterations})... Violations: {string.Join(", ", audit.Violations)}");
 
                 bool repairedThisIteration = false;
 
@@ -244,7 +244,7 @@ namespace Pirate.MapGen
                 if (pathFailed)
                 {
                     totalPathRestarts++;
-                    Debug.Log($"Path {pathsGenerated + 1} failed and will be restarted. Total path restarts: {totalPathRestarts}");
+                    //Debug.Log($"Path {pathsGenerated + 1} failed and will be restarted. Total path restarts: {totalPathRestarts}");
                 }
                 else
                 {
@@ -351,7 +351,7 @@ namespace Pirate.MapGen
                 node.Tags.Add("fixed_first_row");
                 placedNodeIds.Add(node.Id);
             }
-            Debug.Log($"Assigned all nodes in Row 0 to Battle. Count: {firstRowNodes.Count}");
+            //Debug.Log($"Assigned all nodes in Row 0 to Battle. Count: {firstRowNodes.Count}");
 
             // 2. Fixed Node: The single node in the last row is the Boss
             Node bossNode = graph.Nodes.FirstOrDefault(n => n.Row == actSpec.Rows - 1);
@@ -360,7 +360,7 @@ namespace Pirate.MapGen
                 bossNode.Type = NodeType.Boss;
                 bossNode.Tags.Add("boss");
                 placedNodeIds.Add(bossNode.Id);
-                Debug.Log($"Assigned Boss to row {actSpec.Rows - 1}.");
+                //Debug.Log($"Assigned Boss to row {actSpec.Rows - 1}.");
             }
 
             // 3. Guaranteed Nodes: All nodes on the pre-boss row become Port nodes.
@@ -378,7 +378,7 @@ namespace Pirate.MapGen
                         placedNodeIds.Add(node.Id);
                     }
                 }
-                Debug.Log($"Assigned all available nodes in Row {preBossPortRow} to Port. Count: {preBossPortNodes.Count(n => n.Type == NodeType.Port)}");
+                //Debug.Log($"Assigned all available nodes in Row {preBossPortRow} to Port. Count: {preBossPortNodes.Count(n => n.Type == NodeType.Port)}");
             }
 
             // 4. Guaranteed Node: Place one Treasure node in the mid-act window.
@@ -396,7 +396,7 @@ namespace Pirate.MapGen
                     treasureNode.Type = NodeType.Treasure;
                     treasureNode.Tags.Add("guaranteed_treasure");
                     placedNodeIds.Add(treasureNode.Id);
-                    Debug.Log($"Assigned Treasure to node {treasureNode.Id} in row {treasureNode.Row}.");
+                    //Debug.Log($"Assigned Treasure to node {treasureNode.Id} in row {treasureNode.Row}.");
                 }
                 else
                 {
@@ -424,12 +424,12 @@ namespace Pirate.MapGen
             AssignNodeTypesWeighted(graph, actSpec, rules, rng, placedNodeIds);
 
             // Debugging: Display final NodeType assignment for each node
-            Debug.Log("--- Final Node Type Assignments ---");
+            /*Debug.Log("--- Final Node Type Assignments ---");
             foreach (Node node in graph.Nodes.OrderBy(n => n.Row).ThenBy(n => n.Col))
             {
-                Debug.Log($"Node ID: {node.Id}, Type: {node.Type}");
+                //Debug.Log($"Node ID: {node.Id}, Type: {node.Type}");
             }
-            Debug.Log("-----------------------------------");
+            //Debug.Log("-----------------------------------");*/
         }
 
         /// <summary>
@@ -454,7 +454,7 @@ namespace Pirate.MapGen
 
                 // Determine eligible node types for the current node
                 List<NodeType> eligibleTypes = GetEligibleNodeTypes(node, graph, actSpec, rules, placedNodeIds);
-                Debug.Log($"[AssignNodeTypesWeighted] Node {node.Id} (Row: {node.Row}): Eligible Types: {string.Join(", ", eligibleTypes)}");
+                //Debug.Log($"[AssignNodeTypesWeighted] Node {node.Id} (Row: {node.Row}): Eligible Types: {string.Join(", ", eligibleTypes)}");
 
                 if (eligibleTypes.Any())
                 {
@@ -472,7 +472,7 @@ namespace Pirate.MapGen
                         // Validate the entire graph with the attempted type
                         AuditReport audit = _validator.Validate(graph, rules, actSpec);
 
-                        Debug.Log($"[AssignNodeTypesWeighted] Node {node.Id} (Attempt {i + 1}): Attempted Type: {attemptedType}, IsValid: {audit.IsValid}, Violations: {string.Join(", ", audit.Violations)}");
+                        //Debug.Log($"[AssignNodeTypesWeighted] Node {node.Id} (Attempt {i + 1}): Attempted Type: {attemptedType}, IsValid: {audit.IsValid}, Violations: {string.Join(", ", audit.Violations)}");
 
                         if (audit.IsValid)
                         {
@@ -505,7 +505,7 @@ namespace Pirate.MapGen
 
                 node.Type = chosenType;
                 placedNodeIds.Add(node.Id);
-                Debug.Log($"[AssignNodeTypesWeighted] Node {node.Id} (Row: {node.Row}) Final Chosen Type: {chosenType}");
+                //Debug.Log($"[AssignNodeTypesWeighted] Node {node.Id} (Row: {node.Row}) Final Chosen Type: {chosenType}");
             }
         }
 
@@ -514,8 +514,8 @@ namespace Pirate.MapGen
         /// </summary>
         private NodeType SelectWeightedRandomType(List<NodeType> availableTypes, SerializableDictionary<NodeType, int> currentBandOdds, IRandomNumberGenerator rng)
         {
-            Debug.Log($"[SelectWeightedRandomType] Available Types: {string.Join(", ", availableTypes)}");
-            Debug.Log($"[SelectWeightedRandomType] Current Band Odds: {string.Join(", ", currentBandOdds.Select(kvp => kvp.ToString()))}");
+            //Debug.Log($"[SelectWeightedRandomType] Available Types: {string.Join(", ", availableTypes)}");
+            //Debug.Log($"[SelectWeightedRandomType] Current Band Odds: {string.Join(", ", currentBandOdds.Select(kvp => kvp.ToString()))}");
 
             if (!availableTypes.Any())
             {
@@ -528,7 +528,7 @@ namespace Pirate.MapGen
                 .Where(kvp => availableTypes.Contains(kvp.Key))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-            Debug.Log($"[SelectWeightedRandomType] Filtered Odds: {string.Join(", ", filteredOdds.Select(kvp => kvp.ToString()))}");
+            //Debug.Log($"[SelectWeightedRandomType] Filtered Odds: {string.Join(", ", filteredOdds.Select(kvp => kvp.ToString()))}");
 
             if (!filteredOdds.Any())
             {
@@ -537,7 +537,7 @@ namespace Pirate.MapGen
             }
 
             int totalWeight = filteredOdds.Sum(kvp => kvp.Value);
-            Debug.Log($"[SelectWeightedRandomType] Total Weight: {totalWeight}");
+            //Debug.Log($"[SelectWeightedRandomType] Total Weight: {totalWeight}");
 
             if (totalWeight <= 0)
             {
@@ -546,14 +546,14 @@ namespace Pirate.MapGen
             }
 
             int randomNumber = (int)(rng.NextULong() % (ulong)totalWeight);
-            Debug.Log($"[SelectWeightedRandomType] Random Number (0 to {totalWeight - 1}): {randomNumber}");
+            //Debug.Log($"[SelectWeightedRandomType] Random Number (0 to {totalWeight - 1}): {randomNumber}");
 
             foreach (var entry in filteredOdds)
             {
                 randomNumber -= entry.Value;
                 if (randomNumber < 0)
                 {
-                    Debug.Log($"[SelectWeightedRandomType] Chosen Type: {entry.Key}");
+                    //Debug.Log($"[SelectWeightedRandomType] Chosen Type: {entry.Key}");
                     return entry.Key;
                 }
             }
