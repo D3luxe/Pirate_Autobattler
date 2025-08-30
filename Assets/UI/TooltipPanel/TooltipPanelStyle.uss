@@ -1,0 +1,101 @@
+:root {
+}
+
+.tooltip {
+    position: absolute;
+    left: 40px;
+    top: 40px;
+    max-width: 520px;
+    padding-top: 12px;
+    padding-right: 12px;
+    padding-bottom: 12px;
+    padding-left: 12px;
+    color: rgb(0, 0, 0);
+    -unity-slice-type: tiled;
+    background-color: rgba(0, 0, 0, 0);
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    width: 300px;
+    flex-basis: 300px;
+}
+
+.tag_row {
+}
+
+.header {
+    align-items: center;
+    flex-direction: row;
+    flex-shrink: 0;
+    min-height: 100px;
+    max-height: 100px;
+}
+
+.badge {
+    width: 64px;
+    height: 64px;
+    border-top-left-radius: 999px;
+    border-top-right-radius: 999px;
+    border-bottom-right-radius: 999px;
+    border-bottom-left-radius: 999px;
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    border-left-color: rgba(165, 108, 34, 0.57);
+    border-right-color: rgba(165, 108, 34, 0.57);
+    border-top-color: rgba(165, 108, 34, 0.57);
+    border-bottom-color: rgba(165, 108, 34, 0.57);
+    background-color: rgba(42, 33, 24, 0.68);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    max-width: 64px;
+    max-height: 64px;
+    top: 0;
+    left: 0;
+}
+
+.badge-text {
+}
+
+.title-block {
+}
+
+.header-text {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.89);
+    text-shadow: 0 0 2px rgb(0, 0, 0);
+    text-overflow: ellipsis;
+    -unity-text-align: middle-center;
+}
+
+.center-details {
+    background-image: url("project://database/Assets/Art/UI/Tooltip_Sprites/TooltipPanel.png?fileID=-1380585963&guid=3927ebf6e465f264ba53d715cd70db90&type=3#TooltipPanel_1");
+    flex-direction: column;
+}
+
+.active-effect {
+}
+
+.active-effect-container {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex-grow: 0;
+    align-self: stretch;
+}
+
+.active-effect-text {
+    font-size: 12px;
+    -unity-text-align: middle-left;
+}
+
+.footer {
+    background-image: url("project://database/Assets/Art/UI/Tooltip_Sprites/TooltipPanel.png?fileID=-2064106368&guid=3927ebf6e465f264ba53d715cd70db90&type=3#TooltipPanel_2");
+    padding-top: 30px;
+    padding-bottom: 15px;
+    flex-shrink: 0;
+    min-height: 100px;
+    max-height: 100px;
+}

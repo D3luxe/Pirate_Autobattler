@@ -1,0 +1,34 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/TooltipPanel/TooltipPanelStyle.uss?fileID=7433441132597879392&amp;guid=632d32f1f10e05348b3a18dd87e9e166&amp;type=3#TooltipPanelStyle" />
+    <ui:VisualElement name="Tooltip" class="tooltip" style="border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; position: absolute;">
+        <ui:VisualElement name="HeaderRow" class="header" style="flex-grow: 1; align-items: center; flex-direction: row; background-image: url(&quot;project://database/Assets/Art/UI/Tooltip_Sprites/TooltipPanel.png?fileID=-5697578562745768190&amp;guid=3927ebf6e465f264ba53d715cd70db90&amp;type=3#TooltipPanel_0&quot;);">
+            <ui:VisualElement name="TimerBadge" class="badge" style="flex-grow: 1;">
+                <ui:Label text="8.0" name="TimerText" enable-rich-text="true" parse-escape-sequences="true" class="badge-text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 20px; color: rgb(173, 173, 173); -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(51, 51, 51); text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.36); -unity-font-style: bold;" />
+                <ui:Label text="SEC" style="font-size: 12px; -unity-text-align: middle-center; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; color: rgb(156, 156, 156); text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.82); -unity-font-style: normal;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="TitleBlock" class="title-block" style="flex-grow: 1; justify-content: center; margin-right: 20%;">
+                <ui:Label text="Race Carl asdfasdfgadfhadsfg asg" name="TitleLabel" focusable="true" class="header-text" style="overflow: hidden;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="Center" class="center-details" style="flex-grow: 1; align-items: center; min-height: auto;">
+            <ui:VisualElement name="ActiveEffect" class="active-effect-container" style="flex-grow: 1; margin-right: 15%; margin-left: 15%;">
+                <ui:VisualElement style="flex-grow: 0; width: 16px; height: 16px; flex-shrink: 0; background-image: url(&quot;project://database/Assets/Art/UI/Depth.png?fileID=2800000&amp;guid=909ea20a5b5b87c46b5d50d4b76f74fb&amp;type=3#Depth&quot;);" />
+                <ui:Label text="Deal 5 damage" name="TitleLabel" class="active-effect-text" style="-unity-font-style: normal; -unity-text-align: middle-center; overflow: visible; flex-wrap: wrap; white-space: normal;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ActiveEffect" class="active-effect-container" style="flex-grow: 1; margin-right: 15%; margin-left: 15%;">
+                <ui:VisualElement style="flex-grow: 0; width: 16px; height: 16px; flex-shrink: 0; background-image: url(&quot;project://database/Assets/Art/UI/Depth.png?fileID=2800000&amp;guid=909ea20a5b5b87c46b5d50d4b76f74fb&amp;type=3#Depth&quot;);" />
+                <ui:Label text="Deal 5 damage" name="TitleLabel" class="active-effect-text" style="-unity-font-style: normal; -unity-text-align: middle-center; overflow: visible; flex-wrap: wrap; white-space: normal;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ActiveEffect" class="active-effect-container" style="flex-grow: 1; margin-right: 15%; margin-left: 15%;">
+                <ui:VisualElement style="flex-grow: 0; width: 16px; height: 16px; flex-shrink: 0; background-image: url(&quot;project://database/Assets/Art/UI/Depth.png?fileID=2800000&amp;guid=909ea20a5b5b87c46b5d50d4b76f74fb&amp;type=3#Depth&quot;);" />
+                <ui:Label text="Deal 5 damage" name="TitleLabel" class="active-effect-text" style="-unity-font-style: normal; -unity-text-align: middle-center; overflow: visible; flex-wrap: wrap; white-space: normal;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="Footer" class="footer" style="flex-grow: 1; align-items: center;">
+            <ui:VisualElement name="PassiveEffect" class="active-effect-container" style="flex-grow: 1; margin-right: 15%; margin-left: 15%;">
+                <ui:VisualElement style="flex-grow: 0; width: 16px; height: 16px; flex-shrink: 0; background-image: url(&quot;project://database/Assets/Art/UI/Depth.png?fileID=2800000&amp;guid=909ea20a5b5b87c46b5d50d4b76f74fb&amp;type=3#Depth&quot;);" />
+                <ui:Label text="Deal 5 damage" name="TitleLabel" class="active-effect-text" style="-unity-font-style: normal; -unity-text-align: middle-center; overflow: visible; flex-wrap: wrap; white-space: normal;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
