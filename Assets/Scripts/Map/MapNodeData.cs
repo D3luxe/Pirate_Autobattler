@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Pirate.MapGen; // Added for NodeType
+using PirateRoguelike.Data; // Added for EncounterSO
 
 [Serializable]
 public class MapNodeData

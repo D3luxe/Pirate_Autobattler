@@ -63,9 +63,42 @@ public class SerializableDictionaryPropertyDrawer : PropertyDrawer
             Rect addButtonRect = new Rect(position.x + position.width - ButtonWidth, position.y + LineHeight * (keysProperty.arraySize + 1), ButtonWidth, LineHeight);
             if (GUI.Button(addButtonRect, "+"))
             {
-                keysProperty.arraySize++;
-                valuesProperty.arraySize++;
-                // Initialize new elements if necessary (e.g., default values)
+                // Find the next available NodeType that is not already in the dictionary
+                NodeType newKey = NodeType.Battle; // Default to Battle
+                bool foundUniqueKey = false;
+
+                // Get the current dictionary keys
+                List<NodeType> currentKeys = new List<NodeType>();
+                for (int i = 0; i < keysProperty.arraySize; i++)
+                {
+                    currentKeys.Add((NodeType)keysProperty.GetArrayElementAtIndex(i).enumValueIndex);
+                }
+
+                foreach (NodeType type in Enum.GetValues(typeof(NodeType)))
+                {
+                    if (!currentKeys.Contains(type))
+                    {
+                        newKey = type;
+                        foundUniqueKey = true;
+                        break;
+                    }
+                }
+
+                if (foundUniqueKey)
+                {
+                    keysProperty.arraySize++;
+                    valuesProperty.arraySize++;
+
+                    // Assign the new unique key
+                    keysProperty.GetArrayElementAtIndex(keysProperty.arraySize - 1).enumValueIndex = (int)newKey;
+                    // Assign a default value (e.g., 0 for int, or default for other types)
+                    // For int values, 0 is a reasonable default.
+                    valuesProperty.GetArrayElementAtIndex(valuesProperty.arraySize - 1).intValue = 0;
+                }
+                else
+                {
+                    Debug.LogWarning("All NodeTypes are already present in the dictionary. Cannot add more unique entries.");
+                }
             }
 
             EditorGUI.indentLevel--;

@@ -32,7 +32,7 @@ MonoBehaviour:
   - floor: 5
     weights:
     - rarity: 0
-      weight: 50
+      weight: 40
     - rarity: 1
       weight: 30
     - rarity: 2
@@ -44,12 +44,22 @@ MonoBehaviour:
     - rarity: 0
       weight: 20
     - rarity: 1
-      weight: 30
+      weight: 40
     - rarity: 2
       weight: 40
     - rarity: 3
       weight: 20
-  - floor: 15
+  - floor: 12
+    weights:
+    - rarity: 0
+      weight: 0
+    - rarity: 1
+      weight: 25
+    - rarity: 2
+      weight: 40
+    - rarity: 3
+      weight: 25
+  - floor: 14
     weights:
     - rarity: 0
       weight: 0

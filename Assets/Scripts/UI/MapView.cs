@@ -563,6 +563,13 @@ public sealed class MapView : MonoBehaviour
 
     private void OnNodeClicked(string nodeId)
     {
+        // If a drag occurred during this click cycle, do not process as a click.
+        if (_dragOccurredThisCycle)
+        {
+            _dragOccurredThisCycle = false; // Reset for next cycle
+            return;
+        }
+
         if (GameSession.CurrentRunState == null || GameSession.CurrentRunState.mapGraphData == null)
         {
             Debug.LogWarning("GameSession or MapGraphData is not initialized.");
@@ -608,11 +615,107 @@ public sealed class MapView : MonoBehaviour
             return;
         }
 
+        // --- NEW: Handle Unknown Node Resolution ---
+        if (clickedNode.type == Pirate.MapGen.NodeType.Unknown.ToString())
+        {
+            // Get necessary data for resolution
+            ulong currentSeed = GameSession.CurrentRunState.randomSeed;
+            IRandomNumberGenerator resolutionRng = new Xoshiro256ss(SeedUtility.CreateSubSeed(currentSeed, "unknown_resolution_" + clickedNode.id)); // Use node ID for unique sub-seed
+            UnknownNodeResolver resolver = new UnknownNodeResolver();
+            RulesSO rules = MapManager.Instance.RunConfig.rules; // Get rules from MapManager
+
+            // Resolve the Unknown node
+            Pirate.MapGen.NodeType resolvedNodeType = resolver.ResolveUnknownNode(
+                MapManager.Instance.CurrentMapGraph.Nodes.FirstOrDefault(n => n.Id == clickedNode.id), // Pass the original MapGraph.Node
+                new Pirate.MapGen.ActSpec { Rows = MapManager.Instance.mapLength }, // Pass ActSpec for row info
+                rules, // Pass rules for UnknownResolution settings
+                resolutionRng,
+                GameSession.CurrentRunState.pityState,
+                GameSession.CurrentRunState.unknownContext
+            );
+
+            // Update the node's type in all relevant data structures
+            clickedNode.type = resolvedNodeType.ToString(); // Update the clickedNode (MapGraphData.Node)
+            // Update the corresponding node in _convertedMapNodes
+            // var convertedNode = _convertedMapNodes[clickedNode.row].FirstOrDefault(n => n.rowIndex == clickedNode.col);
+            // if (convertedNode != null)
+            // {
+            //     convertedNode.nodeType = resolvedNodeType;
+            //     // Also update encounter, iconPath, tooltipText, isElite based on resolvedNodeType
+            //     // This logic is currently in MapManager.ConvertMapGraphToMapGraphData, need to extract or re-implement
+            //     UpdateMapNodeDataEncounterInfo(convertedNode, resolvedNodeType, MapManager.Instance.RunConfig.rules); // Corrected line
+            // }
+
+            // Update the visual element to reflect the new type
+            VisualElement ve = nodeVisualElements[clickedNode.id];
+            ve.RemoveFromClassList("type-unknown"); // Remove old class
+            ve.AddToClassList($"type-{resolvedNodeType.ToString().ToLower()}"); // Add new class
+            // Update icon if applicable
+            if (System.Enum.TryParse<PirateRoguelike.Data.EncounterType>(resolvedNodeType.ToString(), true, out var encounterType) && _iconLookup.TryGetValue(encounterType, out Sprite iconSprite))
+            {
+                ve.style.backgroundImage = new StyleBackground(iconSprite);
+            }
+            else
+            {
+                ve.style.backgroundImage = null; // Clear old icon if no new one
+            }
+            // Update tooltip
+            ve.tooltip = $"Resolved to: {resolvedNodeType.ToString()}"; // Simple tooltip for now
+
+            Debug.Log($"Node {clickedNode.id} resolved from Unknown to {resolvedNodeType}.");
+        }
+        // --- END NEW ---
+
         Debug.Log($"Valid move! Moving from {currentPlayerNode.id} to {clickedNode.id}.");
         GameSession.CurrentRunState.currentEncounterId = clickedNode.id;
         GameSession.CurrentRunState.currentColumnIndex = clickedNode.row;
 
         GameSession.InvokeOnPlayerNodeChanged();
+    }
+
+    // Helper method to update MapNodeData with encounter info (extracted from MapManager)
+    private void UpdateMapNodeDataEncounterInfo(MapNodeData mapNode, Pirate.MapGen.NodeType resolvedNodeType, RulesSO rules)
+    {
+        PirateRoguelike.Data.EncounterSO encounter = null;
+        switch (resolvedNodeType)
+        {
+            case Pirate.MapGen.NodeType.Battle:
+                encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == PirateRoguelike.Data.EncounterType.Battle && !e.isElite);
+                break;
+            case Pirate.MapGen.NodeType.Elite:
+                encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == PirateRoguelike.Data.EncounterType.Elite);
+                break;
+            case Pirate.MapGen.NodeType.Boss:
+                encounter = GameDataRegistry.GetEncounter("enc_boss");
+                break;
+            case Pirate.MapGen.NodeType.Shop:
+                encounter = GameDataRegistry.GetEncounter("enc_shop");
+                break;
+            case Pirate.MapGen.NodeType.Event:
+                encounter = GameDataRegistry.GetEncounter("enc_event");
+                break;
+            case Pirate.MapGen.NodeType.Treasure:
+                encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == PirateRoguelike.Data.EncounterType.Treasure);
+                break;
+            case Pirate.MapGen.NodeType.Port: // Added Port case
+                encounter = GameDataRegistry.GetEncounter("enc_port"); // Assuming a specific port encounter
+                break;
+            default:
+                encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == PirateRoguelike.Data.EncounterType.Battle && !e.isElite);
+                break;
+        }
+
+        if (encounter != null)
+        {
+            mapNode.encounter = encounter;
+            mapNode.iconPath = encounter.iconPath;
+            mapNode.tooltipText = encounter.tooltipText;
+            mapNode.isElite = encounter.isElite;
+        }
+        else
+        {
+            Debug.LogWarning($"Could not find a suitable encounter for resolved node type {resolvedNodeType}.");
+        }
     }
 
     private void OnNodePointerEnter(MapGraphData.Node hoveredNode)

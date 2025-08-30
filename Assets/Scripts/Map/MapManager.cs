@@ -11,6 +11,9 @@ public class MapManager : MonoBehaviour
 
     public event Action OnMapDataUpdated; // New event
 
+    public RunConfigSO RunConfig => _runConfig;
+    public MapGraph CurrentMapGraph => _currentMapGraph;
+
     public int mapLength = 15;
     public Vector2Int nodesPerColumnRange = new Vector2Int(2, 4);
 
@@ -150,7 +153,11 @@ public class MapManager : MonoBehaviour
 
             // Determine EncounterSO based on NodeType
             EncounterSO encounter = null;
-            switch (mapNode.nodeType)
+            NodeType resolvedNodeType = mapNode.nodeType;
+
+            
+
+            switch (resolvedNodeType)
             {
                 case NodeType.Battle:
                     encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && !e.isElite);
@@ -167,8 +174,8 @@ public class MapManager : MonoBehaviour
                 case NodeType.Event:
                     encounter = GameDataRegistry.GetEncounter("enc_event"); // Assuming a specific event encounter
                     break;
-                case NodeType.Unknown:
-                    encounter = GameDataRegistry.GetEncounter("enc_unknown"); // Assuming a specific unknown encounter
+                case NodeType.Treasure:
+                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Treasure); // Assuming a specific treasure encounter
                     break;
                 default:
                     encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && !e.isElite); // Default to Battle

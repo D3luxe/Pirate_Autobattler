@@ -41,53 +41,85 @@ namespace Pirate.MapGen
             IRandomNumberGenerator repairRng = new Xoshiro256ss(SeedUtility.CreateSubSeed(seed, "repairs"));
             result.SubSeeds.Repairs = repairRng.NextULong(); // Store the initial state of the sub-seed
 
-            AuditReport audit = _validator.Validate(graph, rules);
+            AuditReport audit = _validator.Validate(graph, rules, actSpec);
             int currentRepairIteration = 0;
 
             while (!audit.IsValid && currentRepairIteration < maxRepairIterations)
             {
                 Debug.Log($"Repairing map (iteration {currentRepairIteration + 1}/{maxRepairIterations})... Violations: {string.Join(", ", audit.Violations)}");
 
-                // Prioritize critical violations
-                if (audit.Violations.Contains("No valid path from start to boss."))
+                bool repairedThisIteration = false;
+
+                // Attempt to fix specific violations
+                foreach (string violation in audit.Violations.ToList()) // ToList to avoid modifying collection while iterating
                 {
-                    // If no path to boss, re-generate skeleton and re-apply typing
-                    // This is a drastic measure, but fixing connectivity is complex.
-                    graph = GenerateSkeleton(actSpec, repairRng); // Use repairRng for determinism
-                    ApplyTypingConstraints(graph, actSpec, rules, repairRng);
-                }
-                else if (audit.Violations.Contains("No Port node found on the row immediately before the Boss."))
-                {
-                    // Find an available node in the pre-boss row and re-type it to Port
-                    int preBossRow = actSpec.Rows - 2;
-                    Node targetNode = graph.Nodes.FirstOrDefault(n => n.Row == preBossRow && n.Type != NodeType.Boss && n.Type != NodeType.Port);
-                    if (targetNode != null)
+                    if (violation.Contains("No valid path from start to boss."))
                     {
-                        targetNode.Type = NodeType.Port;
-                        targetNode.Tags.Add("preBossPort");
+                        // This is a drastic measure, but fixing connectivity is complex.
+                        // If no path to boss, re-generate skeleton and re-apply typing
+                        graph = GenerateSkeleton(actSpec, repairRng); // Use repairRng for determinism
+                        ApplyTypingConstraints(graph, actSpec, rules, repairRng);
+                        repairedThisIteration = true;
+                        break; // Restart validation after drastic change
                     }
-                }
-                else if (audit.Violations.Contains("No Treasure node found within the specified mid-act window."))
-                {
-                    // Find an available node in the mid-act window and re-type it to Treasure
-                    Node targetNode = graph.Nodes.FirstOrDefault(n => rules.Windows.MidTreasureRows.Contains(n.Row) && n.Type != NodeType.Boss && n.Type != NodeType.Treasure);
-                    if (targetNode != null)
+                    else if (violation.Contains("No Port node found on the row immediately before the Boss."))
                     {
-                        targetNode.Type = NodeType.Treasure;
-                        targetNode.Tags.Add("midActTreasure");
+                        int preBossRow = actSpec.Rows - 2;
+                        Node targetNode = graph.Nodes.FirstOrDefault(n => n.Row == preBossRow && n.Type != NodeType.Boss && n.Type != NodeType.Port);
+                        if (targetNode != null)
+                        {
+                            targetNode.Type = NodeType.Port;
+                            targetNode.Tags.Add("preBossPort");
+                            repairedThisIteration = true;
+                        }
                     }
+                    else if (violation.Contains("No Treasure node found within the specified mid-act window."))
+                    {
+                        Node targetNode = graph.Nodes.FirstOrDefault(n => rules.Windows.MidTreasureRows.Contains(n.Row) && n.Type != NodeType.Boss && n.Type != NodeType.Treasure);
+                        if (targetNode != null)
+                        {
+                            targetNode.Type = NodeType.Treasure;
+                            targetNode.Tags.Add("midActTreasure");
+                            repairedThisIteration = true;
+                        }
+                    }
+                    // Add more specific repair logic for other violations here
+                    // For example, for spacing violations, identify the offending nodes and try to re-type them
+                    // For "Boss edges are correct" violations, identify the incorrect edges/nodes and try to fix them
                 }
-                else
+
+                if (!repairedThisIteration)
                 {
-                    // Handle count and spacing violations
-                    // This part would be more complex, iterating through violations and applying specific fixes.
-                    // For now, a simple re-type of a random node to Battle as a fallback if no specific violation is handled.
-                    Node nodeToRetype = graph.Nodes[(int)(repairRng.NextULong() % (ulong)graph.Nodes.Count)];
-                    nodeToRetype.Type = NodeType.Battle; // Simple re-type to Battle as a fallback
+                    // Fallback: If no specific repair was applied, try a general re-type of a random non-locked node
+                    Node nodeToRetype = graph.Nodes.Where(n => !n.Tags.Contains("fixed_first_row") && !n.Tags.Contains("boss") && !n.Tags.Contains("fixed_pre_boss_port") && !n.Tags.Contains("fixed_treasure_row")).OrderBy(n => repairRng.NextULong()).FirstOrDefault();
+                    if (nodeToRetype != null)
+                    {
+                        NodeType originalType = nodeToRetype.Type;
+                        List<NodeType> eligibleTypes = GetEligibleNodeTypes(nodeToRetype, graph, actSpec, rules, new HashSet<string>(graph.Nodes.Where(n => n.Type != NodeType.Unknown).Select(n => n.Id))); // Pass all currently typed nodes as placed
+                        if (eligibleTypes.Any())
+                        {
+                            // Try to re-type to a random eligible type
+                            SerializableDictionary<NodeType, int> currentBandOdds = GetOddsForNodeRow(nodeToRetype.Row, actSpec.Rows, rules);
+                            NodeType attemptedType = SelectWeightedRandomType(eligibleTypes, currentBandOdds, repairRng);
+                            nodeToRetype.Type = attemptedType;
+                            repairedThisIteration = true;
+                        }
+                        else
+                        {
+                            // As a last resort, if no eligible types, re-type to FallbackNodeType
+                            nodeToRetype.Type = rules.Spacing.FallbackNodeType;
+                            repairedThisIteration = true;
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("No non-locked nodes available for general re-typing fallback. Map might be unrepairable.");
+                        break; // Cannot repair further
+                    }
                 }
 
                 // Re-validate after each repair attempt
-                audit = _validator.Validate(graph, rules);
+                audit = _validator.Validate(graph, rules, actSpec);
                 currentRepairIteration++;
             }
 
@@ -117,7 +149,7 @@ namespace Pirate.MapGen
             // 1. Create nodes for each column
             for (int r = 0; r < actSpec.Rows; r++)
             {
-                                int nodesInRow = (r == 0 || r == actSpec.Rows - 1) ? 1 : (int)(rng.NextULong() % (ulong)(actSpec.Columns - 2)) + 2; // 2 to Columns-1 nodes for mid-rows
+                int nodesInRow = (r == 0 || r == actSpec.Rows - 1) ? 1 : (int)(rng.NextULong() % (ulong)(actSpec.Columns - 2)) + 2; // 2 to Columns-1 nodes for mid-rows
                 if (r == 0) nodesInRow = 1; // First row always 1 node
                 if (r == actSpec.Rows - 1) nodesInRow = 1; // Last row always 1 node (Boss)
 
@@ -204,6 +236,70 @@ namespace Pirate.MapGen
         }
 
         /// <summary>
+        /// Assigns fixed and guaranteed node types to the map graph.
+        /// This is Phase B.1 of the map generation process, handling immutable placements.
+        /// </summary>
+        /// <param name="graph">The map graph skeleton.</param>
+        /// <param name="actSpec">The act specification.</param>
+        /// <param name="rules">The generation rules.</param>
+        /// <param name="rng">The random number generator.</param>
+        /// <param name="placedNodeIds">A HashSet to track IDs of nodes that have already been assigned a type.</param>
+        private void AssignFixedAndGuaranteedNodes(MapGraph graph, ActSpec actSpec, RulesSO rules, IRandomNumberGenerator rng, HashSet<string> placedNodeIds)
+        {
+            // Helper to get available nodes (not yet placed)
+            Func<int, List<Node>> getAvailableNodesInRow = (row) =>
+                graph.Nodes.Where(n => n.Row == row && !placedNodeIds.Contains(n.Id)).ToList();
+
+            // 1. Fixed Row: Row 0 = all Battle (Monster)
+            List<Node> firstRowNodes = graph.Nodes.Where(n => n.Row == 0).ToList();
+            foreach (Node node in firstRowNodes)
+            {
+                node.Type = NodeType.Battle; // Assuming Monster maps to Battle NodeType
+                node.Tags.Add("fixed_first_row");
+                placedNodeIds.Add(node.Id);
+            }
+            Debug.Log($"Assigned all nodes in Row 0 to Battle. Count: {firstRowNodes.Count}");
+
+            // 2. Fixed Row: Row R = single Boss node
+            Node bossNode = graph.Nodes.FirstOrDefault(n => n.Row == actSpec.Rows - 1);
+            if (bossNode != null)
+            {
+                bossNode.Type = NodeType.Boss;
+                bossNode.Tags.Add("boss");
+                placedNodeIds.Add(bossNode.Id);
+                Debug.Log($"Assigned Boss to row {actSpec.Rows - 1}.");
+            }
+
+            // 3. Fixed Row: Row R-1 = all Port (pre-boss rest row)
+            int preBossPortRow = actSpec.Rows - 2;
+            if (preBossPortRow >= 0)
+            {
+                List<Node> preBossPortNodes = graph.Nodes.Where(n => n.Row == preBossPortRow).ToList();
+                foreach (Node node in preBossPortNodes)
+                {
+                    node.Type = NodeType.Port;
+                    node.Tags.Add("fixed_pre_boss_port");
+                    placedNodeIds.Add(node.Id);
+                }
+                Debug.Log($"Assigned all nodes in Row {preBossPortRow} to Port. Count: {preBossPortNodes.Count}");
+            }
+
+            // 4. Fixed Row: Row ⌈0.6R⌉ = all Treasure
+            int treasureRow = (int)Math.Ceiling(0.6 * actSpec.Rows);
+            if (treasureRow >= 0 && treasureRow < actSpec.Rows - 1) // Ensure within valid range and not boss row
+            {
+                List<Node> midTreasureNodes = graph.Nodes.Where(n => n.Row == treasureRow).ToList();
+                foreach (Node node in midTreasureNodes)
+                {
+                    node.Type = NodeType.Treasure;
+                    node.Tags.Add("fixed_treasure_row");
+                    placedNodeIds.Add(node.Id);
+                }
+                Debug.Log($"Assigned all nodes in Row {treasureRow} to Treasure. Count: {midTreasureNodes.Count}");
+            }
+        }
+
+        /// <summary>
         /// Applies typing constraints to the map graph.
         /// Phase B of the map generation process.
         /// </summary>
@@ -213,195 +309,13 @@ namespace Pirate.MapGen
         /// <param name="rng">The random number generator.</param>
         public void ApplyTypingConstraints(MapGraph graph, ActSpec actSpec, RulesSO rules, IRandomNumberGenerator rng)
         {
-            // 1. Place Boss (already set in skeleton, but confirm/tag here)
-            Node bossNode = graph.Nodes.FirstOrDefault(n => n.Row == actSpec.Rows - 1);
-            if (bossNode != null)
-            {
-                Debug.Log($"Assigning Boss to row {actSpec.Rows - 1}");
-                bossNode.Type = NodeType.Boss;
-                bossNode.Tags.Add("boss");
-            }
-
-            // Keep track of placed nodes to avoid re-assigning types
             HashSet<string> placedNodeIds = new HashSet<string>();
-            if (bossNode != null) placedNodeIds.Add(bossNode.Id);
 
-            // Helper to get available nodes (not yet placed)
-            Func<int, List<Node>> getAvailableNodesInRow = (row) => 
-                graph.Nodes.Where(n => n.Row == row && !placedNodeIds.Contains(n.Id)).ToList();
+            // Phase B.1: Assign Fixed and Guaranteed Nodes
+            AssignFixedAndGuaranteedNodes(graph, actSpec, rules, rng, placedNodeIds);
 
-            // 2. Place Pre-boss Port
-            int preBossRow = actSpec.Rows - 2; // Row immediately before the boss
-            if (preBossRow >= 0)
-            {
-                List<Node> availablePreBossNodes = getAvailableNodesInRow(preBossRow);
-                if (availablePreBossNodes.Any())
-                {
-                    Node portNode = availablePreBossNodes[(int)(rng.NextULong() % (ulong)availablePreBossNodes.Count)];
-                    portNode.Type = NodeType.Port;
-                    portNode.Tags.Add("preBossPort");
-                    placedNodeIds.Add(portNode.Id);
-                }
-                else
-                {
-                    // This should ideally not happen if skeleton generation is robust
-                    // Log a warning or handle as an error for validation phase
-                    Debug.Log($"Warning: No available nodes in pre-boss row {preBossRow} for Port.");
-                }
-            }
-
-            // 3. Place Mid-act Treasure
-            if (rules.Windows.MidTreasureRows != null && rules.Windows.MidTreasureRows.Any())
-            {
-                List<Node> potentialTreasureNodes = new List<Node>();
-                foreach (int row in rules.Windows.MidTreasureRows)
-                {
-                    if (row >= 0 && row < actSpec.Rows - 1) // Ensure within valid range and not boss row
-                    {
-                        potentialTreasureNodes.AddRange(getAvailableNodesInRow(row));
-                    }
-                }
-
-                if (potentialTreasureNodes.Any())
-                {
-                    Node treasureNode = potentialTreasureNodes[(int)(rng.NextULong() % (ulong)potentialTreasureNodes.Count)];
-                    treasureNode.Type = NodeType.Treasure;
-                    treasureNode.Tags.Add("midActTreasure");
-                    placedNodeIds.Add(treasureNode.Id);
-                }
-                else
-                {
-                    Debug.Log("Warning: No available nodes in mid-treasure rows for Treasure.");
-                }
-            }
-
-            // Initialize counts for each type based on rules.Counts.Targets
-            Dictionary<NodeType, int> desiredCounts = new Dictionary<NodeType, int>();
-            foreach (NodeType type in Enum.GetValues(typeof(NodeType)))
-            {
-                desiredCounts[type] = rules.Counts.Targets.GetValueOrDefault(type, 0);
-            }
-
-            // Adjust desired counts for already placed guaranteed nodes
-            foreach (Node node in graph.Nodes.Where(n => placedNodeIds.Contains(n.Id)))
-            {
-                if (desiredCounts.ContainsKey(node.Type))
-                {
-                    desiredCounts[node.Type]--;
-                }
-            }
-
-            // 4. Place Elites
-            // Helper to check if a node is too close to an already placed node of a specific type
-            Func<Node, NodeType, int, bool> isTooClose = (newNode, typeToCheck, minGap) =>
-            {
-                return graph.Nodes.Any(n => n.Type == typeToCheck && Math.Abs(n.Row - newNode.Row) < minGap);
-            };
-
-            int elitesToPlace = desiredCounts.GetValueOrDefault(NodeType.Elite, 0);
-            bool burningElitePlaced = false;
-
-            // Prioritize placing elites in later rows first to respect early-row cap
-            for (int r = actSpec.Rows - 2; r >= 0 && elitesToPlace > 0; r--)
-            {
-                if (r < rules.Spacing.EliteEarlyRowsCap) continue; // Respect early-row cap
-
-                List<Node> availableNodesInRow = getAvailableNodesInRow(r);
-                List<Node> eligibleNodes = availableNodesInRow.Where(n => !isTooClose(n, NodeType.Elite, rules.Spacing.EliteMinGap)).ToList();
-
-                if (eligibleNodes.Any())
-                {
-                    // Try to place one elite per eligible row
-                    Node eliteNode = eligibleNodes[(int)(rng.NextULong() % (ulong)eligibleNodes.Count)];
-                    eliteNode.Type = NodeType.Elite;
-                    placedNodeIds.Add(eliteNode.Id);
-                    elitesToPlace--;
-
-                    // Place Burning Elite if enabled and not yet placed
-                    if (actSpec.Flags.EnableBurningElites && !burningElitePlaced)
-                    {
-                        eliteNode.Tags.Add("burning");
-                        burningElitePlaced = true;
-                    }
-                }
-            }
-
-            // If we still need to place elites and couldn't due to early-row cap, try placing them earlier if allowed by min/max
-            // This is a fallback and might violate early-row cap if min count is high
-            for (int r = 0; r < actSpec.Rows - 1 && elitesToPlace > 0; r++)
-            {
-                List<Node> availableNodesInRow = getAvailableNodesInRow(r);
-                List<Node> eligibleNodes = availableNodesInRow.Where(n => !isTooClose(n, NodeType.Elite, rules.Spacing.EliteMinGap)).ToList();
-
-                if (eligibleNodes.Any())
-                {
-                    Node eliteNode = eligibleNodes[(int)(rng.NextULong() % (ulong)eligibleNodes.Count)];
-                    eliteNode.Type = NodeType.Elite;
-                    placedNodeIds.Add(eliteNode.Id);
-                    elitesToPlace--;
-
-                    if (actSpec.Flags.EnableBurningElites && !burningElitePlaced)
-                    {
-                        eliteNode.Tags.Add("burning");
-                        burningElitePlaced = true;
-                    }
-                }
-            }
-
-            // Update desired counts after placing elites
-            desiredCounts[NodeType.Elite] = elitesToPlace;
-
-            // 5. Place Shops
-            int shopsToPlace = desiredCounts.GetValueOrDefault(NodeType.Shop, 0);
-            for (int r = 0; r < actSpec.Rows - 1 && shopsToPlace > 0; r++)
-            {
-                List<Node> availableNodesInRow = getAvailableNodesInRow(r);
-                List<Node> eligibleNodes = availableNodesInRow.Where(n => !isTooClose(n, NodeType.Shop, rules.Spacing.ShopMinGap)).ToList();
-
-                if (eligibleNodes.Any())
-                {
-                    Node shopNode = eligibleNodes[(int)(rng.NextULong() % (ulong)eligibleNodes.Count)];
-                    shopNode.Type = NodeType.Shop;
-                    placedNodeIds.Add(shopNode.Id);
-                    shopsToPlace--;
-                }
-            }
-            desiredCounts[NodeType.Shop] = shopsToPlace;
-
-            // 6. Place Ports (remaining)
-            int portsToPlace = desiredCounts.GetValueOrDefault(NodeType.Port, 0);
-            for (int r = 0; r < actSpec.Rows - 1 && portsToPlace > 0; r++)
-            {
-                List<Node> availableNodesInRow = getAvailableNodesInRow(r);
-                List<Node> eligibleNodes = availableNodesInRow.Where(n => !isTooClose(n, NodeType.Port, rules.Spacing.PortMinGap)).ToList();
-
-                if (eligibleNodes.Any())
-                {
-                    Node portNode = eligibleNodes[(int)(rng.NextULong() % (ulong)eligibleNodes.Count)];
-                    portNode.Type = NodeType.Port;
-                    placedNodeIds.Add(portNode.Id);
-                    portsToPlace--;
-                }
-            }
-            desiredCounts[NodeType.Port] = portsToPlace;
-
-            // 7. Fill Remaining Nodes (Unknowns, Battles)
-            List<Node> unplacedNodes = graph.Nodes.Where(n => !placedNodeIds.Contains(n.Id)).ToList();
-            foreach (Node node in unplacedNodes)
-            {
-                if (desiredCounts.GetValueOrDefault(NodeType.Unknown, 0) > 0)
-                {
-                    node.Type = NodeType.Unknown;
-                    desiredCounts[NodeType.Unknown]--;
-                }
-                else
-                {
-                    Debug.LogWarning($"Node {node.Id} is being assigned as a Battle encounter. This is likely because all specific node types (Boss, Port, Treasure, Elite, Shop) have been placed, and the target count for Unknown nodes has been exhausted. Consider adjusting rules.Counts.Targets to include more non-Battle node types or Unknown nodes.");
-                    node.Type = NodeType.Battle;
-                    desiredCounts[NodeType.Battle]--;
-                }
-                placedNodeIds.Add(node.Id);
-            }
+            // Phase B.2: Assign remaining nodes using weighted odds and re-rolls
+            AssignNodeTypesWeighted(graph, actSpec, rules, rng, placedNodeIds);
 
             // Debugging: Display final NodeType assignment for each node
             Debug.Log("--- Final Node Type Assignments ---");
@@ -410,6 +324,280 @@ namespace Pirate.MapGen
                 Debug.Log($"Node ID: {node.Id}, Type: {node.Type}");
             }
             Debug.Log("-----------------------------------");
+        }
+
+        /// <summary>
+        /// Assigns node types to the remaining unplaced nodes using weighted odds and re-rolls.
+        /// This is Phase B.2 of the map generation process.
+        /// </summary>
+        /// <param name="graph">The map graph skeleton.</param>
+        /// <param name="actSpec">The act specification.</param>
+        /// <param name="rules">The generation rules.</param>
+        /// <param name="rng">The random number generator.</param>
+        /// <param name="placedNodeIds">A HashSet tracking IDs of nodes that have already been assigned a type.</param>
+        private void AssignNodeTypesWeighted(MapGraph graph, ActSpec actSpec, RulesSO rules, IRandomNumberGenerator rng, HashSet<string> placedNodeIds)
+        {
+            List<Node> unplacedNodes = graph.Nodes.Where(n => !placedNodeIds.Contains(n.Id)).ToList();
+
+            // Sort unplaced nodes by row to process them in order
+            unplacedNodes = unplacedNodes.OrderBy(n => n.Row).ThenBy(n => n.Col).ToList();
+
+            foreach (Node node in unplacedNodes)
+            {
+                NodeType chosenType = NodeType.Battle; // Default fallback
+
+                // Determine eligible node types for the current node
+                List<NodeType> eligibleTypes = GetEligibleNodeTypes(node, graph, actSpec, rules, placedNodeIds);
+                Debug.Log($"[AssignNodeTypesWeighted] Node {node.Id} (Row: {node.Row}): Eligible Types: {string.Join(", ", eligibleTypes)}");
+
+                if (eligibleTypes.Any())
+                {
+                    bool typeAssigned = false;
+                    NodeType originalNodeType = node.Type; // Store original type for potential revert
+
+                    // Determine the correct RowBandOdds for the current node's row
+                    SerializableDictionary<NodeType, int> currentBandOdds = GetOddsForNodeRow(node.Row, actSpec.Rows, rules);
+
+                    for (int i = 0; i < rules.Spacing.MaxRerollAttempts; i++)
+                    {
+                        NodeType attemptedType = SelectWeightedRandomType(eligibleTypes, currentBandOdds, rng); // Pass currentBandOdds
+                        node.Type = attemptedType; // Temporarily assign the attempted type
+
+                        // Validate the entire graph with the attempted type
+                        AuditReport audit = _validator.Validate(graph, rules, actSpec);
+
+                        Debug.Log($"[AssignNodeTypesWeighted] Node {node.Id} (Attempt {i + 1}): Attempted Type: {attemptedType}, IsValid: {audit.IsValid}, Violations: {string.Join(", ", audit.Violations)}");
+
+                        if (audit.IsValid)
+                        {
+                            chosenType = attemptedType;
+                            typeAssigned = true;
+                            break; // Valid type found, exit re-roll loop
+                        }
+                        else
+                        {
+                            // If invalid, revert the node's type for the next attempt
+                            node.Type = originalNodeType;
+                            // Optionally log the reason for re-roll for debugging
+                            // Debug.LogWarning($"Attempted type {attemptedType} for node {node.Id} failed validation: {string.Join(", ", audit.Violations)}. Re-rolling...");
+                        }
+                    }
+
+                    if (!typeAssigned)
+                    {
+                        // Fallback if re-rolls fail
+                        chosenType = rules.Spacing.FallbackNodeType;
+                        Debug.LogWarning($"[AssignNodeTypesWeighted] Failed to assign a type to node {node.Id} after {rules.Spacing.MaxRerollAttempts} re-rolls. Falling back to {chosenType}.");
+                    }
+                }
+                else
+                {
+                    // No eligible types found, fall back
+                    chosenType = rules.Spacing.FallbackNodeType;
+                    Debug.LogWarning($"[AssignNodeTypesWeighted] No eligible types found for node {node.Id}. Falling back to {chosenType}.");
+                }
+
+                node.Type = chosenType;
+                placedNodeIds.Add(node.Id);
+                Debug.Log($"[AssignNodeTypesWeighted] Node {node.Id} (Row: {node.Row}) Final Chosen Type: {chosenType}");
+            }
+        }
+
+        /// <summary>
+        /// Selects a node type based on weighted odds.
+        /// </summary>
+        private NodeType SelectWeightedRandomType(List<NodeType> availableTypes, SerializableDictionary<NodeType, int> currentBandOdds, IRandomNumberGenerator rng)
+        {
+            Debug.Log($"[SelectWeightedRandomType] Available Types: {string.Join(", ", availableTypes)}");
+            Debug.Log($"[SelectWeightedRandomType] Current Band Odds: {string.Join(", ", currentBandOdds.Select(kvp => kvp.ToString()))}");
+
+            if (!availableTypes.Any())
+            {
+                Debug.LogError("SelectWeightedRandomType called with no available types.");
+                return NodeType.Battle; // Should not happen if GetEligibleNodeTypes works correctly
+            }
+
+            // Filter currentBandOdds to only include available types
+            Dictionary<NodeType, int> filteredOdds = currentBandOdds
+                .Where(kvp => availableTypes.Contains(kvp.Key))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            Debug.Log($"[SelectWeightedRandomType] Filtered Odds: {string.Join(", ", filteredOdds.Select(kvp => kvp.ToString()))}");
+
+            if (!filteredOdds.Any())
+            {
+                Debug.LogWarning("No weighted odds found for available types in current band. Returning first available type.");
+                return availableTypes.First();
+            }
+
+            int totalWeight = filteredOdds.Sum(kvp => kvp.Value);
+            Debug.Log($"[SelectWeightedRandomType] Total Weight: {totalWeight}");
+
+            if (totalWeight <= 0)
+            {
+                Debug.LogWarning("Total weight is zero or negative in current band. Returning first available type.");
+                return availableTypes.First();
+            }
+
+            int randomNumber = (int)(rng.NextULong() % (ulong)totalWeight);
+            Debug.Log($"[SelectWeightedRandomType] Random Number (0 to {totalWeight - 1}): {randomNumber}");
+
+            foreach (var entry in filteredOdds)
+            {
+                randomNumber -= entry.Value;
+                if (randomNumber < 0)
+                {
+                    Debug.Log($"[SelectWeightedRandomType] Chosen Type: {entry.Key}");
+                    return entry.Key;
+                }
+            }
+
+            // Fallback, should not be reached
+            Debug.LogWarning("[SelectWeightedRandomType] Fallback reached. Returning first available type.");
+            return availableTypes.First();
+        }
+
+        /// <summary>
+        /// Determines the eligible node types for a given node based on all generation rules.
+        /// </summary>
+        private List<NodeType> GetEligibleNodeTypes(Node node, MapGraph graph, ActSpec actSpec, RulesSO rules, HashSet<string> placedNodeIds)
+        {
+            List<NodeType> eligibleTypes = Enum.GetValues(typeof(NodeType)).Cast<NodeType>().ToList();
+
+            // Remove types that are already fixed or boss
+            eligibleTypes.Remove(NodeType.Boss);
+            eligibleTypes.Remove(NodeType.Port); // Ports are fixed in pre-boss row
+            eligibleTypes.Remove(NodeType.Treasure); // Treasures are fixed in mid-act row
+            eligibleTypes.Remove(NodeType.Event); // Events are only resolved from Unknown nodes, not generated directly
+
+            // The first row is fixed to Battle, so Battle should not be an eligible type for other nodes
+            // This is implicitly handled by AssignFixedAndGuaranteedNodes marking Row 0 nodes as placed.
+            // No need to remove NodeType.Battle here unless it's a specific ban for other rows.
+
+            // Rule 2: Structural bans & availability
+            // Elites unlock at row ⌈0.35R⌉
+            int eliteUnlockRow = (int)Math.Ceiling(0.35 * actSpec.Rows);
+            if (node.Row < eliteUnlockRow)
+            {
+                eligibleTypes.Remove(NodeType.Elite);
+            }
+
+            // No Port on row R-2 (already handled by fixed rows, but good to keep in mind for general bans)
+            // This rule is now implicitly handled by the fixed row assignment for R-1 (all Port) and the fact that R-2 is not a fixed Port row.
+            // If rules.Bans.BanPortOnPrePreBossRow is true, and this row is R-2, then remove Port.
+            if (rules.Flags.BanPortOnPrePreBossRow && node.Row == actSpec.Rows - 3) // R-3 is R-2 relative to R-1 (pre-boss port row)
+            {
+                eligibleTypes.Remove(NodeType.Port);
+            }
+
+            // Rule 3: Adjacency rules (generation-time only)
+            // Along any single path: no Elite→Elite, Shop→Shop, Port→Port consecutives.
+            // At a split, a parent’s children must be different types, except when the next row is uniform by design.
+
+            // To implement adjacency rules, we need to know the parent nodes and their types.
+            // This requires looking at the graph's edges.
+
+            // Get parent nodes
+            List<Node> parentNodes = graph.Edges
+                .Where(e => e.ToId == node.Id)
+                .Select(e => graph.Nodes.FirstOrDefault(n => n.Id == e.FromId))
+                .Where(n => n != null && placedNodeIds.Contains(n.Id)) // Only consider parents that have already been typed
+                .ToList();
+
+            // Check for consecutive bans
+            foreach (Node parent in parentNodes)
+            {
+                if (rules.Flags.NoEliteToElite && parent.Type == NodeType.Elite)
+                {
+                    eligibleTypes.Remove(NodeType.Elite);
+                }
+                if (rules.Flags.NoShopToShop && parent.Type == NodeType.Shop)
+                {
+                    eligibleTypes.Remove(NodeType.Shop);
+                }
+                if (rules.Flags.NoPortToPort && parent.Type == NodeType.Port)
+                {
+                    eligibleTypes.Remove(NodeType.Port);
+                }
+            }
+
+            // Check for children must be different types (if applicable)
+            // This rule applies to the *children* of a parent, not the current node's type based on its parents.
+            // This rule is better enforced when selecting types for children, or as a validation step.
+            // For now, I will skip this part as it's more complex to enforce during the current node's typing.
+            // It might be better handled as a post-processing step or during validation.
+
+            // Check for children must be different types (if applicable)
+            if (rules.Flags.ChildrenMustBeDifferentTypes)
+            {
+                // Check if the current row is a uniform row (Treasure or Port)
+                int treasureRow = (int)Math.Ceiling(0.6 * actSpec.Rows);
+                int preBossPortRow = actSpec.Rows - 2;
+                bool isUniformRow = (node.Row == treasureRow) || (node.Row == preBossPortRow);
+
+                if (!isUniformRow)
+                {
+                    foreach (Node parent in parentNodes)
+                    {
+                        // Find all children of this parent in the current row
+                        List<Node> siblings = graph.Edges
+                            .Where(e => e.FromId == parent.Id && graph.Nodes.Any(n => n.Id == e.ToId && n.Row == node.Row))
+                            .Select(e => graph.Nodes.FirstOrDefault(n => n.Id == e.ToId))
+                            .Where(n => n != null && n.Id != node.Id && placedNodeIds.Contains(n.Id)) // Only consider already placed siblings
+                            .ToList();
+
+                        if (siblings.Any()) // If this parent has other children in this row
+                        {
+                            foreach (Node sibling in siblings)
+                            {
+                                eligibleTypes.Remove(sibling.Type); // Remove sibling's type from eligible types for current node
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Ensure that the list of eligible types is not empty. If it is, something is wrong.
+            if (!eligibleTypes.Any())
+            {
+                Debug.LogWarning($"No eligible types remaining for node {node.Id} after applying rules. This should not happen. Falling back to {rules.Spacing.FallbackNodeType}.");
+                // As a last resort, allow FallbackNodeType
+                eligibleTypes.Add(rules.Spacing.FallbackNodeType);
+            }
+
+            return eligibleTypes;
+        }
+
+        /// <summary>
+        /// Helper method to get the correct odds for a given row
+        /// </summary>
+        private SerializableDictionary<NodeType, int> GetOddsForNodeRow(int row, int totalRows, RulesSO rules)
+        {
+            // Determine fixed rows for band calculation
+            int treasureRow = (int)Math.Ceiling(0.6 * totalRows);
+            int eliteUnlockRow = (int)Math.Ceiling(0.35 * totalRows);
+            int preBossPortRow = totalRows - 2;
+
+            // Prioritize specific bands
+            foreach (var bandOdds in rules.Spacing.RowBandGenerationOdds)
+            {
+                if (row >= bandOdds.MinRow && row <= bandOdds.MaxRow)
+                {
+                    return bandOdds.Odds;
+                }
+            }
+
+            // Fallback to a default if no specific band matches
+            // This assumes there's a "Default" band with MinRow=0, MaxRow=totalRows
+            var defaultBand = rules.Spacing.RowBandGenerationOdds.FirstOrDefault(b => b.Band == RowBand.Default);
+            if (defaultBand != null)
+            {
+                return defaultBand.Odds;
+            }
+
+            // If no default band is found, return an empty dictionary or throw an error
+            Debug.LogError($"No generation odds defined for row {row} and no default band found. Returning empty odds.");
+            return new SerializableDictionary<NodeType, int>();
         }
     }
 }

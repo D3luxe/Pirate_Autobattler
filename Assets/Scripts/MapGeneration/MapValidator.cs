@@ -12,7 +12,7 @@ namespace Pirate.MapGen
         /// <param name="graph">The map graph to validate.</param>
         /// <param name="rules">The rules to validate against.</param>
         /// <returns>An AuditReport detailing any violations.</returns>
-        public AuditReport Validate(MapGraph graph, RulesSO rules)
+        public AuditReport Validate(MapGraph graph, RulesSO rules, ActSpec actSpec)
         {
             AuditReport report = new AuditReport { IsValid = true };
 
@@ -39,7 +39,7 @@ namespace Pirate.MapGen
 
 
             // Rule 4: Counts within limits (min/max)
-            var countViolations = AreCountsWithinLimits(graph, rules);
+            var countViolations = AreCountsWithinLimits(graph, rules, actSpec);
             if (countViolations.Any())
             {
                 report.IsValid = false;
@@ -59,6 +59,14 @@ namespace Pirate.MapGen
             {
                 report.IsValid = false;
                 report.Violations.Add($"Elite found in row <= {rules.Spacing.EliteEarlyRowsCap}.");
+            }
+
+            // Rule 7: Boss edges are correct
+            var bossEdgeViolations = AreBossEdgesCorrect(graph, actSpec);
+            if (bossEdgeViolations.Any())
+            {
+                report.IsValid = false;
+                report.Violations.AddRange(bossEdgeViolations);
             }
 
             return report;
@@ -144,24 +152,19 @@ namespace Pirate.MapGen
         /// <param name="graph">The map graph.</param>
         /// <param name="rules">The rules containing the count limits.</param>
         /// <returns>A list of violation messages.</returns>
-        private List<string> AreCountsWithinLimits(MapGraph graph, RulesSO rules)
+        private List<string> AreCountsWithinLimits(MapGraph graph, RulesSO rules, ActSpec actSpec)
         {
             List<string> violations = new List<string>();
             var nodeCounts = graph.Nodes.GroupBy(n => n.Type).ToDictionary(g => g.Key, g => g.Count());
 
-            foreach (NodeType type in Enum.GetValues(typeof(NodeType)))
+            // Only validate Boss count as it's a fixed, single node.
+            // Other node type counts are now considered goals for the generator, not strict validation failures.
+            int bossCount = nodeCounts.GetValueOrDefault(NodeType.Boss, 0);
+            if (bossCount != 1)
             {
-                int count = nodeCounts.GetValueOrDefault(type, 0);
-
-                if (rules.Counts.Min.ContainsKey(type) && count < rules.Counts.Min[type])
-                {
-                    violations.Add($"Count for {type} ({count}) is below minimum ({rules.Counts.Min[type]}).");
-                }
-                if (rules.Counts.Max.ContainsKey(type) && count > rules.Counts.Max[type])
-                {
-                    violations.Add($"Count for {type} ({count}) is above maximum ({rules.Counts.Max[type]}).");
-                }
+                violations.Add($"Count for Boss ({bossCount}) is not 1. There should be exactly one Boss node.");
             }
+
             return violations;
         }
 
@@ -181,7 +184,8 @@ namespace Pirate.MapGen
                 var eliteNodes = graph.Nodes.Where(n => n.Type == NodeType.Elite).OrderBy(n => n.Row).ToList();
                 for (int i = 1; i < eliteNodes.Count; i++)
                 {
-                    if (eliteNodes[i].Row - eliteNodes[i - 1].Row < rules.Spacing.EliteMinGap)
+                    // Only apply spacing rule if nodes are in different rows
+                    if (eliteNodes[i].Row != eliteNodes[i - 1].Row && eliteNodes[i].Row - eliteNodes[i - 1].Row < rules.Spacing.EliteMinGap)
                     {
                         violations.Add($"Elite spacing violation between row {eliteNodes[i - 1].Row} and {eliteNodes[i].Row}. Minimum gap is {rules.Spacing.EliteMinGap}.");
                     }
@@ -194,7 +198,8 @@ namespace Pirate.MapGen
                 var shopNodes = graph.Nodes.Where(n => n.Type == NodeType.Shop).OrderBy(n => n.Row).ToList();
                 for (int i = 1; i < shopNodes.Count; i++)
                 {
-                    if (shopNodes[i].Row - shopNodes[i - 1].Row < rules.Spacing.ShopMinGap)
+                    // Only apply spacing rule if nodes are in different rows
+                    if (shopNodes[i].Row != shopNodes[i - 1].Row && shopNodes[i].Row - shopNodes[i - 1].Row < rules.Spacing.ShopMinGap)
                     {
                         violations.Add($"Shop spacing violation between row {shopNodes[i - 1].Row} and {shopNodes[i].Row}. Minimum gap is {rules.Spacing.ShopMinGap}.");
                     }
@@ -207,7 +212,8 @@ namespace Pirate.MapGen
                 var portNodes = graph.Nodes.Where(n => n.Type == NodeType.Port).OrderBy(n => n.Row).ToList();
                 for (int i = 1; i < portNodes.Count; i++)
                 {
-                    if (portNodes[i].Row - portNodes[i - 1].Row < rules.Spacing.PortMinGap)
+                    // Only apply spacing rule if nodes are in different rows
+                    if (portNodes[i].Row != portNodes[i - 1].Row && portNodes[i].Row - portNodes[i - 1].Row < rules.Spacing.PortMinGap)
                     {
                         violations.Add($"Port spacing violation between row {portNodes[i - 1].Row} and {portNodes[i].Row}. Minimum gap is {rules.Spacing.PortMinGap}.");
                     }
@@ -228,6 +234,65 @@ namespace Pirate.MapGen
             if (rules.Spacing.EliteEarlyRowsCap <= 0) return true; // No cap, so it's respected
 
             return !graph.Nodes.Any(n => n.Type == NodeType.Elite && n.Row < rules.Spacing.EliteEarlyRowsCap);
+        }
+
+        /// <summary>
+        /// Checks if all nodes in the row immediately preceding the Boss row (R-1) are Ports and connect only to the Boss node,
+        /// and that no other nodes connect to the Boss node.
+        /// </summary>
+        private List<string> AreBossEdgesCorrect(MapGraph graph, ActSpec actSpec)
+        {
+            List<string> violations = new List<string>();
+
+            Node bossNode = graph.Nodes.FirstOrDefault(n => n.Row == actSpec.Rows - 1 && n.Type == NodeType.Boss);
+            if (bossNode == null)
+            {
+                violations.Add("Boss node not found in the last row.");
+                return violations;
+            }
+
+            int preBossRow = actSpec.Rows - 2;
+            List<Node> preBossNodes = graph.Nodes.Where(n => n.Row == preBossRow).ToList();
+
+            if (!preBossNodes.Any())
+            {
+                violations.Add($"No nodes found in the pre-boss row (row {preBossRow}).");
+                return violations;
+            }
+
+            // Check if all pre-boss nodes are Ports and connect to the Boss
+            foreach (Node preBossNode in preBossNodes)
+            {
+                if (preBossNode.Type != NodeType.Port)
+                {
+                    violations.Add($"Node {preBossNode.Id} in pre-boss row is not a Port type.");
+                }
+
+                bool connectsToBoss = graph.Edges.Any(e => e.FromId == preBossNode.Id && e.ToId == bossNode.Id);
+                if (!connectsToBoss)
+                {
+                    violations.Add($"Node {preBossNode.Id} in pre-boss row does not connect to the Boss node.");
+                }
+            }
+
+            // Check if only pre-boss nodes connect to the Boss
+            var incomingEdgesToBoss = graph.Edges.Where(e => e.ToId == bossNode.Id).ToList();
+            foreach (var edge in incomingEdgesToBoss)
+            {
+                Node fromNode = graph.Nodes.FirstOrDefault(n => n.Id == edge.FromId);
+                if (fromNode == null)
+                {
+                    violations.Add($"Edge to Boss from unknown node ID: {edge.FromId}.");
+                    continue;
+                }
+
+                if (fromNode.Row != preBossRow)
+                {
+                    violations.Add($"Node {fromNode.Id} (row {fromNode.Row}) connects to Boss, but is not in the pre-boss row (row {preBossRow}).");
+                }
+            }
+
+            return violations;
         }
     }
 }

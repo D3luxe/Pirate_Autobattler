@@ -77,8 +77,8 @@ MonoBehaviour:
     icon: {fileID: -4786724353424990833, guid: c71be03a5e807074ab72da4851a468d9, type: 3}
   - type: 3
     icon: {fileID: -2270217657116803017, guid: fca5cf9ec866c804892b7661cd6e0809, type: 3}
-  - type: 4
-    icon: {fileID: -4921701424370083402, guid: 3ee1df741f9f3ea40a18bb2763810e7f, type: 3}
+  - type: 7
+    icon: {fileID: 21300000, guid: 3ee1df741f9f3ea40a18bb2763810e7f, type: 3}
   - type: 5
     icon: {fileID: 6468930929206040152, guid: 4e3dd86ae9ad6cd429c2819cc9209e63, type: 3}
   - type: 6

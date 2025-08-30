@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using PirateRoguelike.Data;
 using Pirate.MapGen; // NEW: Added for MapGraphData
+using System.Linq; // Added for LINQ extension methods
 
 public static class GameSession
 {
@@ -43,7 +44,9 @@ public static class GameSession
             inventoryItems = new List<SerializableItemInstance>(),
             mapGraphData = new MapGraphData(), // Initialize with an empty MapGraphData
             randomSeed = (ulong)System.DateTime.Now.Ticks, // Use ulong for seed and System.DateTime.Now.Ticks for initial randomness
-            rerollsThisShop = 0 // Initialize reroll count
+            rerollsThisShop = 0, // Initialize reroll count
+            pityState = new PityState(), // Initialize pity state
+            unknownContext = new UnknownContext() // Initialize unknown context
         };
         Debug.Log("Starting a new run. RNG seed: " + CurrentRunState.randomSeed.ToString());
         // Convert ulong seed to int for Unity's Random.InitState by XORing upper and lower 32 bits

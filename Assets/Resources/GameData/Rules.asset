@@ -13,23 +13,33 @@ MonoBehaviour:
   m_Name: Rules
   m_EditorClassIdentifier: Assembly-CSharp::Pirate.MapGen.RulesSO
   testValue: 0
-  Counts:
-    Min:
-      keys: 0700000001000000030000000200000004000000
-      values: 0100000002000000010000000300000001000000
-    Max:
-      keys: 0700000001000000030000000200000004000000
-      values: 0100000004000000030000000600000002000000
-    Targets:
-      keys: 0700000001000000030000000200000004000000
-      values: 0100000003000000020000000400000001000000
   Spacing:
     EliteMinGap: 2
     ShopMinGap: 2
     PortMinGap: 1
     EliteEarlyRowsCap: 4
+    MaxRerollAttempts: 5
+    FallbackNodeType: 0
+    RowBandGenerationOdds:
+    - Band: 1
+      MinRow: 0
+      MaxRow: 4
+      Odds:
+        keys: 00000000060000000300000002000000010000000400000005000000
+        values: 370000001e000000050000000a000000000000000000000000000000
+    - Band: 4
+      MinRow: 5
+      MaxRow: 8
+      Odds:
+        keys: 00000000060000000300000002000000010000000400000005000000
+        values: 2d0000001e00000008000000070000000a0000000000000000000000
+    - Band: 3
+      MinRow: 9
+      MaxRow: 14
+      Odds:
+        keys: 00000000060000000300000002000000010000000400000005000000
+        values: 28000000190000000a000000070000000a0000000000000000000000
   Windows:
-    PreBossPortRow: lastRow-1
     MidTreasureRows: 0600000009000000
   UnknownWeights:
     Start:
@@ -41,6 +51,21 @@ MonoBehaviour:
     Caps:
       keys: 05000000000000000300000004000000
       values: 3c00000037000000190000000f000000
+    BattlePityBase: 0.1
+    BattlePityIncrement: 0.1
+    TreasurePityBase: 0.02
+    TreasurePityIncrement: 0.02
+    ShopPityBase: 0.03
+    ShopPityIncrement: 0.03
+    FallbackToEvent: 1
+    PityPerAct: 1
   Flags:
     EnableMetaKeys: 0
     EnableBurningElites: 0
+    BanPortOnPrePreBossRow: 1
+    NoEliteToElite: 1
+    NoShopToShop: 1
+    NoPortToPort: 1
+    ChildrenMustBeDifferentTypes: 1
+    IgnoreAdjacencyRulesOnResolve: 1
+    RespectStructuralBansOnResolve: 1
