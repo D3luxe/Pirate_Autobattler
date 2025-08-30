@@ -98,7 +98,8 @@ public class MapManager : MonoBehaviour
                 row = node.Row,
                 col = node.Col,
                 type = node.Type.ToString(), // Convert NodeType enum to string
-                tags = node.Tags
+                tags = node.Tags,
+                PathIndices = node.PathIndices // Copy path indices
             });
         }
 
@@ -108,7 +109,8 @@ public class MapManager : MonoBehaviour
             _mapGraphData.edges.Add(new MapGraphData.Edge
             {
                 fromId = edge.FromId,
-                toId = edge.ToId
+                toId = edge.ToId,
+                PathIndices = edge.PathIndices // Copy path indices
             });
         }
 

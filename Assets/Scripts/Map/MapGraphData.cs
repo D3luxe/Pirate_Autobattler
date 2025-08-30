@@ -26,6 +26,7 @@ namespace Pirate.MapGen
             public int col;
             public string type; // Corresponds to NodeType enum name (e.g., "Battle", "Elite")
             public List<string> tags; // e.g., "boss-preview", "burning-elite", "meta-key"
+            public HashSet<int> PathIndices = new HashSet<int>();
         }
 
         [Serializable]
@@ -33,6 +34,7 @@ namespace Pirate.MapGen
         {
             public string fromId;
             public string toId;
+            public HashSet<int> PathIndices = new HashSet<int>();
         }
 
         [Serializable]

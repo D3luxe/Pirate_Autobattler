@@ -160,37 +160,36 @@ namespace Pirate.MapGen
                 }
             }
 
+            var nodeLookup = graph.Nodes.ToDictionary(n => n.Id);
             var allUsedNodeIds = new HashSet<string>();
-            var allUsedEdgeIds = new HashSet<string>();
             var edgesByRow = new List<Tuple<int, int>>[actSpec.Rows - 1];
             for (int i = 0; i < edgesByRow.Length; i++) edgesByRow[i] = new List<Tuple<int, int>>();
 
-            var startCols = new int[6];
             int pathsGenerated = 0;
-            const int MAX_TOTAL_RESTARTS = 500;
-            int totalRestarts = 0;
+            const int MAX_TOTAL_PATH_RESTARTS = 500;
+            int totalPathRestarts = 0;
 
             // 2. Generate 6 paths
             while (pathsGenerated < 6)
             {
-                if (totalRestarts > MAX_TOTAL_RESTARTS)
+                if (totalPathRestarts > MAX_TOTAL_PATH_RESTARTS)
                 {
-                    Debug.LogError("Max total restarts exceeded. Aborting skeleton generation.");
-                    break;
+                    Debug.LogError("Max total path restarts exceeded. Aborting skeleton generation.");
+                    return new MapGraph(); // Return empty graph on total failure
                 }
 
                 var pathDecisionStack = new Stack<PathStep>();
                 
-                // Determine start column
-                int startCol;
-                if (pathsGenerated == 0) { startCol = (int)(rng.NextULong() % (ulong)actSpec.Columns); }
-                else if (pathsGenerated == 1) { do { startCol = (int)(rng.NextULong() % (ulong)actSpec.Columns); } while (startCol == startCols[0]); }
-                else { startCol = (int)(rng.NextULong() % (ulong)actSpec.Columns); }
-                if (pathsGenerated < startCols.Length) startCols[pathsGenerated] = startCol;
+                int startCol = (int)(rng.NextULong() % (ulong)actSpec.Columns);
+                // Simple non-duplicate start for first two paths
+                if (pathsGenerated == 1 && graph.Nodes.Any(n => n.Row == 0 && n.PathIndices.Any()))
+                {
+                    int firstPathStartCol = graph.Nodes.First(n => n.Row == 0 && n.PathIndices.Contains(0)).Col;
+                    do { startCol = (int)(rng.NextULong() % (ulong)actSpec.Columns); } while (startCol == firstPathStartCol);
+                }
 
                 int currentCol = startCol;
                 int r = 0;
-                
                 bool pathFailed = false;
 
                 while (r < actSpec.Rows - 1)
@@ -198,17 +197,9 @@ namespace Pirate.MapGen
                     List<int> candidates = GetThreeNearestCandidates(currentCol, actSpec.Columns, rng);
                     List<int> validCandidates = FilterCandidatesByCrossing(candidates, r, currentCol, edgesByRow[r]);
 
-                    if (r == actSpec.Rows - 2) // Pre-boss row
-                    {
-                        int bossCol = actSpec.Columns / 2;
-                        if (validCandidates.Contains(bossCol)) { validCandidates = new List<int> { bossCol }; }
-                        else { validCandidates.Clear(); }
-                    }
-
                     if (validCandidates.Any())
                     {
                         int chosenNextCol = validCandidates[(int)(rng.NextULong() % (ulong)validCandidates.Count)];
-                        
                         pathDecisionStack.Push(new PathStep
                         {
                             Row = r,
@@ -216,44 +207,34 @@ namespace Pirate.MapGen
                             ChosenNextCol = chosenNextCol,
                             RemainingCandidates = new List<int>(validCandidates.Where(c => c != chosenNextCol))
                         });
-                        
                         currentCol = chosenNextCol;
                         r++;
                     }
                     else // No valid candidates, must backtrack
                     {
-                        if (!pathDecisionStack.Any())
-                        {
-                            pathFailed = true;
-                            break; 
-                        }
+                        if (!pathDecisionStack.Any()) { pathFailed = true; break; }
 
                         PathStep lastStep = null;
                         do {
-                            if (!pathDecisionStack.Any()) {
-                                pathFailed = true;
-                                break;
-                            }
+                            if (!pathDecisionStack.Any()) { pathFailed = true; break; }
                             lastStep = pathDecisionStack.Pop();
                         } while (!lastStep.RemainingCandidates.Any());
 
                         if (pathFailed || lastStep == null) break;
 
-                        // We found a step with alternatives. Restore state and retry.
                         r = lastStep.Row;
                         currentCol = lastStep.CurrentCol;
                         
                         int nextCandidate = lastStep.RemainingCandidates[0];
                         lastStep.RemainingCandidates.RemoveAt(0);
-                        pathDecisionStack.Push(lastStep); // Push back with fewer candidates
+                        pathDecisionStack.Push(lastStep);
 
-                        // Manually perform the next step
                         pathDecisionStack.Push(new PathStep
                         {
                             Row = r,
                             CurrentCol = currentCol,
                             ChosenNextCol = nextCandidate,
-                            RemainingCandidates = new List<int>() // Will be generated if this fails
+                            RemainingCandidates = new List<int>()
                         });
                         currentCol = nextCandidate;
                         r++;
@@ -262,37 +243,87 @@ namespace Pirate.MapGen
 
                 if (pathFailed)
                 {
-                    totalRestarts++;
-                    Debug.Log($"Path {pathsGenerated + 1} failed and will be restarted. Total restarts: {totalRestarts}");
+                    totalPathRestarts++;
+                    Debug.Log($"Path {pathsGenerated + 1} failed and will be restarted. Total path restarts: {totalPathRestarts}");
                 }
-                else // Path completed
+                else
                 {
-                    Debug.Log($"Path {pathsGenerated + 1} completed.");
-                    // Add nodes and edges from the completed path to the overall used sets
                     var finalPath = new List<PathStep>(pathDecisionStack);
                     finalPath.Reverse();
 
-                    // Add start node
-                    allUsedNodeIds.Add($"node_0_{startCol}");
+                    Node startNode = nodeLookup[$"node_0_{startCol}"];
+                    startNode.PathIndices.Add(pathsGenerated);
+                    allUsedNodeIds.Add(startNode.Id);
 
                     foreach(var step in finalPath)
                     {
-                        allUsedNodeIds.Add($"node_{step.Row}_{step.CurrentCol}");
-                        allUsedNodeIds.Add($"node_{step.Row + 1}_{step.ChosenNextCol}");
+                        Node fromNode = nodeLookup[$"node_{step.Row}_{step.CurrentCol}"];
+                        Node toNode = nodeLookup[$"node_{step.Row + 1}_{step.ChosenNextCol}"];
                         string edgeId = $"edge_{step.Row}_{step.CurrentCol}_{step.ChosenNextCol}";
-                        if(allUsedEdgeIds.Add(edgeId))
+
+                        fromNode.PathIndices.Add(pathsGenerated);
+                        toNode.PathIndices.Add(pathsGenerated);
+                        allUsedNodeIds.Add(fromNode.Id);
+                        allUsedNodeIds.Add(toNode.Id);
+
+                        Edge edge = graph.Edges.FirstOrDefault(e => e.Id == edgeId);
+                        if (edge == null)
                         {
-                            graph.Edges.Add(new Edge { Id = edgeId, FromId = $"node_{step.Row}_{step.CurrentCol}", ToId = $"node_{step.Row + 1}_{step.ChosenNextCol}" });
+                            edge = new Edge { Id = edgeId, FromId = fromNode.Id, ToId = toNode.Id };
+                            graph.Edges.Add(edge);
                             edgesByRow[step.Row].Add(Tuple.Create(step.CurrentCol, step.ChosenNextCol));
                         }
+                        edge.PathIndices.Add(pathsGenerated);
                     }
                     pathsGenerated++;
                 }
             }
 
-            // 3. Pruning
+            // 3. Boss Row Consolidation
+            int bossRow = actSpec.Rows - 1;
+            int bossCol = actSpec.Columns / 2;
+            string bossNodeId = $"node_{bossRow}_{bossCol}";
+            Node trueBossNode = nodeLookup[bossNodeId];
+
+            var edgesToFinalRow = graph.Edges.Where(e => nodeLookup[e.ToId].Row == bossRow).ToList();
+            foreach (var edge in edgesToFinalRow)
+            {
+                if (edge.ToId != bossNodeId)
+                {
+                    allUsedNodeIds.Remove(edge.ToId); // Mark the old destination for pruning
+                    edge.ToId = bossNodeId; // Rewire to the true boss
+                }
+            }
+
+            // 4. Pruning
+            // Prune all nodes in the final row except the boss node.
+            graph.Nodes.RemoveAll(n => n.Row == bossRow && n.Id != bossNodeId);
+            // Add the true boss node to the used set, ensuring it's never pruned.
+            allUsedNodeIds.Add(bossNodeId);
+            // Prune all other unused nodes
             graph.Nodes.RemoveAll(n => !allUsedNodeIds.Contains(n.Id));
-            graph.Edges.RemoveAll(e => !allUsedEdgeIds.Contains(e.Id));
+
+            // 5. Edge Cleanup
+            // Remove edges pointing to nodes that have been pruned.
+            graph.Edges.RemoveAll(e => !nodeLookup.ContainsKey(e.FromId) || !nodeLookup.ContainsKey(e.ToId));
+            // Remove duplicate edges created by rewiring.
+            var uniqueEdges = new Dictionary<string, Edge>();
+            foreach (var edge in graph.Edges)
+            {
+                string uniqueKey = $"{edge.FromId}->{edge.ToId}";
+                if (!uniqueEdges.ContainsKey(uniqueKey))
+                {
+                    uniqueEdges.Add(uniqueKey, edge);
+                }
+                else
+                {
+                    foreach(var pathIndex in edge.PathIndices)
+                    {
+                        uniqueEdges[uniqueKey].PathIndices.Add(pathIndex);
+                    }
+                }
+            }
+            graph.Edges = uniqueEdges.Values.ToList();
 
             return graph;
         }
@@ -322,7 +353,7 @@ namespace Pirate.MapGen
             }
             Debug.Log($"Assigned all nodes in Row 0 to Battle. Count: {firstRowNodes.Count}");
 
-            // 2. Fixed Row: Row R = single Boss node
+            // 2. Fixed Node: The single node in the last row is the Boss
             Node bossNode = graph.Nodes.FirstOrDefault(n => n.Row == actSpec.Rows - 1);
             if (bossNode != null)
             {
@@ -330,52 +361,47 @@ namespace Pirate.MapGen
                 bossNode.Tags.Add("boss");
                 placedNodeIds.Add(bossNode.Id);
                 Debug.Log($"Assigned Boss to row {actSpec.Rows - 1}.");
-
-                // Ensure all nodes in the pre-boss row connect to the boss node
-                int preBossRow = actSpec.Rows - 2;
-                if (preBossRow >= 0)
-                {
-                    List<Node> preBossNodes = graph.Nodes.Where(n => n.Row == preBossRow).ToList();
-                    foreach (Node preBossNode in preBossNodes)
-                    {
-                        // Check if an edge already exists from preBossNode to bossNode
-                        if (!graph.Edges.Any(e => e.FromId == preBossNode.Id && e.ToId == bossNode.Id))
-                        {
-                            // Create and add the edge
-                            Edge newEdge = new Edge { Id = $"edge_{preBossNode.Row}_{preBossNode.Col}_{bossNode.Col}", FromId = preBossNode.Id, ToId = bossNode.Id };
-                            graph.Edges.Add(newEdge);
-                            Debug.Log($"Added missing edge from {preBossNode.Id} to {bossNode.Id}");
-                        }
-                    }
-                }
             }
 
-            // 3. Fixed Row: Row R-1 = all Port (pre-boss rest row)
+            // 3. Guaranteed Nodes: All nodes on the pre-boss row become Port nodes.
             int preBossPortRow = actSpec.Rows - 2;
             if (preBossPortRow >= 0)
             {
                 List<Node> preBossPortNodes = graph.Nodes.Where(n => n.Row == preBossPortRow).ToList();
                 foreach (Node node in preBossPortNodes)
                 {
-                    node.Type = NodeType.Port;
-                    node.Tags.Add("fixed_pre_boss_port");
-                    placedNodeIds.Add(node.Id);
+                    // This check is important to not override a potential pre-boss shop, etc. if that feature is added
+                    if (!placedNodeIds.Contains(node.Id))
+                    {
+                        node.Type = NodeType.Port;
+                        node.Tags.Add("guaranteed_pre_boss_port");
+                        placedNodeIds.Add(node.Id);
+                    }
                 }
-                Debug.Log($"Assigned all nodes in Row {preBossPortRow} to Port. Count: {preBossPortNodes.Count}");
+                Debug.Log($"Assigned all available nodes in Row {preBossPortRow} to Port. Count: {preBossPortNodes.Count(n => n.Type == NodeType.Port)}");
             }
 
-            // 4. Fixed Row: Row ⌈0.6R⌉ = all Treasure
-            int treasureRow = (int)Math.Ceiling(0.6 * actSpec.Rows);
-            if (treasureRow >= 0 && treasureRow < actSpec.Rows - 1) // Ensure within valid range and not boss row
+            // 4. Guaranteed Node: Place one Treasure node in the mid-act window.
+            if (rules.Windows.MidTreasureRows != null && rules.Windows.MidTreasureRows.Any())
             {
-                List<Node> midTreasureNodes = graph.Nodes.Where(n => n.Row == treasureRow).ToList();
-                foreach (Node node in midTreasureNodes)
+                // Find all available (un-typed) nodes within the treasure window rows.
+                List<Node> potentialTreasureNodes = graph.Nodes
+                    .Where(n => rules.Windows.MidTreasureRows.Contains(n.Row) && !placedNodeIds.Contains(n.Id))
+                    .ToList();
+
+                if (potentialTreasureNodes.Any())
                 {
-                    node.Type = NodeType.Treasure;
-                    node.Tags.Add("fixed_treasure_row");
-                    placedNodeIds.Add(node.Id);
+                    // Select one node at random to become the treasure node.
+                    Node treasureNode = potentialTreasureNodes[(int)(rng.NextULong() % (ulong)potentialTreasureNodes.Count)];
+                    treasureNode.Type = NodeType.Treasure;
+                    treasureNode.Tags.Add("guaranteed_treasure");
+                    placedNodeIds.Add(treasureNode.Id);
+                    Debug.Log($"Assigned Treasure to node {treasureNode.Id} in row {treasureNode.Row}.");
                 }
-                Debug.Log($"Assigned all nodes in Row {treasureRow} to Treasure. Count: {midTreasureNodes.Count}");
+                else
+                {
+                    Debug.LogWarning("Could not place guaranteed Treasure node: No available nodes found in the specified mid-act window.");
+                }
             }
         }
 
@@ -706,7 +732,12 @@ namespace Pirate.MapGen
         /// </summary>
         private bool CheckForCrossing(int a, int b, int c, int d)
         {
-            // Edges (a,b) and (c,d) cross if (a < c and b > d) or (a > c and b < d)
+            // If edges share a start or end node, they don't cross in a way we want to prevent.
+            if (a == c || b == d)
+            {
+                return false;
+            }
+            // Original crossing check for non-adjacent edges.
             return (a < c && b > d) || (a > c && b < d);
         }
 

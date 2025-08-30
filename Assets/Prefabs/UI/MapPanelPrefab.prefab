@@ -91,9 +91,17 @@ MonoBehaviour:
   rowHeight: 200
   padY: 80
   minSep: 200
-  jitterAmp: 50
+  jitterAmp: 0
   edgeWidth: 4
   dashLength: 10
   gapLength: 5
   curvePadding: 20
+  pathColors:
+  - {r: 1, g: 0, b: 0, a: 0.5}
+  - {r: 0, g: 1, b: 0, a: 0.5}
+  - {r: 0, g: 0, b: 1, a: 0.5}
+  - {r: 1, g: 1, b: 0, a: 0.5}
+  - {r: 1, g: 0, b: 1, a: 0.5}
+  - {r: 0, g: 1, b: 1, a: 0.5}
+  mergeColor: {r: 1, g: 1, b: 1, a: 0.7}
   centeringOffset: 250

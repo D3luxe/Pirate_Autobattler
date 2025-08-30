@@ -38,6 +38,18 @@ public sealed class MapView : MonoBehaviour
     public float gapLength = 5f;
     public float curvePadding = 20f;
 
+    [Header("Path Debug Colors")]
+    public Color[] pathColors = new Color[6] 
+    {
+        new Color(1, 0, 0, 0.5f), // Red
+        new Color(0, 1, 0, 0.5f), // Green
+        new Color(0, 0, 1, 0.5f), // Blue
+        new Color(1, 1, 0, 0.5f), // Yellow
+        new Color(1, 0, 1, 0.5f), // Magenta
+        new Color(0, 1, 1, 0.5f)  // Cyan
+    };
+    public Color mergeColor = new Color(1, 1, 1, 0.7f); // White
+
     public float centeringOffset = 0f; // New serialized field for fine-tuning centering
     private float _previousCenteringOffset = 0f; // Store previous value for OnValidate
 
@@ -213,6 +225,24 @@ public sealed class MapView : MonoBehaviour
             ve.name = n.id;
             ve.AddToClassList("map-node");
 
+            // --- Path Color Debugging ---
+            if (n.PathIndices != null && n.PathIndices.Count > 0)
+            {
+                if (n.PathIndices.Count > 1)
+                {
+                    ve.style.backgroundColor = mergeColor;
+                }
+                else
+                {
+                    int pathIndex = n.PathIndices.First();
+                    if (pathIndex < pathColors.Length)
+                    {
+                        ve.style.backgroundColor = pathColors[pathIndex];
+                    }
+                }
+            }
+            // --- End Path Color Debugging ---
+
             if (System.Enum.TryParse<PirateRoguelike.Data.EncounterType>(n.type, true, out var encounterType) && _iconLookup.TryGetValue(encounterType, out Sprite iconSprite))
             {
                 ve.style.backgroundImage = new StyleBackground(iconSprite);
@@ -337,12 +367,33 @@ public sealed class MapView : MonoBehaviour
     {
         var p2d = mgc.painter2D;
         p2d.lineWidth = edgeWidth;
-        p2d.strokeColor = Color.white;
 
         float patternLength = dashLength + gapLength;
 
         foreach (var e in edges)
         {
+            // --- Path Color Debugging ---
+            if (e.PathIndices != null && e.PathIndices.Count > 0)
+            {
+                if (e.PathIndices.Count > 1)
+                {
+                    p2d.strokeColor = mergeColor;
+                }
+                else
+                {
+                    int pathIndex = e.PathIndices.First();
+                    if (pathIndex < pathColors.Length)
+                    {
+                        p2d.strokeColor = pathColors[pathIndex];
+                    }
+                }
+            }
+            else
+            {
+                p2d.strokeColor = Color.white; // Default color
+            }
+            // --- End Path Color Debugging ---
+
             if (!visualNodePositions.TryGetValue(e.fromId, out Vector2 fromPos) || !visualNodePositions.TryGetValue(e.toId, out Vector2 toPos))
             {
                 Debug.LogWarning($"Missing position for edge {e.fromId} -> {e.toId}");

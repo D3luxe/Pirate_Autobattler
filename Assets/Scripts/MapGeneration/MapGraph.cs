@@ -21,6 +21,7 @@ namespace Pirate.MapGen
         public List<string> Tags { get; set; } = new List<string>();
         // Using a dictionary for meta to allow flexible key-value pairs
         public Dictionary<string, string> Meta { get; set; } = new Dictionary<string, string>();
+        public HashSet<int> PathIndices { get; set; } = new HashSet<int>();
     }
 
     [Serializable]
@@ -29,6 +30,7 @@ namespace Pirate.MapGen
         public string Id { get; set; }
         public string FromId { get; set; }
         public string ToId { get; set; }
+        public HashSet<int> PathIndices { get; set; } = new HashSet<int>();
     }
 
     public enum NodeType
