@@ -1,8 +1,24 @@
-Assets\Scripts\Core\GameSession.cs(76,99): error CS1061: 'SerializableItemInstance' does not contain a definition for 'rarity' and no accessible extension method 'rarity' accepting a first argument of type 'SerializableItemInstance' could be found (are you missing a using directive or an assembly reference?)
+Assets\Scripts\UI\TooltipController.cs(132,5): error CS8803: Top-level statements must precede namespace and type declarations.
 
-Assets\Scripts\Core\ShipState.cs(67,121): error CS1061: 'SerializableItemInstance' does not contain a definition for 'rarity' and no accessible extension method 'rarity' accepting a first argument of type 'SerializableItemInstance' could be found (are you missing a using directive or an assembly reference?)
+Assets\Scripts\UI\TooltipController.cs(132,5): error CS0106: The modifier 'private' is not valid for this item
 
-Assets\Scripts\Combat\ItemInstance.cs(26,24): error CS7036: There is no argument given that corresponds to the required formal parameter 'id' of 'SerializableItemInstance.SerializableItemInstance(string, float, float)'
+Assets\Scripts\UI\TooltipController.cs(145,5): error CS0106: The modifier 'public' is not valid for this item
 
-Assets\Scripts\Combat\ItemInstance.cs(29,17): error CS0117: 'SerializableItemInstance' does not contain a definition for 'rarity'
+Assets\Scripts\UI\TooltipController.cs(165,5): error CS0106: The modifier 'public' is not valid for this item
+
+Assets\Scripts\UI\TooltipController.cs(171,5): error CS0106: The modifier 'private' is not valid for this item
+
+Assets\Scripts\UI\TooltipController.cs(224,1): error CS1022: Type or namespace definition, or end-of-file expected
+
+Assets\Scripts\UI\TooltipController.cs(226,5): error CS0106: The modifier 'public' is not valid for this item
+
+Assets\Scripts\UI\TooltipController.cs(234,5): error CS0106: The modifier 'private' is not valid for this item
+
+Assets\Scripts\UI\TooltipController.cs(247,5): error CS0106: The modifier 'public' is not valid for this item
+
+Assets\Scripts\UI\TooltipController.cs(267,5): error CS0106: The modifier 'public' is not valid for this item
+
+Assets\Scripts\UI\TooltipController.cs(273,5): error CS0106: The modifier 'private' is not valid for this item
+
+Assets\Scripts\UI\TooltipController.cs(327,5): error CS0106: The modifier 'public' is not valid for this item
 

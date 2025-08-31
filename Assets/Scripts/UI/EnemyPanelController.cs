@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using PirateRoguelike.UI; // Make sure this namespace is correct for ShipPanelView
+using PirateRoguelike.Runtime; // NEW: Added for RuntimeItem
 
 /// <summary>
 /// Manages the enemy's UI panel in the battle scene.
@@ -10,6 +11,8 @@ public class EnemyPanelController : MonoBehaviour
 {
     [Tooltip("The UIDocument component for the enemy panel.")]
     [SerializeField] private UIDocument _enemyPanelDocument;
+    [SerializeField] private VisualTreeAsset _slotTemplate; // NEW: Slot UXML template
+    [SerializeField] private PlayerUIThemeSO _theme; // NEW: Player UI Theme for slot visuals
 
     private ShipState _enemyShipState;
 
@@ -88,23 +91,72 @@ public class EnemyPanelController : MonoBehaviour
     {
         if (_enemyShipState != null && _equipmentBar != null)
         {
-            // Clear existing equipment icons
             _equipmentBar.Clear();
 
             // Populate with current equipment
             foreach (var itemInstance in _enemyShipState.Equipped)
             {
-                var slot = new VisualElement();
-                slot.AddToClassList("slot"); 
+                var slotInstance = _slotTemplate.Instantiate();
+                var slotElement = slotInstance.Q<VisualElement>("slot");
+                
+                // Create SlotDataViewModel from RuntimeItem
+                var slotData = new SlotDataViewModel(itemInstance, 0); // Index might not be relevant here, using 0 for now
 
-                if (itemInstance != null && itemInstance.Def != null)
+                BindSlot(slotElement, slotData); // Bind visual data
+
+                // Register PointerEnter and PointerLeave events for tooltip
+                if (!slotData.IsEmpty && slotData.ItemData != null)
                 {
-                    var icon = new Image { sprite = itemInstance.Def.icon };
-                    icon.AddToClassList("slot__icon");
-                    slot.Add(icon);
+                    var currentItemData = slotData.ItemData; // Capture the current item data
+                    slotElement.RegisterCallback<PointerEnterEvent>(evt =>
+                    {
+                        TooltipController.Instance.Show(currentItemData, slotElement);
+                    });
+                    slotElement.RegisterCallback<PointerLeaveEvent>(evt =>
+                    {
+                        TooltipController.Instance.Hide();
+                    });
                 }
-                _equipmentBar.Add(slot);
+                _equipmentBar.Add(slotElement);
             }
+        }
+    }
+
+    private void BindSlot(VisualElement slotElement, ISlotViewData slotData)
+    {
+        var icon = slotElement.Q<Image>("icon");
+        icon.sprite = slotData.IsEmpty ? _theme.emptySlotBackground : slotData.Icon;
+        icon.style.visibility = slotData.IsEmpty ? Visibility.Visible : Visibility.Visible;
+
+        // Assign rarity frame from theme
+        var rarityFrame = slotElement.Q<Image>("rarity-frame");
+        if (!string.IsNullOrEmpty(slotData.Rarity))
+        {
+            switch (slotData.Rarity.ToLower())
+            {
+                case "bronze": rarityFrame.sprite = _theme.bronzeFrame; break;
+                case "silver": rarityFrame.sprite = _theme.silverFrame; break;
+                case "gold": rarityFrame.sprite = _theme.goldFrame; break;
+                case "diamond": rarityFrame.sprite = _theme.diamondFrame; break;
+            }
+        }
+        else
+        {
+            rarityFrame.sprite = null; // No frame for empty/unassigned rarity
+        }
+
+        slotElement.Q<VisualElement>("cooldown-overlay").style.scale = new Scale(new Vector2(1, slotData.CooldownPercent));
+
+        slotElement.ClearClassList();
+        slotElement.AddToClassList("slot");
+
+        if (slotData.IsEmpty) slotElement.AddToClassList("slot--empty");
+        if (slotData.IsDisabled) slotElement.AddToClassList("slot--disabled");
+        if (slotData.IsPotentialMergeTarget) slotElement.AddToClassList("slot--merge");
+
+        if (!string.IsNullOrEmpty(slotData.Rarity))
+        {
+            slotElement.AddToClassList($"rarity--{slotData.Rarity.ToLower()}");
         }
     }
 }

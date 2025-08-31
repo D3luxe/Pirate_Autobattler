@@ -51,3 +51,4 @@ MonoBehaviour:
   rewardUIPrefab: {fileID: 4782130974891231969, guid: 63fb0a46f00834d4b8bdea2eb7118b0d, type: 3}
   mapManagerPrefab: {fileID: 5280767250319595147, guid: 28e27271814713a4281cb30dc2ae41cd, type: 3}
   tooltipManagerPrefab: {fileID: 6294734344320484715, guid: c8173fb64b71637418ce567650adbe5c, type: 3}
+  _globalUIOverlayPrefab: {fileID: 8004934526173211991, guid: 6f2494b50d401fc4a83cb8fb9e1a5040, type: 3}

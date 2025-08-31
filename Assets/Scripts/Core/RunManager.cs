@@ -18,10 +18,12 @@ public class RunManager : MonoBehaviour
     [SerializeField] private GameObject rewardUIPrefab;
     [SerializeField] private GameObject mapManagerPrefab;
     [SerializeField] private GameObject tooltipManagerPrefab; // NEW: Tooltip Manager Prefab
+    [SerializeField] private GameObject _globalUIOverlayPrefab; // NEW: Global UI Overlay Prefab
 
     private PlayerPanelController _playerPanelController;
     private MapView _mapView;
     private TooltipController _tooltipController; // NEW: Tooltip Controller reference
+    private UIDocument _globalUIOverlayDocument; // NEW: Reference to the Global UI Overlay UIDocument
 
     private InputAction _saveHotkeyAction; // NEW: Input Action for save hotkey
 
@@ -66,8 +68,6 @@ public class RunManager : MonoBehaviour
             Debug.LogError("MapManager Prefab is not assigned in RunManager!");
         }
 
-        
-
         // Instantiate MapView UI from prefab
         if (mapViewPrefab != null)
         {
@@ -94,25 +94,6 @@ public class RunManager : MonoBehaviour
             Debug.LogError("RewardUI Prefab is not assigned in RunManager!");
         }
 
-        
-
-        // Instantiate MapView UI from prefab
-        if (mapViewPrefab != null)
-        {
-            GameObject mapViewInstance = Instantiate(mapViewPrefab, transform);
-            _mapView = mapViewInstance.GetComponent<MapView>();
-            // The UIDocument reference will now be handled by the prefab setup
-        }
-        else
-        {
-            Debug.LogError("MapView Prefab is not assigned in RunManager!");
-        }
-
-        if (_playerPanelController != null && _mapView != null)
-        {
-            _playerPanelController.SetMapPanel(_mapView);
-        }
-
         // Instantiate PlayerPanel UI
         if (playerPanelPrefab != null)
         {
@@ -122,6 +103,21 @@ public class RunManager : MonoBehaviour
         else
         {
             Debug.LogError("PlayerPanel Prefab is not assigned in RunManager!");
+        }
+
+        // Instantiate Global UI Overlay
+        if (_globalUIOverlayPrefab != null)
+        {
+            GameObject globalUIInstance = Instantiate(_globalUIOverlayPrefab, transform);
+            _globalUIOverlayDocument = globalUIInstance.GetComponent<UIDocument>();
+            if (_globalUIOverlayDocument == null)
+            {
+                Debug.LogError("GlobalUIOverlay Prefab does not have a UIDocument component!");
+            }
+        }
+        else
+        {
+            Debug.LogError("GlobalUIOverlay Prefab is not assigned in RunManager!");
         }
 
         // Instantiate TooltipManager UI
@@ -135,18 +131,14 @@ public class RunManager : MonoBehaviour
             Debug.LogError("TooltipManager Prefab is not assigned in RunManager!");
         }
 
-        // Initialize TooltipController after both PlayerPanel and TooltipManager are instantiated
-        if (_tooltipController != null && _playerPanelController != null)
+        // Initialize TooltipController using the Global UI Overlay's rootVisualElement
+        if (_tooltipController != null && _globalUIOverlayDocument != null)
         {
-            UIDocument playerPanelUIDocument = _playerPanelController.GetComponent<UIDocument>();
-            if (playerPanelUIDocument != null)
-            {
-                _tooltipController.Initialize(playerPanelUIDocument.rootVisualElement);
-            }
-            else
-            {
-                Debug.LogError("PlayerPanel Prefab does not have a UIDocument component!");
-            }
+            _tooltipController.Initialize(_globalUIOverlayDocument.rootVisualElement);
+        }
+        else
+        {
+            Debug.LogError("TooltipController or Global UI Overlay Document is null. Cannot initialize tooltip.");
         }
 
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -207,20 +199,6 @@ public class RunManager : MonoBehaviour
         if (_playerPanelController != null)
         {
             _playerPanelController.Initialize();
-        }
-
-        // Initialize TooltipController after PlayerPanel is initialized
-        if (_tooltipController != null && _playerPanelController != null)
-        {
-            UIDocument playerPanelUIDocument = _playerPanelController.GetComponent<UIDocument>(); // Get UIDocument from the instantiated PlayerPanel
-            if (playerPanelUIDocument != null)
-            {
-                _tooltipController.Initialize(playerPanelUIDocument.rootVisualElement);
-            }
-            else
-            {
-                Debug.LogError("PlayerPanel Prefab does not have a UIDocument component!");
-            }
         }
     }
 

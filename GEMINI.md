@@ -65,6 +65,7 @@
     -   **UI Systems:** Manages various UI elements and their interactions using UI Toolkit.
         -   **`TooltipController`**: A singleton `MonoBehaviour` responsible for managing the lifecycle, content population, positioning, and visibility of the item tooltip. It dynamically instantiates tooltip elements from UXML assets and attaches them to the main UI `rootVisualElement` (Player Panel's `UIDocument`'s root) to ensure correct z-ordering.
         -   **`EffectDisplay`**: A helper class used by `TooltipController` to dynamically display individual ability effects within the tooltip.
+        -   **`EnemyPanelController`**: Manages the enemy's UI panel, including dynamic equipment slot generation and tooltip integration.
 
 -   **Combat Tick Walkthrough (`CombatController.HandleTick`):**
     1.  **Sudden Death Check**: Initiates if battle exceeds 30 seconds; ships take increasing damage. (`CombatController.cs:71-86`)

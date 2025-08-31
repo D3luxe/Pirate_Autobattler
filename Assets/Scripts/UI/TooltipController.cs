@@ -1,19 +1,23 @@
-
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using PirateRoguelike.Runtime; // Added for RuntimeItem and RuntimeAbility
 using PirateRoguelike.Combat; // Added for IRuntimeContext
+using System.Collections; // Added for IEnumerator
 
 // Temporary dummy implementation for IRuntimeContext
-public class DummyRuntimeContext : IRuntimeContext { }
+public class DummyRuntimeContext : IRuntimeContext
+{
+    // Empty implementation
+}
 
 public class TooltipController : MonoBehaviour
 {
     public static TooltipController Instance { get; private set; }
 
-    [SerializeField] private VisualTreeAsset _tooltipUxml; // Re-added serialized field
-    private VisualElement _tooltip;
+    [SerializeField] private VisualTreeAsset _tooltipUxml;
+    private VisualElement _tooltipContainer; // Reference to the TemplateContainer
+    private VisualElement _tooltipPanelRoot; // Reference to the actual tooltip panel root
     private Label _titleLabel;
     private Label _timerText;
     private VisualElement _center;
@@ -38,26 +42,31 @@ public class TooltipController : MonoBehaviour
     public void Initialize(VisualElement mainUIRoot)
     {
         // Instantiate the tooltip from the UXML asset
-        _tooltip = _tooltipUxml.Instantiate();
-        _tooltip.style.position = Position.Absolute; // Force absolute positioning
-        mainUIRoot.Add(_tooltip); // Add to the main UI root
+        _tooltipContainer = _tooltipUxml.Instantiate();
+        _tooltipPanelRoot = _tooltipContainer.Q<VisualElement>("Tooltip"); // Query for the actual tooltip panel root
+        _tooltipContainer.style.position = Position.Absolute; // Force absolute positioning
+        mainUIRoot.Add(_tooltipContainer); // Add to the main UI root
 
         // Query for the main elements from the instantiated tooltip
-        _titleLabel = _tooltip.Q<Label>("TitleLabel");
-        _timerText = _tooltip.Q<Label>("TimerText");
-        _center = _tooltip.Q<VisualElement>("Center");
-        _footer = _tooltip.Q<VisualElement>("Footer");
+        _titleLabel = _tooltipPanelRoot.Q<Label>("TitleLabel");
+        _timerText = _tooltipPanelRoot.Q<Label>("TimerText");
+        _center = _tooltipPanelRoot.Q<VisualElement>("Center");
+        _footer = _tooltipPanelRoot.Q<VisualElement>("Footer");
 
         // Explicitly set initial position and hide
-        _tooltip.style.left = 0;
-        _tooltip.style.top = 0;
-        _tooltip.style.display = DisplayStyle.None;
-        _tooltip.RemoveFromClassList("tooltip--visible");
+        _tooltipContainer.style.left = 0;
+        _tooltipContainer.style.top = 0;
+        _tooltipPanelRoot.AddToClassList("tooltip--hidden");
     }
 
     public void Show(RuntimeItem runtimeItem, VisualElement targetElement)
     {
-        if (_tooltip == null) return; // Null check
+        if (_tooltipContainer == null || _tooltipPanelRoot == null) return; // Null check
+        StartCoroutine(ShowCoroutine(runtimeItem, targetElement));
+    }
+
+    private IEnumerator ShowCoroutine(RuntimeItem runtimeItem, VisualElement targetElement)
+    {
         Debug.Log($"TooltipController.Show() called for item: {runtimeItem.DisplayName}");
         _titleLabel.text = runtimeItem.DisplayName;
         _timerText.text = runtimeItem.CooldownSec > 0 ? $"{runtimeItem.CooldownSec}s" : "";
@@ -88,31 +97,33 @@ public class TooltipController : MonoBehaviour
             }
         }
 
-        _tooltip.style.display = DisplayStyle.Flex;
         // Remove and re-add to ensure it's the last child (highest z-order)
         // We need a reference to the root VisualElement of the main UI Document
         // This should be passed in during initialization.
-        // For now, let's assume _tooltip.parent is the correct root if it exists.
-        // If _tooltip.parent is null, it means it hasn't been added to any hierarchy yet.
-        VisualElement currentRoot = _tooltip.parent;
+        // For now, let's assume _tooltipContainer.parent is the correct root if it exists.
+        // If _tooltipContainer.parent is null, it means it hasn't been added to any hierarchy yet.
+        VisualElement currentRoot = _tooltipContainer.parent;
         if (currentRoot != null)
         {
-            _tooltip.RemoveFromHierarchy();
-            currentRoot.Add(_tooltip);
+            _tooltipContainer.RemoveFromHierarchy();
+            currentRoot.Add(_tooltipContainer);
         }
 
         // Positioning and animation
-        _tooltip.style.left = targetElement.worldBound.xMax;
-        _tooltip.style.top = targetElement.worldBound.y;
-        Debug.Log($"Tooltip position set to: X={_tooltip.style.left.value.ToString()}, Y={_tooltip.style.top.value.ToString()}");
-        _tooltip.AddToClassList("tooltip--visible");
+        _tooltipContainer.style.left = targetElement.worldBound.xMax;
+        _tooltipContainer.style.top = targetElement.worldBound.y;
+        Debug.Log($"Tooltip position set to: X={_tooltipContainer.style.left.value.ToString()}, Y={_tooltipContainer.style.top.value.ToString()}");
+        
+        _tooltipPanelRoot.RemoveFromClassList("tooltip--hidden");
+        yield return null; // Wait for one frame
+        _tooltipPanelRoot.AddToClassList("tooltip--visible");
     }
 
     public void Hide()
     {
-        if (_tooltip == null) return; // Null check
+        if (_tooltipContainer == null || _tooltipPanelRoot == null) return; // Null check
         Debug.Log("TooltipController.Hide() called.");
-        _tooltip.RemoveFromClassList("tooltip--visible");
-        _tooltip.style.display = DisplayStyle.None;
+        _tooltipPanelRoot.RemoveFromClassList("tooltip--visible");
+        _tooltipPanelRoot.AddToClassList("tooltip--hidden");
     }
 }

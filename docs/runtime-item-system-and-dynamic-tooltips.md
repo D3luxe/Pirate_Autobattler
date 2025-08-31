@@ -76,23 +76,24 @@ To ensure tooltips accurately reflect the dynamic state of items, the tooltip sy
 
 ## 4. Enemy Panel Integration
 
-The enemy panel has been updated to utilize the same robust item slot and tooltip setup as the player panel, leveraging the new runtime item system.
+The enemy panel now fully utilizes the new runtime item system and tooltip setup, with all logic consolidated into the `EnemyPanelController`. The previously separate `EnemyPanelView` is deprecated.
 
 ### 4.1. Core Components
 
-*   **`EnemyPanelView` (`Assets/Scripts/UI/EnemyPanel/EnemyPanelView.cs`):**
+*   **`EnemyPanelController` (`Assets/Scripts/UI/EnemyPanelController.cs`):**
     *   Manages the visual elements of the enemy ship panel (ship display, equipment slots).
-    *   Similar in structure and function to `PlayerPanelView`.
-
-*   **`EnemyPanelController` (`Assets/Scripts/UI/EnemyPanel/EnemyPanelController.cs`):**
-    *   Acts as an adapter between the enemy's `ShipState` data and the `EnemyPanelView`.
-    *   Populates the enemy's equipment slots with `ISlotViewData` instances, which now internally use `RuntimeItem`.
+    *   Acts as an adapter between the enemy's `ShipState` data and the UI.
+    *   Dynamically instantiates item slots from a UXML template.
+    *   Populates the enemy's equipment slots with `RuntimeItem` instances.
+    *   Registers pointer events for tooltip display.
     *   Subscribes to enemy `ShipState` events (`OnHealthChanged`, `OnEquipmentChanged`) to ensure the UI updates dynamically.
 
 ### 4.2. Integration
 
 *   The `EnemyPanelController` is instantiated and initialized within the `CombatController` (specifically in its `Init()` method), receiving the enemy's `ShipState`.
-*   This ensures that the enemy's equipped items are displayed with correct data and that tooltips function for them, reflecting any dynamic changes to their stats.
+*   It dynamically creates UI Toolkit `VisualElement`s for each equipped item, using a shared slot UXML template.
+*   It registers `PointerEnterEvent` and `PointerLeaveEvent` callbacks on these dynamically created slots.
+*   These callbacks trigger the `TooltipController.Show()` and `Hide()` methods, passing the `RuntimeItem` associated with the slot, ensuring that tooltips function correctly for enemy-equipped items and reflect any dynamic changes to their stats.
 
 ## 5. Benefits of the New System
 

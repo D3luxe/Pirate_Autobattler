@@ -16,13 +16,14 @@
     justify-content: center;
     width: 300px;
     flex-basis: 300px;
-    transition-duration: 0.2s;
     transition-property: opacity;
+    opacity: 0;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
 }
 
 .tooltip--hidden {
     opacity: 0;
-    display: none;
 }
 
 .tooltip--visible {

@@ -26,7 +26,7 @@ A `MonoBehaviour` script was created to manage the tooltip's state and content.
 
 -   **Responsibilities:**
     -   Acts as a singleton (`TooltipController.Instance`).
-    -   Instantiates the tooltip from `TooltipPanel.uxml` and adds it to the main UI `rootVisualElement` (Player Panel's `UIDocument`'s root) to ensure correct z-ordering.
+    -   Instantiates the tooltip from `TooltipPanel.uxml` and adds it to a global UI `rootVisualElement` to ensure correct z-ordering across all UI elements.
     -   Exposes a public `Show(ItemSO item, VisualElement targetElement)` method to display and position the tooltip.
     -   Exposes a public `Hide()` method to conceal the tooltip.
     -   Dynamically populates the tooltip's UXML fields with data from the provided `ItemSO`.
@@ -63,16 +63,21 @@ The `PlayerPanelView.cs` script was updated to trigger the tooltip for inventory
 
 ### Step 5: Create Tooltip Prefab and Integrate with `RunManager`
 
-A `TooltipManager` prefab was created and integrated into the `RunManager` for proper lifecycle management.
+A `TooltipManager` prefab was created and integrated into the `RunManager` for proper lifecycle management. Additionally, a `GlobalUIOverlay` prefab was introduced to manage the global UI layer for elements like tooltips.
 
 -   **`TooltipManager` Prefab Contents:**
     -   A `GameObject` with the `TooltipController.cs` script attached.
     -   The `TooltipPanel.uxml`, `ActiveEffect.uxml`, and `PassiveEffect.uxml` assets are assigned to the `TooltipController`'s serialized fields.
-    -   **Note:** The `UIDocument` component was removed from this GameObject, as the tooltip is now added to the Player Panel's `UIDocument`.
+    -   **Note:** The `UIDocument` component was removed from this GameObject, as the tooltip is now added to a global `UIDocument`.
+
+-   **`GlobalUIOverlay` Prefab Contents:**
+    -   A `GameObject` with a `UIDocument` component attached.
+    -   This `UIDocument` uses a simple UXML asset (e.g., `GlobalUIOverlay.uxml`) and serves as the root for all global UI elements, ensuring they render on top.
 
 -   **`RunManager.cs` Integration:**
     -   Instantiates the `TooltipManager` prefab in `Awake()`.
-    -   Initializes the `TooltipController` by passing the Player Panel's `UIDocument`'s `rootVisualElement` to its `Initialize()` method, ensuring correct z-ordering and initialization timing.
+    -   Instantiates the `GlobalUIOverlay` prefab in `Awake()`.
+    -   Initializes the `TooltipController` by passing the `GlobalUIOverlay`'s `UIDocument`'s `rootVisualElement` to its `Initialize()` method, ensuring correct z-ordering and initialization timing.
 
 ### Step 6: Create `ActiveEffect.uxml` and `PassiveEffect.uxml`
 

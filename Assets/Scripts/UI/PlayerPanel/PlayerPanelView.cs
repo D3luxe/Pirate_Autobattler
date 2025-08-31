@@ -27,7 +27,7 @@ namespace PirateRoguelike.UI
         public PlayerPanelView(VisualElement root, VisualTreeAsset slotTemplate, PlayerUIThemeSO theme, GameObject ownerGameObject)
         {
             _root = root;
-            _root.BringToFront();
+            //_root.BringToFront();
             _slotTemplate = slotTemplate;
             _theme = theme;
             _ownerGameObject = ownerGameObject; // Assign owner GameObject
