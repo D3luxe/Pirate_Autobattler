@@ -6,6 +6,7 @@ namespace PirateRoguelike.UI.Components
 {
     public partial class SlotElement : VisualElement
     {
+        public SlotManipulator Manipulator { get; set; }
 
         private Image _slotIcon;
         private Label _slotRarityLabel;
@@ -36,7 +37,7 @@ namespace PirateRoguelike.UI.Components
 
         private void OnAttachToPanel(AttachToPanelEvent evt)
         {
-            Debug.Log($"SlotElement.OnAttachToPanel: UserData is {this.userData?.GetType().Name ?? "NULL"}. SlotId: {(this.userData as ISlotViewData)?.SlotId ?? -1}");
+            //Debug.Log($"SlotElement.OnAttachToPanel: UserData is {this.userData?.GetType().Name ?? "NULL"}. SlotId: {(this.userData as ISlotViewData)?.SlotId ?? -1}");
             // Initial UI update after elements are queried
             UpdateUI();
         }

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System;
+using System.Linq; // Added for ToList()
 using PirateRoguelike.UI.Components; // Added for SlotElement
 
 namespace PirateRoguelike.UI
@@ -18,6 +19,7 @@ namespace PirateRoguelike.UI
         {
             _slotData = slotData;
             _isDragging = false;
+            Debug.Log($"SlotManipulator: Constructor called for Slot ID: {slotData.SlotId}");
         }
 
         protected override void RegisterCallbacksOnTarget()
@@ -37,6 +39,7 @@ namespace PirateRoguelike.UI
             target.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
             target.UnregisterCallback<PointerUpEvent>(OnPointerUp);
             target.UnregisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
+            Debug.Log($"SlotManipulator: UnregisterCallbacksFromTarget called for Slot ID: {_slotData.SlotId}");
         }
 
         private void OnPointerDown(PointerDownEvent evt)
@@ -102,6 +105,7 @@ namespace PirateRoguelike.UI
 
             if (dropTargetElement != null && dropSlotData != null) // Ensure dropSlotData is not null
             {
+                Debug.Log($"OnSlotDropped Event: From Slot ID: {_slotData.SlotId}, From Container: {_fromContainer}, To Slot ID: {dropSlotData.SlotId}, To Container: {toContainer}");
                 PlayerPanelEvents.OnSlotDropped?.Invoke(_slotData.SlotId, _fromContainer, dropSlotData.SlotId, toContainer);
             }
 
@@ -169,8 +173,6 @@ namespace PirateRoguelike.UI
                 }
                 current = current.parent;
             }
-            // Default or error case, should ideally not happen if all slots are in a defined container
- //           Debug.LogWarning($"Slot element {slotElement.name} not found within a known container (equipment-bar or inventory-container). Defaulting to Inventory.");
             return SlotContainerType.Inventory;
         }
 
@@ -181,6 +183,11 @@ namespace PirateRoguelike.UI
             _ghostIcon = null;
             _lastHoveredSlot?.RemoveFromClassList("slot--hover");
             _lastHoveredSlot = null;
+        }
+
+        public void Dispose()
+        {
+            UnregisterCallbacksFromTarget();
         }
     }
 }

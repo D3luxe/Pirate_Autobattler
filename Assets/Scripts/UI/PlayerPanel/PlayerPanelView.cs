@@ -111,7 +111,11 @@ namespace PirateRoguelike.UI
             container.Clear();
             foreach (var slotData in slots)
             {
-                container.Add(CreateSlotElement(slotData));
+                SlotElement newSlotElement = CreateSlotElement(slotData);
+                container.Add(newSlotElement);
+                SlotManipulator newManipulator = new SlotManipulator(slotData);
+                newSlotElement.AddManipulator(newManipulator);
+                newSlotElement.Manipulator = newManipulator; // Assign to new property
             }
 
             // Subscribe to collection changes
@@ -132,6 +136,11 @@ namespace PirateRoguelike.UI
                             var elementToRemove = container.Children().FirstOrDefault(e => e.userData == oldItem);
                             if (elementToRemove != null)
                             {
+                                // Dispose manipulator before removing element
+                                if (elementToRemove is SlotElement oldSlotElement && oldSlotElement.Manipulator != null)
+                                {
+                                    oldSlotElement.Manipulator.Dispose(); // Call Dispose
+                                }
                                 container.Remove(elementToRemove);
                             }
                         }
@@ -143,12 +152,21 @@ namespace PirateRoguelike.UI
                             var elementToRemove = container.Children().FirstOrDefault(e => e.userData == oldItem);
                             if (elementToRemove != null)
                             {
+                                // Dispose manipulator before removing element
+                                if (elementToRemove is SlotElement oldSlotElement && oldSlotElement.Manipulator != null)
+                                {
+                                    oldSlotElement.Manipulator.Dispose(); // Call Dispose
+                                }
                                 container.Remove(elementToRemove);
                             }
                         }
                         foreach (ISlotViewData newItem in args.NewItems)
                         {
-                            container.Insert(args.NewStartingIndex, CreateSlotElement(newItem));
+                            SlotElement newSlotElement = CreateSlotElement(newItem);
+                            container.Insert(args.NewStartingIndex, newSlotElement);
+                            SlotManipulator newManipulator = new SlotManipulator(newItem);
+                            newSlotElement.AddManipulator(newManipulator);
+                            newSlotElement.Manipulator = newManipulator; // Assign to new property
                         }
                         break;
                     case NotifyCollectionChangedAction.Move:
@@ -162,10 +180,22 @@ namespace PirateRoguelike.UI
                         break;
                     case NotifyCollectionChangedAction.Reset:
                         // Clear all and re-add
+                        // Dispose manipulators from all existing elements before clearing
+                        foreach (var child in container.Children().ToList()) // ToList to avoid modifying collection while iterating
+                        {
+                            if (child is SlotElement oldSlotElement && oldSlotElement.Manipulator != null)
+                            {
+                                oldSlotElement.Manipulator.Dispose(); // Call Dispose
+                            }
+                        }
                         container.Clear();
                         foreach (var slotData in slots)
                         {
-                            container.Add(CreateSlotElement(slotData));
+                            SlotElement newSlotElement = CreateSlotElement(slotData);
+                            container.Add(newSlotElement);
+                            SlotManipulator newManipulator = new SlotManipulator(slotData);
+                            newSlotElement.AddManipulator(newManipulator);
+                            newSlotElement.Manipulator = newManipulator; // Assign to new property
                         }
                         break;
                 }
@@ -177,7 +207,7 @@ namespace PirateRoguelike.UI
             SlotElement slotElement = new SlotElement();
             slotElement.userData = slotData; // Store view model in userData for easy lookup
             //Debug.Log($"CreateSlotElement: Setting userData for slot {slotData.SlotId}. IsEmpty: {slotData.IsEmpty}. UserData type: {slotElement.userData.GetType().Name}");
-            slotElement.AddManipulator(new SlotManipulator(slotData));
+            // Manipulator is now added in BindSlots after element is added to container
             slotElement.Bind(slotData);
 
             // Register PointerEnter and PointerLeave events for tooltip

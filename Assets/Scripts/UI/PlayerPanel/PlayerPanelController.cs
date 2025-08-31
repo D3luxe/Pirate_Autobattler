@@ -105,19 +105,59 @@ namespace PirateRoguelike.UI
 
         private void UpdateEquipmentSlots()
         {
-            _equipmentSlots.Clear();
-            foreach (var slotVm in GameSession.PlayerShip.Equipped.Select((item, index) => new SlotDataViewModel(item, index)).Cast<ISlotViewData>()) 
+            var currentEquipped = GameSession.PlayerShip.Equipped;
+            // Ensure _equipmentSlots has the correct count
+            while (_equipmentSlots.Count < currentEquipped.Count())
             {
-                _equipmentSlots.Add(slotVm);
+                _equipmentSlots.Add(null); // Add placeholders if new items are more than current slots
+            }
+            while (_equipmentSlots.Count > currentEquipped.Count())
+            {
+                _equipmentSlots.RemoveAt(_equipmentSlots.Count - 1); // Remove excess slots
+            }
+
+            for (int i = 0; i < currentEquipped.Count(); i++)
+            {
+                ISlotViewData newSlotData = new SlotDataViewModel(currentEquipped[i], i);
+                // Check if the item has changed or if the slot is empty and now has an item
+                if (_equipmentSlots[i] == null || 
+                    _equipmentSlots[i].SlotId != newSlotData.SlotId || 
+                    _equipmentSlots[i].IsEmpty != newSlotData.IsEmpty ||
+                    (_equipmentSlots[i].ItemData == null && newSlotData.ItemData != null) || // Empty to filled
+                    (_equipmentSlots[i].ItemData != null && newSlotData.ItemData == null) || // Filled to empty
+                    (_equipmentSlots[i].ItemData != null && newSlotData.ItemData != null && ((SlotDataViewModel)_equipmentSlots[i]).ItemInstanceId != ((SlotDataViewModel)newSlotData).ItemInstanceId))
+                {
+                    _equipmentSlots[i] = newSlotData;
+                }
             }
         }
 
         private void UpdateInventorySlots()
         {
-            _inventorySlots.Clear();
-            foreach (var slotVm in GameSession.Inventory.Items.Select((item, index) => new SlotDataViewModel(item, index)).Cast<ISlotViewData>()) 
+            var currentInventory = GameSession.Inventory.Items;
+            // Ensure _inventorySlots has the correct count
+            while (_inventorySlots.Count < currentInventory.Count())
             {
-                _inventorySlots.Add(slotVm);
+                _inventorySlots.Add(null); // Add placeholders if new items are more than current slots
+            }
+            while (_inventorySlots.Count > currentInventory.Count())
+            {
+                _inventorySlots.RemoveAt(_inventorySlots.Count - 1); // Remove excess slots
+            }
+
+            for (int i = 0; i < currentInventory.Count(); i++)
+            {
+                ISlotViewData newSlotData = new SlotDataViewModel(currentInventory[i], i);
+                // Check if the item has changed or if the slot is empty and now has an item
+                if (_inventorySlots[i] == null || 
+                    _inventorySlots[i].SlotId != newSlotData.SlotId || 
+                    _inventorySlots[i].IsEmpty != newSlotData.IsEmpty ||
+                    (_inventorySlots[i].ItemData == null && newSlotData.ItemData != null) || // Empty to filled
+                    (_inventorySlots[i].ItemData != null && newSlotData.ItemData == null) || // Filled to empty
+                    (_inventorySlots[i].ItemData != null && newSlotData.ItemData != null && ((SlotDataViewModel)_inventorySlots[i]).ItemInstanceId != ((SlotDataViewModel)newSlotData).ItemInstanceId))
+                {
+                    _inventorySlots[i] = newSlotData;
+                }
             }
         }
     }
@@ -161,6 +201,7 @@ namespace PirateRoguelike.UI
         }
         public bool IsPotentialMergeTarget => false; // TODO: Hook up merge logic
         public RuntimeItem ItemData => _item?.RuntimeItem;
+        public string ItemInstanceId => _item?.Def.id; 
     }
 
 
@@ -249,83 +290,49 @@ namespace PirateRoguelike.UI
         }
         private void HandleSlotDropped(int fromSlotId, SlotContainerType fromContainer, int toSlotId, SlotContainerType toContainer)
         {
-            Debug.Log($"HandleSlotDropped: From {fromContainer} slot {fromSlotId} to {toContainer} slot {toSlotId}");
-
             if (fromContainer == SlotContainerType.Inventory && toContainer == SlotContainerType.Inventory)
             {
-                Debug.Log($"HandleSlotDropped: Swapping items within inventory: {fromSlotId} and {toSlotId}");
                 GameSession.Inventory.SwapItems(fromSlotId, toSlotId);
             }
             else if (fromContainer == SlotContainerType.Equipment && toContainer == SlotContainerType.Equipment)
             {
-                Debug.Log($"HandleSlotDropped: Swapping items within equipment: {fromSlotId} and {toSlotId}");
                 GameSession.PlayerShip.SwapEquipment(fromSlotId, toSlotId); // Use SwapEquipment
             }
             else if (fromContainer == SlotContainerType.Inventory && toContainer == SlotContainerType.Equipment)
             {
-                Debug.Log($"HandleSlotDropped: Equipping item from inventory slot {fromSlotId} to equipment slot {toSlotId}");
                 ItemInstance itemToEquip = GameSession.Inventory.GetItemAt(fromSlotId);
-                Debug.Log($"HandleSlotDropped: Item to equip: {itemToEquip?.Def.displayName ?? "NULL"}");
                 if (itemToEquip != null)
                 {
                     ItemInstance equippedItem = GameSession.PlayerShip.GetEquippedItem(toSlotId);
-                    Debug.Log($"HandleSlotDropped: Currently equipped item at {toSlotId}: {equippedItem?.Def.displayName ?? "NULL"}");
                     if (equippedItem != null)
                     {
-                        Debug.Log($"HandleSlotDropped: Equipment slot {toSlotId} is occupied. Swapping {itemToEquip.Def.displayName} with {equippedItem.Def.displayName}.");
                         GameSession.PlayerShip.SetEquippedAt(toSlotId, itemToEquip);
                         GameSession.Inventory.SetItemAt(fromSlotId, equippedItem);
                     }
                     else
                     {
-                        Debug.Log($"HandleSlotDropped: Equipment slot {toSlotId} is empty. Moving {itemToEquip.Def.displayName}.");
                         GameSession.PlayerShip.SetEquippedAt(toSlotId, itemToEquip);
                         GameSession.Inventory.RemoveItemAt(fromSlotId);
                     }
-
-                    Debug.Log($"HandleSlotDropped: After equip - Equipped slot {toSlotId} has {GameSession.PlayerShip.GetEquippedItem(toSlotId)?.Def.displayName ?? "NULL"}");
-                    Debug.Log($"HandleSlotDropped: After equip - Inventory slot {fromSlotId} has {GameSession.Inventory.GetItemAt(fromSlotId)?.Def.displayName ?? "NULL"}");
-                }
-                else
-                {
-                    Debug.LogWarning($"HandleSlotDropped: Item to equip from inventory slot {fromSlotId} was NULL.");
                 }
             }
             else if (fromContainer == SlotContainerType.Equipment && toContainer == SlotContainerType.Inventory)
             {
-                Debug.Log($"HandleSlotDropped: Unequipping from equipment slot {fromSlotId} to inventory slot {toSlotId}");
                 ItemInstance itemToUnequip = GameSession.PlayerShip.GetEquippedItem(fromSlotId);
-                Debug.Log($"HandleSlotDropped: Item to unequip: {itemToUnequip?.Def.displayName ?? "NULL"}");
-
                 if (itemToUnequip != null)
                 {
                     ItemInstance inventoryItem = GameSession.Inventory.GetItemAt(toSlotId);
-                    Debug.Log($"HandleSlotDropped: Currently in inventory slot {toSlotId}: {inventoryItem?.Def.displayName ?? "NULL"}");
-
                     if (inventoryItem != null)
                     {
-                        Debug.Log($"HandleSlotDropped: Inventory slot {toSlotId} is occupied. Swapping {itemToUnequip.Def.displayName} with {inventoryItem.Def.displayName}.");
                         GameSession.Inventory.SetItemAt(toSlotId, itemToUnequip);
                         GameSession.PlayerShip.SetEquippedAt(fromSlotId, inventoryItem);
                     }
                     else
                     {
-                        Debug.Log($"HandleSlotDropped: Inventory slot {toSlotId} is empty. Moving {itemToUnequip.Def.displayName}.");
                         GameSession.Inventory.AddItemAt(itemToUnequip, toSlotId);
                         GameSession.PlayerShip.RemoveEquippedAt(fromSlotId);
                     }
-
-                    Debug.Log($"HandleSlotDropped: After unequip - Equipped slot {fromSlotId} has {GameSession.PlayerShip.GetEquippedItem(fromSlotId)?.Def.displayName ?? "NULL"}");
-                    Debug.Log($"HandleSlotDropped: After unequip - Inventory slot {toSlotId} has {GameSession.Inventory.GetItemAt(toSlotId)?.Def.displayName ?? "NULL"}");
                 }
-                else
-                {
-                    Debug.LogWarning($"HandleSlotDropped: Item to unequip from equipment slot {fromSlotId} was NULL.");
-                }
-            }
-            else
-            {
-                Debug.LogWarning($"Unhandled slot drop: From {fromContainer} to {toContainer}");
             }
         }
 
