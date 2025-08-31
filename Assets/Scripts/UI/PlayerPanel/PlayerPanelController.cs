@@ -44,6 +44,7 @@ namespace PirateRoguelike.UI
         public bool IsDisabled => false; // TODO: Hook up stun/disable logic
         public float CooldownPercent => (_item == null || _item.Def.cooldownSec <= 0) ? 0 : _item.CooldownRemaining / _item.Def.cooldownSec;
         public bool IsPotentialMergeTarget => false; // TODO: Hook up merge logic
+        public ItemSO ItemData => _item?.Def; // New: Expose the ItemSO
     }
 
 
@@ -66,7 +67,7 @@ namespace PirateRoguelike.UI
         public void Initialize()
         {
             var root = GetComponent<UIDocument>().rootVisualElement;
-            _panelView = new PlayerPanelView(root, _slotTemplate, _theme);
+            _panelView = new PlayerPanelView(root, _slotTemplate, _theme, this.gameObject);
 
             // Get reference to the MapToggle button
             _mapToggleButton = root.Q<Button>("MapToggle");

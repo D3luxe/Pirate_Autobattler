@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="ActiveEffect" class="active-effect-container" style="flex-grow: 1; margin-right: 15%; margin-left: 15%;">
+        <ui:VisualElement style="flex-grow: 0; width: 16px; height: 16px; flex-shrink: 0; background-image: url(&quot;project://database/Assets/Art/UI/Depth.png?fileID=2800000&amp;guid=909ea20a5b5b87c46b5d50d4b76f74fb&amp;type=3#Depth&quot;);" />
+        <ui:Label text="Deal 5 damage" name="TitleLabel" class="active-effect-text" style="-unity-font-style: normal; -unity-text-align: middle-center; overflow: visible; flex-wrap: wrap; white-space: normal;" />
+    </ui:VisualElement>
+</ui:UXML>

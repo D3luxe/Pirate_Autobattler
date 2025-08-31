@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.UIElements;
 using PirateRoguelike.Data;
@@ -22,6 +23,9 @@ public partial class ShopItemViewUI : VisualElement
         _buyItemButton = this.Q<Button>("BuyItemButton");
 
         _buyItemButton.clicked += OnBuyItemClicked;
+
+        RegisterCallback<PointerEnterEvent>(OnPointerEnter);
+        RegisterCallback<PointerLeaveEvent>(OnPointerLeave);
     }
 
     public void Setup(VisualTreeAsset uxml, StyleSheet uss)
@@ -51,5 +55,18 @@ public partial class ShopItemViewUI : VisualElement
         {
             _shopManager.BuyItem(_itemInstance.Def);
         }
+    }
+
+    private void OnPointerEnter(PointerEnterEvent evt)
+    {
+        if (_itemInstance != null)
+        {
+            TooltipController.Instance.Show(_itemInstance.Def, this);
+        }
+    }
+
+    private void OnPointerLeave(PointerLeaveEvent evt)
+    {
+        TooltipController.Instance.Hide();
     }
 }

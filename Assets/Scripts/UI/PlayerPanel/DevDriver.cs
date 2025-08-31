@@ -15,6 +15,7 @@ namespace PirateRoguelike.UI
         public bool IsDisabled { get; set; }
         public float CooldownPercent { get; set; }
         public bool IsPotentialMergeTarget { get; set; }
+        public ItemSO ItemData { get; set; } // New: Expose the ItemSO
     }
 
     public class MockShipViewData : IShipViewData
@@ -51,7 +52,7 @@ namespace PirateRoguelike.UI
         void Start()
         {
             var root = GetComponent<UIDocument>().rootVisualElement;
-            _panelView = new PlayerPanelView(root, _slotTemplate, _theme);
+            _panelView = new PlayerPanelView(root, _slotTemplate, _theme, this.gameObject);
 
             // Create Mock Data
             var mockData = new MockPlayerPanelData

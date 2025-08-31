@@ -22,12 +22,15 @@ namespace PirateRoguelike.UI
         private Button _pauseButton, _settingsButton, _battleSpeedButton, _mapToggleButton;
         private Image _battleSpeedIcon;
 
-        public PlayerPanelView(VisualElement root, VisualTreeAsset slotTemplate, PlayerUIThemeSO theme)
+        private GameObject _ownerGameObject; // New field
+
+        public PlayerPanelView(VisualElement root, VisualTreeAsset slotTemplate, PlayerUIThemeSO theme, GameObject ownerGameObject)
         {
             _root = root;
             _root.BringToFront();
             _slotTemplate = slotTemplate;
             _theme = theme;
+            _ownerGameObject = ownerGameObject; // Assign owner GameObject
             _root.pickingMode = PickingMode.Ignore; // Let clicks pass through the root container
             QueryElements();
             RegisterCallbacks();
@@ -117,6 +120,20 @@ namespace PirateRoguelike.UI
                 slotElement.AddManipulator(new SlotManipulator(slots[i])); // Pass ISlotViewData to manipulator
 
                 BindSlot(slotElement, slots[i]);
+
+                // Register PointerEnter and PointerLeave events for tooltip
+                if (!slots[i].IsEmpty && slots[i].ItemData != null)
+                {
+                    var currentSlotData = slots[i]; // Capture the current slot data
+                    slotElement.RegisterCallback<PointerEnterEvent>(evt =>
+                    {
+                        TooltipController.Instance.Show(currentSlotData.ItemData, slotElement);
+                    });
+                    slotElement.RegisterCallback<PointerLeaveEvent>(evt =>
+                    {
+                        TooltipController.Instance.Hide();
+                    });
+                }
             }
         }
 
