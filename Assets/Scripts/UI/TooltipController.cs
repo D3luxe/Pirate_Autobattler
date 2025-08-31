@@ -23,6 +23,10 @@ public class TooltipController : MonoBehaviour
     private VisualElement _center;
     private VisualElement _footer;
 
+    private Coroutine _currentTooltipCoroutine; // NEW: Field to hold the current coroutine
+    public bool IsTooltipVisible { get; private set; } // NEW: Flag to track tooltip visibility
+
+
     [SerializeField] private VisualTreeAsset _activeEffectUxml;
     [SerializeField] private VisualTreeAsset _passiveEffectUxml;
 
@@ -48,7 +52,7 @@ public class TooltipController : MonoBehaviour
         mainUIRoot.Add(_tooltipContainer); // Add to the main UI root
 
         // Query for the main elements from the instantiated tooltip
-        _titleLabel = _tooltipPanelRoot.Q<Label>("TitleLabel");
+                _titleLabel = _tooltipPanelRoot.Q<Label>("TitleLabel");
         _timerText = _tooltipPanelRoot.Q<Label>("TimerText");
         _center = _tooltipPanelRoot.Q<VisualElement>("Center");
         _footer = _tooltipPanelRoot.Q<VisualElement>("Footer");
@@ -62,12 +66,19 @@ public class TooltipController : MonoBehaviour
     public void Show(RuntimeItem runtimeItem, VisualElement targetElement)
     {
         if (_tooltipContainer == null || _tooltipPanelRoot == null) return; // Null check
-        StartCoroutine(ShowCoroutine(runtimeItem, targetElement));
+
+        if (_currentTooltipCoroutine != null) // NEW: Stop existing coroutine
+        {
+            StopCoroutine(_currentTooltipCoroutine);
+        }
+        _currentTooltipCoroutine = StartCoroutine(ShowCoroutine(runtimeItem, targetElement)); // NEW: Assign coroutine
+        IsTooltipVisible = true; // NEW: Set flag to true
     }
 
     private IEnumerator ShowCoroutine(RuntimeItem runtimeItem, VisualElement targetElement)
     {
         Debug.Log($"TooltipController.Show() called for item: {runtimeItem.DisplayName}");
+        _tooltipPanelRoot.style.visibility = Visibility.Visible;
         _titleLabel.text = runtimeItem.DisplayName;
         _timerText.text = runtimeItem.CooldownSec > 0 ? $"{runtimeItem.CooldownSec}s" : "";
 
@@ -117,13 +128,35 @@ public class TooltipController : MonoBehaviour
         _tooltipPanelRoot.RemoveFromClassList("tooltip--hidden");
         yield return null; // Wait for one frame
         _tooltipPanelRoot.AddToClassList("tooltip--visible");
+        
+        _currentTooltipCoroutine = null; // NEW: Clear coroutine reference
     }
 
     public void Hide()
     {
         if (_tooltipContainer == null || _tooltipPanelRoot == null) return; // Null check
+        if (!IsTooltipVisible) return; // NEW: Only hide if currently visible
+
+        if (_currentTooltipCoroutine != null) // NEW: Stop existing coroutine
+        {
+            StopCoroutine(_currentTooltipCoroutine);
+        }
+        _currentTooltipCoroutine = StartCoroutine(HideCoroutine()); // NEW: Assign coroutine
+        IsTooltipVisible = false; // NEW: Set flag to false
+    }
+
+    private IEnumerator HideCoroutine()
+    {
         Debug.Log("TooltipController.Hide() called.");
         _tooltipPanelRoot.RemoveFromClassList("tooltip--visible");
         _tooltipPanelRoot.AddToClassList("tooltip--hidden");
+
+        // Wait for the opacity transition to complete (0.2 seconds as per USS)
+        yield return new WaitForSeconds(0.2f); 
+
+        // Now set visibility to hidden
+        _tooltipPanelRoot.style.visibility = Visibility.Hidden;
+        
+        _currentTooltipCoroutine = null; // NEW: Clear coroutine reference
     }
 }

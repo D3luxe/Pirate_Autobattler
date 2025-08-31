@@ -47,6 +47,9 @@ namespace PirateRoguelike.UI
                 return;
             }
 
+            // Hide the tooltip when a drag operation begins
+            TooltipController.Instance.Hide();
+
             _startPosition = evt.position;
             target.CapturePointer(evt.pointerId);
             _isDragging = true;

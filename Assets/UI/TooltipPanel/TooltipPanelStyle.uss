@@ -25,7 +25,6 @@
 .tooltip--hidden {
     opacity: 0;
 }
-
 .tooltip--visible {
     opacity: 1;
 }

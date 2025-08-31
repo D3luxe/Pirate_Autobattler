@@ -121,19 +121,27 @@ namespace PirateRoguelike.UI
 
                 BindSlot(slotElement, slots[i]);
 
-                // Register PointerEnter and PointerLeave events for tooltip
-                if (!slots[i].IsEmpty && slots[i].ItemData != null)
+                // Register PointerEnter and PointerLeave events for tooltip for ALL slots
+                var currentSlotData = slots[i]; // Capture the current slot data
+                slotElement.RegisterCallback<PointerEnterEvent>(evt =>
                 {
-                    var currentSlotData = slots[i]; // Capture the current slot data
-                    slotElement.RegisterCallback<PointerEnterEvent>(evt =>
+                    if (!currentSlotData.IsEmpty && currentSlotData.ItemData != null)
                     {
                         TooltipController.Instance.Show(currentSlotData.ItemData, slotElement);
-                    });
-                    slotElement.RegisterCallback<PointerLeaveEvent>(evt =>
+                    }
+                    else
+                    {
+                        // If entering an empty slot, ensure tooltip is hidden
+                        TooltipController.Instance.Hide();
+                    }
+                });
+                slotElement.RegisterCallback<PointerLeaveEvent>(evt =>
+                {
+                    if (TooltipController.Instance.IsTooltipVisible) // NEW: Check if tooltip is visible
                     {
                         TooltipController.Instance.Hide();
-                    });
-                }
+                    }
+                });
             }
         }
 
