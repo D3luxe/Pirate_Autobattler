@@ -77,7 +77,7 @@ public class TooltipController : MonoBehaviour
 
     private IEnumerator ShowCoroutine(RuntimeItem runtimeItem, VisualElement targetElement)
     {
-        Debug.Log($"TooltipController.Show() called for item: {runtimeItem.DisplayName}");
+        //Debug.Log($"TooltipController.Show() called for item: {runtimeItem.DisplayName}");
         _tooltipPanelRoot.style.visibility = Visibility.Visible;
         _titleLabel.text = runtimeItem.DisplayName;
         _timerText.text = runtimeItem.CooldownSec > 0 ? $"{runtimeItem.CooldownSec}s" : "";
@@ -123,7 +123,7 @@ public class TooltipController : MonoBehaviour
         // Positioning and animation
         _tooltipContainer.style.left = targetElement.worldBound.xMax;
         _tooltipContainer.style.top = targetElement.worldBound.y;
-        Debug.Log($"Tooltip position set to: X={_tooltipContainer.style.left.value.ToString()}, Y={_tooltipContainer.style.top.value.ToString()}");
+        //Debug.Log($"Tooltip position set to: X={_tooltipContainer.style.left.value.ToString()}, Y={_tooltipContainer.style.top.value.ToString()}");
         
         _tooltipPanelRoot.RemoveFromClassList("tooltip--hidden");
         yield return null; // Wait for one frame
@@ -147,7 +147,7 @@ public class TooltipController : MonoBehaviour
 
     private IEnumerator HideCoroutine()
     {
-        Debug.Log("TooltipController.Hide() called.");
+        //Debug.Log("TooltipController.Hide() called.");
         _tooltipPanelRoot.RemoveFromClassList("tooltip--visible");
         _tooltipPanelRoot.AddToClassList("tooltip--hidden");
 

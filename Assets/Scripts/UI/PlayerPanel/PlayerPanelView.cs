@@ -1,37 +1,39 @@
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq; // Added
 using UnityEngine;
 using UnityEngine.UIElements;
+using PirateRoguelike.UI.Components; // Added for ShipDisplayElement and SlotElement
+using PirateRoguelike.UI.Utilities; // Added for BindingUtility
+using PirateRoguelike.Shared; // Added for ObservableList
 
 namespace PirateRoguelike.UI
 {
     public class PlayerPanelView
     {
         private VisualElement _root;
-        private VisualTreeAsset _slotTemplate;
+        
         private PlayerUIThemeSO _theme;
         private int _battleSpeed = 1;
 
         // --- Queried Elements ---
-        private ShipPanelView _shipPanelView;
+        private ShipDisplayElement _shipDisplayElement; // Replaced ShipPanelView
         private VisualElement _equipmentBar;
-        private VisualElement _inventoryContainer; // New
-        private VisualElement _mainContainer; // The actual panel background/container
-        private List<VisualElement> _equipmentSlotElements = new List<VisualElement>();
-        private List<VisualElement> _inventorySlotElements = new List<VisualElement>();
+        private VisualElement _inventoryContainer;
+        private VisualElement _mainContainer;
+        
         private Label _goldLabel, _livesLabel, _depthLabel;
         private Button _pauseButton, _settingsButton, _battleSpeedButton, _mapToggleButton;
         private Image _battleSpeedIcon;
 
-        private GameObject _ownerGameObject; // New field
+        private GameObject _ownerGameObject;
 
-        public PlayerPanelView(VisualElement root, VisualTreeAsset slotTemplate, PlayerUIThemeSO theme, GameObject ownerGameObject)
+        public PlayerPanelView(VisualElement root, PlayerUIThemeSO theme, GameObject ownerGameObject)
         {
             _root = root;
-            //_root.BringToFront();
-            _slotTemplate = slotTemplate;
             _theme = theme;
-            _ownerGameObject = ownerGameObject; // Assign owner GameObject
-            _root.pickingMode = PickingMode.Ignore; // Let clicks pass through the root container
+            _ownerGameObject = ownerGameObject;
+            // Removed: _root.pickingMode = PickingMode.Ignore;
             QueryElements();
             RegisterCallbacks();
         }
@@ -41,7 +43,9 @@ namespace PirateRoguelike.UI
             _mainContainer = _root.Q("main-container");
             if (_mainContainer != null) _mainContainer.pickingMode = PickingMode.Ignore;
 
-            _shipPanelView = new ShipPanelView(_root.Q("ship-panel-instance"));
+            // Instantiate ShipDisplayElement directly as it's no longer a UxmlElement
+            _shipDisplayElement = new ShipDisplayElement();
+            _root.Q("left-column").Add(_shipDisplayElement); // Assuming "left-column" is the correct parent
 
             var topBar = _root.Q("top-bar");
             _equipmentBar = topBar.Q("equipment-bar");
@@ -62,7 +66,7 @@ namespace PirateRoguelike.UI
             _pauseButton.clicked += () => PlayerPanelEvents.OnPauseClicked?.Invoke();
             _settingsButton.clicked += () => PlayerPanelEvents.OnSettingsClicked?.Invoke();
             _battleSpeedButton.clicked += ToggleBattleSpeed;
-            if (_mapToggleButton != null) // Add null check
+            if (_mapToggleButton != null)
             {
                 _mapToggleButton.clicked += () => PlayerPanelEvents.OnMapToggleClicked?.Invoke();
             }
@@ -71,14 +75,12 @@ namespace PirateRoguelike.UI
         public void BindInitialData(IPlayerPanelData data)
         {
             // Bind Ship Data
-            _shipPanelView.SetShipName(data.ShipData.ShipName);
-            _shipPanelView.SetShipSprite(data.ShipData.ShipSprite);
-            _shipPanelView.UpdateHealth(data.ShipData.CurrentHp, data.ShipData.MaxHp);
+            _shipDisplayElement.Bind(data.ShipData);
 
-            // Bind HUD Data
-            UpdateGold(data.HudData.Gold);
-            UpdateLives(data.HudData.Lives);
-            UpdateDepth(data.HudData.Depth);
+            // Bind HUD Data using BindingUtility
+            BindingUtility.BindLabelText(_goldLabel, data.HudData, nameof(data.HudData.Gold));
+            BindingUtility.BindLabelText(_livesLabel, data.HudData, nameof(data.HudData.Lives));
+            BindingUtility.BindLabelText(_depthLabel, data.HudData, nameof(data.HudData.Depth));
 
             // Set initial icons from theme
             _root.Q<Image>("gold-icon").sprite = _theme.goldIcon;
@@ -93,104 +95,95 @@ namespace PirateRoguelike.UI
             UpdatePlayerInventory(data.InventorySlots);
         }
 
-        public void UpdateEquipment(List<ISlotViewData> slots)
+        public void UpdateEquipment(ObservableList<ISlotViewData> slots)
         {
-            //Debug.Log("PlayerPanelView: UpdateEquipment called.");
-            PopulateSlots(_equipmentBar, _equipmentSlotElements, slots);
+            BindSlots(_equipmentBar, slots);
         }
 
-        public void UpdatePlayerInventory(List<ISlotViewData> slots)
+        public void UpdatePlayerInventory(ObservableList<ISlotViewData> slots)
         {
-            //Debug.Log("PlayerPanelView: UpdatePlayerInventory called.");
-            PopulateSlots(_inventoryContainer, _inventorySlotElements, slots);
+            BindSlots(_inventoryContainer, slots);
         }
 
-        private void PopulateSlots(VisualElement container, List<VisualElement> slotElementCache, List<ISlotViewData> slots)
+        private void BindSlots(VisualElement container, ObservableList<ISlotViewData> slots)
         {
+            // Clear existing elements and populate initially
             container.Clear();
-            slotElementCache.Clear();
-            for (int i = 0; i < slots.Count; i++)
+            foreach (var slotData in slots)
             {
-                var slotInstance = _slotTemplate.Instantiate();
-                var slotElement = slotInstance.Q<VisualElement>("slot");
-                slotElement.userData = slots[i]; // Store the entire ISlotViewData
-                container.Add(slotElement);
-                slotElementCache.Add(slotElement);
-
-                slotElement.AddManipulator(new SlotManipulator(slots[i])); // Pass ISlotViewData to manipulator
-
-                BindSlot(slotElement, slots[i]);
-
-                // Register PointerEnter and PointerLeave events for tooltip for ALL slots
-                var currentSlotData = slots[i]; // Capture the current slot data
-                slotElement.RegisterCallback<PointerEnterEvent>(evt =>
-                {
-                    if (!currentSlotData.IsEmpty && currentSlotData.ItemData != null)
-                    {
-                        TooltipController.Instance.Show(currentSlotData.ItemData, slotElement);
-                    }
-                    else
-                    {
-                        // If entering an empty slot, ensure tooltip is hidden
-                        TooltipController.Instance.Hide();
-                    }
-                });
-                slotElement.RegisterCallback<PointerLeaveEvent>(evt =>
-                {
-                    if (TooltipController.Instance.IsTooltipVisible) // NEW: Check if tooltip is visible
-                    {
-                        TooltipController.Instance.Hide();
-                    }
-                });
+                container.Add(CreateSlotElement(slotData));
             }
-        }
 
-        private void BindSlot(VisualElement slotElement, ISlotViewData slotData)
-        {
-            var icon = slotElement.Q<Image>("icon");
-            icon.sprite = slotData.IsEmpty ? _theme.emptySlotBackground : slotData.Icon;
-            icon.style.visibility = slotData.IsEmpty ? Visibility.Visible : Visibility.Visible;
-
-            // Assign rarity frame from theme
-            var rarityFrame = slotElement.Q<Image>("rarity-frame");
-            if (!string.IsNullOrEmpty(slotData.Rarity))
+            // Subscribe to collection changes
+            slots.CollectionChanged += (sender, args) =>
             {
-                switch (slotData.Rarity.ToLower())
+                switch (args.Action)
                 {
-                    case "bronze": rarityFrame.sprite = _theme.bronzeFrame; break;
-                    case "silver": rarityFrame.sprite = _theme.silverFrame; break;
-                    case "gold": rarityFrame.sprite = _theme.goldFrame; break;
-                    case "diamond": rarityFrame.sprite = _theme.diamondFrame; break;
+                    case NotifyCollectionChangedAction.Add:
+                        foreach (ISlotViewData newItem in args.NewItems)
+                        {
+                            container.Insert(args.NewStartingIndex, CreateSlotElement(newItem));
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        foreach (ISlotViewData oldItem in args.OldItems)
+                        {
+                            // Find and remove the corresponding VisualElement
+                            var elementToRemove = container.Children().FirstOrDefault(e => e.userData == oldItem);
+                            if (elementToRemove != null)
+                            {
+                                container.Remove(elementToRemove);
+                            }
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Replace:
+                        // For replace, remove old and add new at the same index
+                        foreach (ISlotViewData oldItem in args.OldItems)
+                        {
+                            var elementToRemove = container.Children().FirstOrDefault(e => e.userData == oldItem);
+                            if (elementToRemove != null)
+                            {
+                                container.Remove(elementToRemove);
+                            }
+                        }
+                        foreach (ISlotViewData newItem in args.NewItems)
+                        {
+                            container.Insert(args.NewStartingIndex, CreateSlotElement(newItem));
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Move:
+                        // Remove and re-insert for move
+                        var elementToMove = container.Children().FirstOrDefault(e => e.userData == args.OldItems[0]);
+                        if (elementToMove != null)
+                        {
+                            container.Remove(elementToMove);
+                            container.Insert(args.NewStartingIndex, elementToMove);
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Reset:
+                        // Clear all and re-add
+                        container.Clear();
+                        foreach (var slotData in slots)
+                        {
+                            container.Add(CreateSlotElement(slotData));
+                        }
+                        break;
                 }
-            }
-            else
-            {
-                rarityFrame.sprite = null; // No frame for empty/unassigned rarity
-            }
-
-            slotElement.Q<VisualElement>("cooldown-overlay").style.scale = new Scale(new Vector2(1, slotData.CooldownPercent));
-
-            slotElement.ClearClassList();
-            slotElement.AddToClassList("slot");
-
-            if (slotData.IsEmpty) slotElement.AddToClassList("slot--empty");
-            if (slotData.IsDisabled) slotElement.AddToClassList("slot--disabled");
-            if (slotData.IsPotentialMergeTarget) slotElement.AddToClassList("slot--merge");
-
-            if (!string.IsNullOrEmpty(slotData.Rarity))
-            {
-                slotElement.AddToClassList($"rarity--{slotData.Rarity.ToLower()}");
-            }
+            };
         }
 
-        public void UpdateHp(float current, float max)
+        private SlotElement CreateSlotElement(ISlotViewData slotData)
         {
-            _shipPanelView.UpdateHealth(current, max);
-        }
+            SlotElement slotElement = new SlotElement();
+            slotElement.userData = slotData; // Store view model in userData for easy lookup
+            //Debug.Log($"CreateSlotElement: Setting userData for slot {slotData.SlotId}. IsEmpty: {slotData.IsEmpty}. UserData type: {slotElement.userData.GetType().Name}");
+            slotElement.AddManipulator(new SlotManipulator(slotData));
+            slotElement.Bind(slotData);
 
-        public void UpdateGold(int amount) => _goldLabel.text = amount.ToString();
-        public void UpdateLives(int amount) => _livesLabel.text = amount.ToString();
-        public void UpdateDepth(int amount) => _depthLabel.text = amount.ToString();
+            // Register PointerEnter and PointerLeave events for tooltip
+            TooltipUtility.RegisterTooltipCallbacks(slotElement, slotData);
+            return slotElement;
+        }
 
         private void ToggleBattleSpeed()
         {

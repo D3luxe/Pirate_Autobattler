@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PirateRoguelike.Runtime; // Added for RuntimeItem
-
 using System.ComponentModel;
+using PirateRoguelike.Shared; // Added for ObservableList
 
 namespace PirateRoguelike.UI
 {
@@ -42,7 +42,7 @@ namespace PirateRoguelike.UI
     {
         IShipViewData ShipData { get; }
         IHudViewData HudData { get; }
-        List<ISlotViewData> EquipmentSlots { get; }
-        List<ISlotViewData> InventorySlots { get; }
+        ObservableList<ISlotViewData> EquipmentSlots { get; }
+        ObservableList<ISlotViewData> InventorySlots { get; }
     }
 }

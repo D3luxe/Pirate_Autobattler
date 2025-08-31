@@ -123,7 +123,7 @@ public class RunManager : MonoBehaviour
         // Instantiate TooltipManager UI
         if (tooltipManagerPrefab != null)
         {
-            GameObject tooltipInstance = Instantiate(tooltipManagerPrefab, transform);
+            GameObject tooltipInstance = Instantiate(tooltipManagerPrefab);
             _tooltipController = tooltipInstance.GetComponent<TooltipController>();
         }
         else

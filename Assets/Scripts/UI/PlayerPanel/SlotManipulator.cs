@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System;
+using PirateRoguelike.UI.Components; // Added for SlotElement
 
 namespace PirateRoguelike.UI
 {
@@ -95,6 +96,10 @@ namespace PirateRoguelike.UI
 
             (VisualElement dropTargetElement, ISlotViewData dropSlotData, SlotContainerType toContainer) = FindHoveredSlot(evt.position);
 
+            Debug.Log($"OnPointerUp: Drop Target Element: {dropTargetElement?.name ?? "NULL"} (Type: {dropTargetElement?.GetType().Name ?? "NULL"})");
+            Debug.Log($"OnPointerUp: Drop Slot Data: {dropSlotData?.SlotId.ToString() ?? "NULL"} (IsEmpty: {dropSlotData?.IsEmpty.ToString() ?? "NULL"})");
+            Debug.Log($"OnPointerUp: To Container: {toContainer}");
+
             if (dropTargetElement != null && dropSlotData != null) // Ensure dropSlotData is not null
             {
                 PlayerPanelEvents.OnSlotDropped?.Invoke(_slotData.SlotId, _fromContainer, dropSlotData.SlotId, toContainer);
@@ -126,9 +131,10 @@ namespace PirateRoguelike.UI
 
             target.pickingMode = originalPickingMode;
 
-//            Debug.Log($"FindHoveredSlot: Picked element: {picked?.name ?? "NULL"}");
-
-            if (picked == null) return (null, null, default); // Return default for SlotContainerType
+            if (picked == null)
+            {
+                return (null, null, default);
+            }
 
             VisualElement current = picked;
             while (current != null && !current.ClassListContains("slot"))
@@ -136,19 +142,15 @@ namespace PirateRoguelike.UI
                 current = current.parent;
             }
 
-//            Debug.Log($"FindHoveredSlot: Found slot element: {current?.name ?? "NULL"}");
-
-            if (current != null && current.userData is ISlotViewData slotData)
+            if (current != null)
             {
-//                Debug.Log($"FindHoveredSlot: Slot userData ID: {slotData.SlotId}");
-                SlotContainerType containerType = GetSlotContainerType(current);
-                return (current, slotData, containerType);
+                SlotElement slotElement = current as SlotElement;
+                if (slotElement != null && slotElement.userData is ISlotViewData slotData)
+                {
+                    return (current, slotData, GetSlotContainerType(current));
+                }
             }
-            else
-            {
-//                Debug.Log($"FindHoveredSlot: Slot userData is not ISlotViewData or is null.");
-                return (null, null, default); // Return default for SlotContainerType
-            }
+            return (null, null, default);
         }
 
         // New helper method to determine the slot's container type

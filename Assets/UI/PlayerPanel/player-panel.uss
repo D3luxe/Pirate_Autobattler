@@ -86,22 +86,13 @@
     width: 60px;
     height: 60px;
     margin: 5px;
-    background-color: rgba(51, 51, 51, 0);
     justify-content: center;
     align-items: center;
     border-radius: 8px;
-    flex-shrink: 0;
     flex-grow: 0;
-}
-
-.slot {
-    width: 60px;
-    height: 60px;
-    margin: 5px;
+    flex-shrink: 0;
+    background-image: url("project://database/Assets/Art/UI/ItemSlot_Empty.png?fileID=2800000&guid=c082f9c0526dfe74ab3dedad7c838055&type=3#ItemSlot_Empty");
     background-color: rgba(51, 51, 51, 0);
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
 }
 
 .slot__rarity-frame {
@@ -134,6 +125,14 @@
 }
 
 .slot--empty .slot__icon {
+    visibility: hidden;
+}
+
+.slot--empty .slot__rarity-frame {
+    visibility: hidden;
+}
+
+.slot--empty .slot__id-label {
     visibility: hidden;
 }
 

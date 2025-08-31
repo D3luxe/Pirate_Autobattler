@@ -4,6 +4,7 @@ using System.Collections.Generic; // Added
 using PirateRoguelike.Data; // Changed from PirateRoguelike.Data.Items
 using PirateRoguelike.Runtime; // Added for RuntimeItem
 using UnityEngine.UIElements; // Added for UIDocument
+using PirateRoguelike.Shared; // Added for ObservableList
 
 namespace PirateRoguelike.UI
 {
@@ -40,10 +41,9 @@ namespace PirateRoguelike.UI
 
     public class DevDriver : MonoBehaviour
     {
-        [SerializeField] private PlayerPanelView _playerPanelView;
-        [SerializeField] private PlayerUIThemeSO _theme;
+        private PlayerPanelView _playerPanelView;
+                [SerializeField] private PlayerUIThemeSO _theme;
         [SerializeField] private ItemSO _mockItem;
-        [SerializeField] private VisualTreeAsset _slotTemplate; // Added
         [SerializeField] private Sprite _playerShipSprite; // Added
 
         void Start()
@@ -51,12 +51,12 @@ namespace PirateRoguelike.UI
             var root = GetComponent<UIDocument>().rootVisualElement;
             var playerPanelRoot = root.Q("player-panel");
 
-            _playerPanelView = new PlayerPanelView(playerPanelRoot, _slotTemplate, _theme, gameObject);
+                        _playerPanelView = new PlayerPanelView(playerPanelRoot, _theme, gameObject);
 
             var mockShipData = new MockShipViewData("The Sea Serpent", _playerShipSprite, 80, 100);
             var mockHudData = new MockHudViewData(150, 3, 5);
 
-            var mockEquipmentSlots = new List<ISlotViewData>
+            var mockEquipmentSlots = new ObservableList<ISlotViewData>
             {
                 new MockSlotViewData(0, _theme.emptySlotBackground, "", true, false, 0, false, null),
                 new MockSlotViewData(1, _theme.emptySlotBackground, "", true, false, 0, false, null),
@@ -64,7 +64,7 @@ namespace PirateRoguelike.UI
                 new MockSlotViewData(3, _theme.emptySlotBackground, "", true, false, 0, false, null)
             };
 
-            var mockInventorySlots = new List<ISlotViewData>
+            var mockInventorySlots = new ObservableList<ISlotViewData>
             {
                 new MockSlotViewData(0, _mockItem.icon, _mockItem.rarity.ToString(), false, false, 0.5f, true, new RuntimeItem(_mockItem)),
                 new MockSlotViewData(1, _theme.emptySlotBackground, "", true, false, 0, false, null),
@@ -128,10 +128,10 @@ namespace PirateRoguelike.UI
         {
             public IShipViewData ShipData { get; private set; }
             public IHudViewData HudData { get; private set; }
-            public List<ISlotViewData> EquipmentSlots { get; private set; }
-            public List<ISlotViewData> InventorySlots { get; private set; }
+            public ObservableList<ISlotViewData> EquipmentSlots { get; private set; }
+            public ObservableList<ISlotViewData> InventorySlots { get; private set; }
 
-            public MockPlayerPanelData(IShipViewData shipData, IHudViewData hudData, List<ISlotViewData> equipmentSlots, List<ISlotViewData> inventorySlots)
+            public MockPlayerPanelData(IShipViewData shipData, IHudViewData hudData, ObservableList<ISlotViewData> equipmentSlots, ObservableList<ISlotViewData> inventorySlots)
             {
                 ShipData = shipData;
                 HudData = hudData;

@@ -2,8 +2,12 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Specialized; // Added
 using PirateRoguelike.Data;
 using PirateRoguelike.Runtime;
+using PirateRoguelike.UI.Components; // Added for ShipDisplayElement and SlotElement
+using PirateRoguelike.Shared; // Added for ObservableList
+using PirateRoguelike.UI.Utilities; // Added for TooltipUtility
 
 namespace PirateRoguelike.UI
 {
@@ -11,86 +15,129 @@ namespace PirateRoguelike.UI
     public class EnemyPanelController : MonoBehaviour
     {
         [SerializeField] private PlayerUIThemeSO _theme; // Reusing player theme for now
-        [SerializeField] private VisualTreeAsset _slotTemplate; // Slot UXML template
 
-        private EnemyPanelView _panelView;
         private ShipState _enemyShipState; // Reference to the enemy's ShipState
         private EnemyShipViewData _viewModel; // Add this line
+        private ShipDisplayElement _shipDisplayElement; // Added for ShipDisplayElement
+        private VisualElement _equipmentBar; // Added to hold equipment slots
+        private ObservableList<ISlotViewData> _enemyEquipmentSlots; // Added for observable enemy equipment
 
         public void Initialize(ShipState enemyShipState)
         {
             _enemyShipState = enemyShipState;
 
             var root = GetComponent<UIDocument>().rootVisualElement;
-            _panelView = new EnemyPanelView(root, _slotTemplate, _theme);
+            // Instantiate ShipDisplayElement directly as it's no longer a UxmlElement
+            _shipDisplayElement = new ShipDisplayElement();
+            root.Add(_shipDisplayElement); // Assuming 'root' is the correct parent for the enemy ship display
+
+            _equipmentBar = root.Q<VisualElement>("equipment-bar"); // Query equipment bar
 
             _viewModel = new EnemyShipViewData(_enemyShipState); // Instantiate the viewmodel
 
-            // Subscribe to enemy ship events
-            _enemyShipState.OnHealthChanged += HandleEnemyHealthChanged;
-            _enemyShipState.OnEquipmentChanged += HandleEnemyEquipmentChanged;
+            // Subscribe to enemy ship events (only equipment changed remains)
+            _enemyShipState.OnEquipmentChanged += UpdateEnemyEquipmentSlots;
 
             // Initial data bind
-            _panelView.UpdateShipData(_viewModel); // Pass the viewmodel
+            _shipDisplayElement.Bind(_viewModel); // Bind ShipDisplayElement
 
-            // Bind Equipment Slots (remains as is for now)
-            _panelView.UpdateEquipment(_enemyShipState.Equipped.Select((item, index) => new SlotDataViewModel(item, index)).Cast<ISlotViewData>().ToList());
+            _enemyEquipmentSlots = new ObservableList<ISlotViewData>();
+            UpdateEnemyEquipmentSlots(); // Initial population
+            BindEquipmentSlots(_equipmentBar, _enemyEquipmentSlots); // Bind to the observable list
         }
 
         void OnDestroy()
         {
             if (_enemyShipState != null)
             {
-                _enemyShipState.OnHealthChanged -= HandleEnemyHealthChanged;
-                _enemyShipState.OnEquipmentChanged -= HandleEnemyEquipmentChanged;
+                _enemyShipState.OnEquipmentChanged -= UpdateEnemyEquipmentSlots; // Unsubscribe
             }
         }
 
         // Event Handlers
-        private void HandleEnemyHealthChanged()
+        private void UpdateEnemyEquipmentSlots()
         {
-            _viewModel.CurrentHp = _enemyShipState.CurrentHealth; // Update viewmodel property directly
+            _enemyEquipmentSlots.Clear();
+            foreach (var slotVm in _enemyShipState.Equipped.Select((item, index) => new SlotDataViewModel(item, index)).Cast<ISlotViewData>()) 
+            {
+                _enemyEquipmentSlots.Add(slotVm);
+            }
         }
 
-        private void HandleEnemyEquipmentChanged()
+        private void BindEquipmentSlots(VisualElement container, ObservableList<ISlotViewData> slots)
         {
-            _panelView.UpdateEquipment(_enemyShipState.Equipped.Select((item, index) => new SlotDataViewModel(item, index)).Cast<ISlotViewData>().ToList());
-        }
-
-        // Helper class for Enemy Ship View Data
-        public class EnemyShipViewData : IShipViewData, System.ComponentModel.INotifyPropertyChanged
-        {
-            public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-
-            protected void OnPropertyChanged(string propertyName)
+            // Clear existing elements and populate initially
+            container.Clear();
+            foreach (var slotData in slots)
             {
-                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+                container.Add(CreateSlotElement(slotData));
             }
 
-            private ShipState _shipState;
-            private float _currentHp;
-
-            public EnemyShipViewData(ShipState shipState)
+            // Subscribe to collection changes
+            slots.CollectionChanged += (sender, args) =>
             {
-                _shipState = shipState;
-                _currentHp = _shipState.CurrentHealth; // Initialize backing field
-            }
-
-            public string ShipName => _shipState.Def.displayName;
-            public Sprite ShipSprite => _shipState.Def.art;
-            public float CurrentHp
-            {
-                get => _currentHp;
-                set
+                switch (args.Action)
                 {
-                    if (_currentHp != value)
-                    {
-                        _currentHp = value;
-                        OnPropertyChanged(nameof(CurrentHp));
-                    }
+                    case NotifyCollectionChangedAction.Add:
+                        foreach (ISlotViewData newItem in args.NewItems)
+                        {
+                            container.Insert(args.NewStartingIndex, CreateSlotElement(newItem));
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        foreach (ISlotViewData oldItem in args.OldItems)
+                        {
+                            var elementToRemove = container.Children().FirstOrDefault(e => e.userData == oldItem);
+                            if (elementToRemove != null)
+                            {
+                                container.Remove(elementToRemove);
+                            }
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Replace:
+                        foreach (ISlotViewData oldItem in args.OldItems)
+                        {
+                            var elementToRemove = container.Children().FirstOrDefault(e => e.userData == oldItem);
+                            if (elementToRemove != null)
+                            {
+                                container.Remove(elementToRemove);
+                            }
+                        }
+                        foreach (ISlotViewData newItem in args.NewItems)
+                        {
+                            container.Insert(args.NewStartingIndex, CreateSlotElement(newItem));
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Move:
+                        var elementToMove = container.Children().FirstOrDefault(e => e.userData == args.OldItems[0]);
+                        if (elementToMove != null)
+                        {
+                            container.Remove(elementToMove);
+                            container.Insert(args.NewStartingIndex, elementToMove);
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Reset:
+                        container.Clear();
+                        foreach (var slotData in slots)
+                        {
+                            container.Add(CreateSlotElement(slotData));
+                        }
+                        break;
                 }
-            }
-            public float MaxHp => _shipState.Def.baseMaxHealth;
+            };
         }
+
+        private SlotElement CreateSlotElement(ISlotViewData slotData)
+        {
+            SlotElement slotElement = new SlotElement();
+            slotElement.userData = slotData;
+            slotElement.Bind(slotData);
+
+            // Register PointerEnter and PointerLeave events for tooltip
+            TooltipUtility.RegisterTooltipCallbacks(slotElement, slotData);
+            return slotElement;
+        }
+
+        
     }
 }

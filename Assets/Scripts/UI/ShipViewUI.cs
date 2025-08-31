@@ -1,14 +1,17 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using PirateRoguelike.Data;
+using System.ComponentModel;
+using PirateRoguelike.UI; // Added
 
 [UxmlElement]
 public partial class ShipViewUI : VisualElement
 {
-
     private VisualElement _shipIcon;
     private Label _shipName;
     private Label _healthStat;
+
+    private IShipViewData _viewModel;
 
     public ShipViewUI()
     {
@@ -18,21 +21,49 @@ public partial class ShipViewUI : VisualElement
         _healthStat = this.Q<Label>("HealthStat");
     }
 
-    public void Setup(VisualTreeAsset uxml, StyleSheet uss)
+    public void Bind(IShipViewData viewModel)
     {
-        uxml.CloneTree(this);
-        styleSheets.Add(uss);
+        if (_viewModel != null)
+        {
+            _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        }
+
+        _viewModel = viewModel;
+
+        if (_viewModel != null)
+        {
+            _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            UpdateUI();
+        }
     }
 
-    public void SetShip(ShipSO ship)
+    private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        _shipName.text = ship.displayName;
-        _healthStat.text = $"HP: {ship.baseMaxHealth}";
+        UpdateUI(e.PropertyName);
+    }
 
-        // Set ship icon (assuming ShipSO has a shipSprite field)
-        if (ship.art != null)
+    private void UpdateUI(string propertyName = null)
+    {
+        if (_viewModel == null) return;
+
+        if (propertyName == null || propertyName == nameof(IShipViewData.ShipName))
         {
-            _shipIcon.style.backgroundImage = new StyleBackground(ship.art.texture);
+            _shipName.text = _viewModel.ShipName;
+        }
+        if (propertyName == null || propertyName == nameof(IShipViewData.CurrentHp) || propertyName == nameof(IShipViewData.MaxHp))
+        {
+            _healthStat.text = $"HP: {_viewModel.CurrentHp}/{_viewModel.MaxHp}";
+        }
+        if (propertyName == null || propertyName == nameof(IShipViewData.ShipSprite))
+        {
+            if (_viewModel.ShipSprite != null)
+            {
+                _shipIcon.style.backgroundImage = new StyleBackground(_viewModel.ShipSprite.texture);
+            }
+            else
+            {
+                _shipIcon.style.backgroundImage = null;
+            }
         }
     }
 }

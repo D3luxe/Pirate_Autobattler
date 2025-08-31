@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="ship-panel" class="ship-panel" style="background-image: url(&quot;project://database/Assets/Art/UI/Ship_And_HP_Bar.png?fileID=2800000&amp;guid=172c1cdb1e097764d9394bf0f88d8814&amp;type=3#Ship_And_HP_Bar&quot;); width: 310px; height: 208px;">
+        <ui:Image name="ship-sprite" class="ship-panel__sprite" style="position: absolute; width: 250px; height: 150px; top: 12px; left: 31px;" />
+        <ui:Label name="ship-name" text="Test1234" class="ship-panel__name" style="position: absolute; top: 151px; left: 20px; width: 256px; -unity-text-align: middle-center; font-size: 18px; color: rgb(10, 10, 10);" />
+        <ui:VisualElement name="hp-bar" class="hp-bar" style="position: absolute; top: 186px; left: 48px; width: 219px; height: 13px;">
+            <ui:VisualElement name="hp-bar__background" class="hp-bar__background">
+                <ui:VisualElement name="hp-bar__foreground" class="hp-bar__foreground" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

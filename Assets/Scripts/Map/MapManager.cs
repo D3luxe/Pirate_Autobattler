@@ -193,7 +193,7 @@ public class MapManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"Could not find a suitable encounter for node type {mapNode.nodeType}.");
+                Debug.LogWarning($"Could not find a suitable encounter for node type {mapNode.nodeType}. Please ensure an EncounterSO for {mapNode.nodeType} is configured in GameDataRegistry.");
             }
 
             _convertedMapNodes[node.Row].Add(mapNode);

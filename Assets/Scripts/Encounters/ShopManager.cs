@@ -2,11 +2,24 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using PirateRoguelike.Data;
+using UnityEngine.UIElements; // Added
+using PirateRoguelike.UI.Components; // Added
+using PirateRoguelike.UI.Utilities; // Added
+using PirateRoguelike.UI; // Added for ShopItemViewData and ShopItemElement
+
 
 public class ShopManager : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private ShopUI shopUI;
+    [SerializeField] private UIDocument _shopUIDocument;
+
+    private VisualElement _shopItemsContainer;
+    private VisualElement _shopShipContainer;
+    private Label _playerGoldLabel;
+    private Label _rerollCostLabel;
+    private Button _rerollButton;
+    private Button _leaveShopButton;
+    
 
     private List<ItemSO> _currentShopItems = new List<ItemSO>();
     private ShipSO _currentShopShip;
@@ -29,12 +42,16 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        // Show InventoryUI when entering shop (full display)
-        if (InventoryUI.Instance != null)
-        {
-            InventoryUI.Instance.SetInventoryVisibility(true, true);
-            InventoryUI.Instance.RefreshAll();
-        }
+        var root = _shopUIDocument.rootVisualElement;
+        _shopItemsContainer = root.Q<VisualElement>("shop-items-container");
+        _shopShipContainer = root.Q<VisualElement>("shop-ship-container");
+        _playerGoldLabel = root.Q<Label>("player-gold-label");
+        _rerollCostLabel = root.Q<Label>("reroll-cost-label");
+        _rerollButton = root.Q<Button>("reroll-button");
+        _leaveShopButton = root.Q<Button>("leave-shop-button");
+
+        _rerollButton.clicked += RerollShop;
+        _leaveShopButton.clicked += LeaveShop;
 
         GenerateShopItems();
         GenerateShopShip();
@@ -126,13 +143,46 @@ public class ShopManager : MonoBehaviour
 
     private void UpdateShopUI()
     {
-        if (shopUI != null)
+        _shopItemsContainer.Clear();
+        foreach (var itemSO in _currentShopItems)
         {
-            shopUI.SetShopManager(this);
-            shopUI.DisplayShopItems(_currentShopItems);
-            shopUI.DisplayShopShip(_currentShopShip, _currentShopShip != null ? _currentShopShip.Cost : 0);
-            shopUI.UpdateRerollCost(GameSession.Economy.GetCurrentRerollCost());
-            shopUI.UpdatePlayerGold(GameSession.Economy.Gold);
+            var shopItemViewData = new ShopItemViewData(itemSO, GetRarityColor(itemSO.rarity), GameSession.Economy.Gold >= itemSO.Cost);
+            var shopItemElement = new ShopItemElement();
+            shopItemElement.Bind(shopItemViewData);
+            shopItemElement.RegisterBuyButtonCallback(() => BuyItem(itemSO));
+            _shopItemsContainer.Add(shopItemElement);
+        }
+
+        _shopShipContainer.Clear();
+        if (_currentShopShip != null)
+        {
+            var shipViewUI = new ShipViewUI();
+            // Create a dummy ShipState for the shop ship to bind to ShipViewUI
+            // This is a temporary solution, ideally ShipViewUI should bind to ShipSO directly or a dedicated ViewModel
+            var shopShipState = new ShipState(_currentShopShip);
+            var enemyShipViewData = new PirateRoguelike.UI.EnemyShipViewData(shopShipState); // Reusing EnemyShipViewData for now
+            shipViewUI.Bind(enemyShipViewData);
+            _shopShipContainer.Add(shipViewUI);
+            // Add a buy button for the ship
+            var buyShipButton = new Button(() => BuyShip(_currentShopShip)) { text = $"Buy Ship ({_currentShopShip.Cost} Gold)" };
+            _shopShipContainer.Add(buyShipButton);
+        }
+
+        _playerGoldLabel.text = $"Gold: {GameSession.Economy.Gold}";
+        _rerollCostLabel.text = $"Reroll: {GameSession.Economy.GetCurrentRerollCost()} Gold";
+    }
+
+    private Color GetRarityColor(Rarity rarity)
+    {
+        // This needs to be consistent with PlayerUIThemeSO.rarityColors
+        // For now, hardcode or get from a central place
+        switch (rarity)
+        {
+            case Rarity.Bronze: return new Color(0.8f, 0.5f, 0.2f); // Example Bronze
+            case Rarity.Silver: return new Color(0.7f, 0.7f, 0.7f); // Example Silver
+            case Rarity.Gold: return new Color(1.0f, 0.8f, 0.0f); // Example Gold
+            case Rarity.Diamond: return new Color(0.0f, 0.8f, 1.0f); // Example Diamond
+            default: return Color.white;
         }
     }
 
@@ -159,7 +209,8 @@ public class ShopManager : MonoBehaviour
             }
             else
             {
-                shopUI.DisplayMessage("Inventory is full!");
+                // Display message directly on UI
+                Debug.LogWarning("Inventory is full!");
                 // Refund gold if inventory is full
                 GameSession.Economy.AddGold(cost);
                 UpdateShopUI(); // Update gold display
@@ -167,7 +218,8 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            shopUI.DisplayMessage("Not enough gold!");
+            // Display message directly on UI
+            Debug.LogWarning("Not enough gold!");
         }
     }
 
@@ -183,7 +235,7 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            shopUI.DisplayMessage("Not enough gold to reroll!");
+            Debug.LogWarning("Not enough gold to reroll!");
         }
     }
 
@@ -249,7 +301,7 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            shopUI.DisplayMessage("Not enough gold to buy this ship!");
+            Debug.LogWarning("Not enough gold to buy this ship!");
         }
     }
 
@@ -258,11 +310,7 @@ public class ShopManager : MonoBehaviour
         GameSession.Economy.ResetRerollCount(); // Reset reroll cost for next shop
         UnityEngine.SceneManagement.SceneManager.LoadScene("Run"); // Return to map
 
-        // Show InventoryUI when leaving shop
-        if (InventoryUI.Instance != null)
-        {
-            InventoryUI.Instance.SetInventoryVisibility(true, true);
-            InventoryUI.Instance.RefreshAll();
-        }
+        // Hide the shop UI
+        _shopUIDocument.rootVisualElement.style.display = DisplayStyle.None;
     }
 }

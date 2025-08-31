@@ -1,5 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <ui:Template name="ShipPanelTemplate" src="project://database/Assets/UI/PlayerPanel/ShipPanel.uxml?fileID=9197481963319205126&amp;guid=74b2d9d265bec2146b4e3607d29ce1fc&amp;type=3#ShipPanel" />
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:local="PirateRoguelike.UI.Components" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/PlayerPanel/player-panel.uss?fileID=7433441132597879392&amp;guid=e6042dd557d2a57459742ed1366a4cd0&amp;type=3#player-panel" />
     <ui:VisualElement name="player-panel" class="player-panel" style="align-items: center; justify-content: center; position: absolute; top: auto; left: auto; right: auto; bottom: 0%;">
         <ui:VisualElement name="main-container" style="width: 1000px; height: 380px; position: relative; background-image: url(&quot;project://database/Assets/Art/UI/PanelBackgroundWithEquipment.png?fileID=2800000&amp;guid=f366d59ef64fe1b488c13bc5a583333b&amp;type=3#PanelBackgroundWithEquipment&quot;);">
@@ -7,7 +6,6 @@
                 <ui:VisualElement name="equipment-bar" class="equipment-bar" style="display: flex; flex-direction: row; flex-wrap: nowrap;" />
             </ui:VisualElement>
             <ui:VisualElement name="left-column" style="position: absolute; top: 127px; left: 32px; flex-direction: column; align-items: center;">
-                <ui:Instance template="ShipPanelTemplate" name="ship-panel-instance" />
             </ui:VisualElement>
             <ui:VisualElement name="middle-column" style="position: absolute; left: 365px; top: 127px; width: 360px; height: 140px;">
                 <ui:VisualElement name="inventory-container" style="flex-grow: 1; display: flex; flex-direction: row; flex-wrap: wrap;" />
