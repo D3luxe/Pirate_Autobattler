@@ -1,26 +1,34 @@
-using PirateRoguelike.Data;
+using UnityEngine;
+using PirateRoguelike.Data; // Changed from PirateRoguelike.Data.Items
+using PirateRoguelike.Runtime; // Added for RuntimeItem
 
-public class ItemInstance
+namespace PirateRoguelike.Data
 {
-    public ItemSO Def { get; }
-    public float CooldownRemaining { get; set; } // Cooldown can now be modified by abilities
-
-    public ItemInstance(ItemSO definition)
+    /// <summary>
+    /// Represents a runtime instance of an item, referencing its ItemSO definition.
+    /// </summary>
+    [System.Serializable]
+    public class ItemInstance
     {
-        Def = definition;
-        CooldownRemaining = Def.cooldownSec; // Start on cooldown
-    }
+        public ItemSO Def; // Reference to the ItemSO definition
+        public RuntimeItem RuntimeItem { get; private set; }
+        public float CooldownRemaining { get; set; } // New: For tracking cooldowns
+        public float StunDuration { get; set; } // New: For tracking stun duration
 
-    // Constructor for loading from save data
-    public ItemInstance(SerializableItemInstance data)
-    {
-        Def = GameDataRegistry.GetItem(data.itemId);
-        CooldownRemaining = data.cooldownRemaining;
-    }
+        public ItemInstance(ItemSO def)
+        {
+            Def = def;
+            RuntimeItem = new RuntimeItem(def);
+            CooldownRemaining = 0; // Initialize cooldown
+            StunDuration = 0; // Initialize stun duration
+        }
 
-    public SerializableItemInstance ToSerializable()
-    {
-        // The stun duration is now an effect, so it's not saved here.
-        return new SerializableItemInstance(Def.id, CooldownRemaining, 0); 
+        public SerializableItemInstance ToSerializable()
+        {
+            return new SerializableItemInstance(Def.id, Def.rarity, CooldownRemaining, StunDuration);
+        }
+
+        // Add any runtime mutable properties here, e.g., current durability, charges, etc.
+        // For now, it just holds a reference to the ItemSO.
     }
 }

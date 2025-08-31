@@ -11,6 +11,8 @@ namespace PirateRoguelike.Data.Actions
         [TextArea]
         [SerializeField] private string description;
 
+        public string Description => description;
+
         /// <summary>
         /// Executes the action's logic.
         /// </summary>

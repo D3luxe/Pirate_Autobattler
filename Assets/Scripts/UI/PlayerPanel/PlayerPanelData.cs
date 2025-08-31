@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using PirateRoguelike.Runtime; // Added for RuntimeItem
 
 namespace PirateRoguelike.UI
 {
@@ -14,7 +15,7 @@ namespace PirateRoguelike.UI
         bool IsDisabled { get; }
         float CooldownPercent { get; } // 0.0 to 1.0
         bool IsPotentialMergeTarget { get; }
-        ItemSO ItemData { get; } // New: Reference to the actual ItemSO
+        RuntimeItem ItemData { get; } // New: Reference to the actual RuntimeItem
     }
 
     // Represents the visual state of the ship panel

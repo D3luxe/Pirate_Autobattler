@@ -62,6 +62,10 @@
     -   **Data:** `ScriptableObject` definitions for game content (`ItemSO`, `ShipSO`, `EnemySO`, etc.).
     -   **UI:** Manages UI using UI Toolkit (`MainMenuController`, `PlayerPanelController`, `MapView`, `BattleUIController`).
 
+    -   **UI Systems:** Manages various UI elements and their interactions using UI Toolkit.
+        -   **`TooltipController`**: A singleton `MonoBehaviour` responsible for managing the lifecycle, content population, positioning, and visibility of the item tooltip. It dynamically instantiates tooltip elements from UXML assets and attaches them to the main UI `rootVisualElement` (Player Panel's `UIDocument`'s root) to ensure correct z-ordering.
+        -   **`EffectDisplay`**: A helper class used by `TooltipController` to dynamically display individual ability effects within the tooltip.
+
 -   **Combat Tick Walkthrough (`CombatController.HandleTick`):**
     1.  **Sudden Death Check**: Initiates if battle exceeds 30 seconds; ships take increasing damage. (`CombatController.cs:71-86`)
     2.  **Process Active Effects**: Iterates sorted active effects for both player/enemy, calls `Tick()`, removes expired. (`CombatController.cs:111-132`)
@@ -120,6 +124,7 @@
 
 -   **Roadmap:**
     -   **Quick Wins:**
+        -   [x] Implement a mouseover tooltip system for items using UI Toolkit.
         -   [ ] Remove `StreamingAssets/items.json`.
         -   [ ] Remove unused events from `EventBus`.
         -   [ ] Optimize `ProcessActiveEffects` to reduce per-tick allocations.

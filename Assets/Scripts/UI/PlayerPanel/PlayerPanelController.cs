@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
+using PirateRoguelike.Data; // Added for ItemInstance
+using PirateRoguelike.Runtime; // Added for RuntimeItem
 
 namespace PirateRoguelike.UI
 {
@@ -44,7 +46,7 @@ namespace PirateRoguelike.UI
         public bool IsDisabled => false; // TODO: Hook up stun/disable logic
         public float CooldownPercent => (_item == null || _item.Def.cooldownSec <= 0) ? 0 : _item.CooldownRemaining / _item.Def.cooldownSec;
         public bool IsPotentialMergeTarget => false; // TODO: Hook up merge logic
-        public ItemSO ItemData => _item?.Def; // New: Expose the ItemSO
+        public RuntimeItem ItemData => _item?.RuntimeItem; // New: Expose the RuntimeItem
     }
 
 

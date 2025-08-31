@@ -2,6 +2,11 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+using PirateRoguelike.Runtime; // Added for RuntimeItem and RuntimeAbility
+using PirateRoguelike.Combat; // Added for IRuntimeContext
+
+// Temporary dummy implementation for IRuntimeContext
+public class DummyRuntimeContext : IRuntimeContext { }
 
 public class TooltipController : MonoBehaviour
 {
@@ -50,40 +55,40 @@ public class TooltipController : MonoBehaviour
         _tooltip.RemoveFromClassList("tooltip--visible");
     }
 
-    public void Show(ItemSO item, VisualElement targetElement)
+    public void Show(RuntimeItem runtimeItem, VisualElement targetElement)
     {
         if (_tooltip == null) return; // Null check
-        Debug.Log($"TooltipController.Show() called for item: {item.displayName}");
-        _titleLabel.text = item.displayName;
-        _timerText.text = item.cooldownSec > 0 ? $"{item.cooldownSec}s" : "";
+        Debug.Log($"TooltipController.Show() called for item: {runtimeItem.DisplayName}");
+        _titleLabel.text = runtimeItem.DisplayName;
+        _timerText.text = runtimeItem.CooldownSec > 0 ? $"{runtimeItem.CooldownSec}s" : "";
 
         _center.Clear();
         _footer.Clear();
 
-        foreach (var ability in item.abilities)
+        // For now, we'll use a dummy context. This will need to be properly passed from the game state.
+        IRuntimeContext dummyContext = new DummyRuntimeContext(); 
+
+        foreach (var runtimeAbility in runtimeItem.Abilities)
         {
-            // Assuming 'isActive' on ItemSO determines if it's an active or passive item.
-            // And 'trigger' on AbilitySO determines if it's an active or passive ability.
+            // Assuming 'IsActive' on RuntimeItem determines if it's an active or passive item.
             // This logic might need refinement based on actual game design.
-            if (item.isActive)
+            if (runtimeItem.IsActive)
             {
                 var newEffect = _activeEffectUxml.Instantiate();
                 var effectDisplay = new EffectDisplay(newEffect);
-                effectDisplay.SetData(ability);
+                effectDisplay.SetData(runtimeAbility, dummyContext); 
                 _center.Add(newEffect);
             }
             else
             {
                 var newEffect = _passiveEffectUxml.Instantiate();
                 var effectDisplay = new EffectDisplay(newEffect);
-                effectDisplay.SetData(ability);
+                effectDisplay.SetData(runtimeAbility, dummyContext); 
                 _footer.Add(newEffect);
             }
         }
 
         _tooltip.style.display = DisplayStyle.Flex;
-        _tooltip.style.backgroundColor = new StyleColor(Color.red); // TEMPORARY: For debugging visibility
-        Debug.Log("Preparing to remove and readd tooltip");
         // Remove and re-add to ensure it's the last child (highest z-order)
         // We need a reference to the root VisualElement of the main UI Document
         // This should be passed in during initialization.

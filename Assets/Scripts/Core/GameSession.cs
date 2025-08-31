@@ -73,7 +73,7 @@ public static class GameSession
         Inventory = new Inventory(config.inventorySize);
         foreach (var itemData in CurrentRunState.inventoryItems)
         {
-            Inventory.AddItem(new ItemInstance(itemData));
+            Inventory.AddItem(new ItemInstance(GameDataRegistry.GetItem(itemData.itemId, itemData.rarity)));
         }
 
         PlayerShip = new ShipState(CurrentRunState.playerShipState);

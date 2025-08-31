@@ -1,95 +1,122 @@
 
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
+using System.Collections.Generic; // Added
+using PirateRoguelike.Data; // Changed from PirateRoguelike.Data.Items
+using PirateRoguelike.Runtime; // Added for RuntimeItem
+using UnityEngine.UIElements; // Added for UIDocument
 
 namespace PirateRoguelike.UI
 {
-    // Mock data implementations for testing
     public class MockSlotViewData : ISlotViewData
     {
-        public int SlotId { get; set; }
-        public Sprite Icon { get; set; }
-        public string Rarity { get; set; }
-        public bool IsEmpty { get; set; }
-        public bool IsDisabled { get; set; }
-        public float CooldownPercent { get; set; }
-        public bool IsPotentialMergeTarget { get; set; }
-        public ItemSO ItemData { get; set; } // New: Expose the ItemSO
+        public int SlotId { get; private set; }
+        public Sprite Icon { get; private set; }
+        public string Rarity { get; private set; }
+        public bool IsEmpty { get; private set; }
+        public bool IsDisabled { get; private set; }
+        public float CooldownPercent { get; private set; }
+        public bool IsPotentialMergeTarget { get; private set; }
+        public RuntimeItem ItemData { get; private set; }
+
+        public MockSlotViewData(int slotId, Sprite icon, string rarity, bool isEmpty, bool isDisabled, float cooldownPercent, bool isPotentialMergeTarget, RuntimeItem itemData)
+        {
+            SlotId = slotId;
+            Icon = icon;
+            Rarity = rarity;
+            IsEmpty = isEmpty;
+            IsDisabled = isDisabled;
+            CooldownPercent = cooldownPercent;
+            IsPotentialMergeTarget = isPotentialMergeTarget;
+            ItemData = itemData;
+        }
     }
 
-    public class MockShipViewData : IShipViewData
-    {
-        public string ShipName { get; set; }
-        public Sprite ShipSprite { get; set; }
-        public float CurrentHp { get; set; }
-        public float MaxHp { get; set; }
-    }
-
-    public class MockHudViewData : IHudViewData
-    {
-        public int Gold { get; set; }
-        public int Lives { get; set; }
-        public int Depth { get; set; }
-    }
-
-    public class MockPlayerPanelData : IPlayerPanelData
-    {
-        public IShipViewData ShipData { get; set; }
-        public IHudViewData HudData { get; set; }
-        public List<ISlotViewData> EquipmentSlots { get; set; }
-        public List<ISlotViewData> InventorySlots { get; set; }
-    }
-
-    [RequireComponent(typeof(UIDocument))]
     public class DevDriver : MonoBehaviour
     {
+        [SerializeField] private PlayerPanelView _playerPanelView;
         [SerializeField] private PlayerUIThemeSO _theme;
-        [SerializeField] private VisualTreeAsset _slotTemplate;
-
-        private PlayerPanelView _panelView;
+        [SerializeField] private ItemSO _mockItem;
+        [SerializeField] private VisualTreeAsset _slotTemplate; // Added
+        [SerializeField] private Sprite _playerShipSprite; // Added
 
         void Start()
         {
             var root = GetComponent<UIDocument>().rootVisualElement;
-            _panelView = new PlayerPanelView(root, _slotTemplate, _theme, this.gameObject);
+            var playerPanelRoot = root.Q("player-panel");
 
-            // Create Mock Data
-            var mockData = new MockPlayerPanelData
+            _playerPanelView = new PlayerPanelView(playerPanelRoot, _slotTemplate, _theme, gameObject);
+
+            var mockShipData = new MockShipViewData("The Sea Serpent", _playerShipSprite, 80, 100);
+            var mockHudData = new MockHudViewData(150, 3, 5);
+
+            var mockEquipmentSlots = new List<ISlotViewData>
             {
-                ShipData = new MockShipViewData
-                {
-                    ShipName = "The Sea Serpent",
-                    ShipSprite = _theme.pauseIcon, // Placeholder
-                    CurrentHp = 75,
-                    MaxHp = 100
-                },
-                HudData = new MockHudViewData
-                {
-                    Gold = 123,
-                    Lives = 3,
-                    Depth = 5
-                },
-                EquipmentSlots = new List<ISlotViewData>(),
-                InventorySlots = new List<ISlotViewData>()
+                new MockSlotViewData(0, _theme.emptySlotBackground, "", true, false, 0, false, null),
+                new MockSlotViewData(1, _theme.emptySlotBackground, "", true, false, 0, false, null),
+                new MockSlotViewData(2, _theme.emptySlotBackground, "", true, false, 0, false, null),
+                new MockSlotViewData(3, _theme.emptySlotBackground, "", true, false, 0, false, null)
             };
 
-            for (int i = 0; i < 10; i++)
+            var mockInventorySlots = new List<ISlotViewData>
             {
-                mockData.EquipmentSlots.Add(new MockSlotViewData { 
-                    SlotId = i, 
-                    Icon = _theme.settingsIcon, // Placeholder
-                    Rarity = new string[]{"bronze", "silver", "gold", "diamond"}[i % 4]
-                });
+                new MockSlotViewData(0, _mockItem.icon, _mockItem.rarity.ToString(), false, false, 0.5f, true, new RuntimeItem(_mockItem)),
+                new MockSlotViewData(1, _theme.emptySlotBackground, "", true, false, 0, false, null),
+                new MockSlotViewData(2, _theme.emptySlotBackground, "", true, false, 0, false, null),
+                new MockSlotViewData(3, _theme.emptySlotBackground, "", true, false, 0, false, null),
+                new MockSlotViewData(4, _theme.emptySlotBackground, "", true, false, 0, false, null),
+                new MockSlotViewData(5, _theme.emptySlotBackground, "", true, false, 0, false, null)
+            };
+
+            var mockPlayerPanelData = new MockPlayerPanelData(mockShipData, mockHudData, mockEquipmentSlots, mockInventorySlots);
+
+            _playerPanelView.BindInitialData(mockPlayerPanelData);
+        }
+
+        // Mock implementations for interfaces
+        public class MockShipViewData : IShipViewData
+        {
+            public string ShipName { get; private set; }
+            public Sprite ShipSprite { get; private set; }
+            public float CurrentHp { get; private set; }
+            public float MaxHp { get; private set; }
+
+            public MockShipViewData(string shipName, Sprite shipSprite, float currentHp, float maxHp)
+            {
+                ShipName = shipName;
+                ShipSprite = shipSprite;
+                CurrentHp = currentHp;
+                MaxHp = maxHp;
             }
+        }
 
-            // Bind data to the view
-            _panelView.BindInitialData(mockData);
+        public class MockHudViewData : IHudViewData
+        {
+            public int Gold { get; private set; }
+            public int Lives { get; private set; }
+            public int Depth { get; private set; }
 
-            // Register for events
-            PlayerPanelEvents.OnPauseClicked += () => Debug.Log("Pause Clicked!");
-            PlayerPanelEvents.OnSettingsClicked += () => Debug.Log("Settings Clicked!");
-            PlayerPanelEvents.OnBattleSpeedChanged += (speed) => Debug.Log($"Battle Speed set to {speed}x");
+            public MockHudViewData(int gold, int lives, int depth)
+            {
+                Gold = gold;
+                Lives = lives;
+                Depth = depth;
+            }
+        }
+
+        public class MockPlayerPanelData : IPlayerPanelData
+        {
+            public IShipViewData ShipData { get; private set; }
+            public IHudViewData HudData { get; private set; }
+            public List<ISlotViewData> EquipmentSlots { get; private set; }
+            public List<ISlotViewData> InventorySlots { get; private set; }
+
+            public MockPlayerPanelData(IShipViewData shipData, IHudViewData hudData, List<ISlotViewData> equipmentSlots, List<ISlotViewData> inventorySlots)
+            {
+                ShipData = shipData;
+                HudData = hudData;
+                EquipmentSlots = equipmentSlots;
+                InventorySlots = inventorySlots;
+            }
         }
     }
 }

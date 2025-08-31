@@ -64,7 +64,7 @@ public class ShipState
         Equipped = new ItemInstance[Def.baseItemSlots];
         for (int i = 0; i < data.equippedItems.Count; i++)
         {
-            Equipped[i] = new ItemInstance(data.equippedItems[i]);
+            Equipped[i] = new ItemInstance(GameDataRegistry.GetItem(data.equippedItems[i].itemId, data.equippedItems[i].rarity));
         }
 
         RecalculateStats(); // Recalculate stats after loading modifiers

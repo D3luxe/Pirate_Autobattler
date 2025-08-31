@@ -61,7 +61,7 @@ public partial class ShopItemViewUI : VisualElement
     {
         if (_itemInstance != null)
         {
-            TooltipController.Instance.Show(_itemInstance.Def, this);
+            TooltipController.Instance.Show(_itemInstance.RuntimeItem, this);
         }
     }
 

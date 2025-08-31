@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using PirateRoguelike.Data; // Added for ItemInstance
 
 public class ShopItemView : MonoBehaviour
 {
