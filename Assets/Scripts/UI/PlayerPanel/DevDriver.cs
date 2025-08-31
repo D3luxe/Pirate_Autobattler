@@ -9,6 +9,13 @@ namespace PirateRoguelike.UI
 {
     public class MockSlotViewData : ISlotViewData
     {
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+        }
+
         public int SlotId { get; private set; }
         public Sprite Icon { get; private set; }
         public string Rarity { get; private set; }
@@ -75,6 +82,13 @@ namespace PirateRoguelike.UI
         // Mock implementations for interfaces
         public class MockShipViewData : IShipViewData
         {
+            public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+
+            protected void OnPropertyChanged(string propertyName)
+            {
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+
             public string ShipName { get; private set; }
             public Sprite ShipSprite { get; private set; }
             public float CurrentHp { get; private set; }
@@ -91,6 +105,13 @@ namespace PirateRoguelike.UI
 
         public class MockHudViewData : IHudViewData
         {
+            public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+
+            protected void OnPropertyChanged(string propertyName)
+            {
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+
             public int Gold { get; private set; }
             public int Lives { get; private set; }
             public int Depth { get; private set; }

@@ -8,18 +8,73 @@ using PirateRoguelike.Runtime; // Added for RuntimeItem
 namespace PirateRoguelike.UI
 {
     // This is the adapter class that converts game data into view data.
-    public class PlayerPanelDataViewModel : IPlayerPanelData, IShipViewData, IHudViewData
+    public class PlayerPanelDataViewModel : IPlayerPanelData, IShipViewData, IHudViewData, System.ComponentModel.INotifyPropertyChanged
     {
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+        }
+
         // IShipViewData
         public string ShipName => GameSession.PlayerShip.Def.displayName;
         public Sprite ShipSprite => GameSession.PlayerShip.Def.art; // Corrected
-        public float CurrentHp => GameSession.PlayerShip.CurrentHealth;
+        private float _currentHp;
+        public float CurrentHp
+        {
+            get => _currentHp;
+            set
+            {
+                if (_currentHp != value)
+                {
+                    _currentHp = value;
+                    OnPropertyChanged(nameof(CurrentHp));
+                }
+            }
+        }
         public float MaxHp => GameSession.PlayerShip.Def.baseMaxHealth;
 
         // IHudViewData
-        public int Gold => GameSession.Economy.Gold;
-        public int Lives => GameSession.Economy.Lives;
-        public int Depth => GameSession.CurrentRunState?.currentColumnIndex ?? 0;
+        private int _gold;
+        public int Gold
+        {
+            get => _gold;
+            set
+            {
+                if (_gold != value)
+                {
+                    _gold = value;
+                    OnPropertyChanged(nameof(Gold));
+                }
+            }
+        }
+        private int _lives;
+        public int Lives
+        {
+            get => _lives;
+            set
+            {
+                if (_lives != value)
+                {
+                    _lives = value;
+                    OnPropertyChanged(nameof(Lives));
+                }
+            }
+        }
+        private int _depth;
+        public int Depth
+        {
+            get => _depth;
+            private set
+            {
+                if (_depth != value)
+                {
+                    _depth = value;
+                    OnPropertyChanged(nameof(Depth));
+                }
+            }
+        }
 
         // IPlayerPanelData
         public IShipViewData ShipData => this;
@@ -28,8 +83,15 @@ namespace PirateRoguelike.UI
         public List<ISlotViewData> InventorySlots => GameSession.Inventory.Items.Select((item, index) => new SlotDataViewModel(item, index)).Cast<ISlotViewData>().ToList();
     }
 
-    public class SlotDataViewModel : ISlotViewData
+    public class SlotDataViewModel : ISlotViewData, System.ComponentModel.INotifyPropertyChanged
     {
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+        }
+
         private readonly ItemInstance _item;
         private readonly int _index;
 
@@ -40,13 +102,26 @@ namespace PirateRoguelike.UI
         }
 
         public int SlotId => _index;
-        public Sprite Icon => _item?.Def.icon; // Corrected: was itemSprite
+        public Sprite Icon => _item?.Def.icon;
         public string Rarity => _item?.Def.rarity.ToString();
         public bool IsEmpty => _item == null;
         public bool IsDisabled => false; // TODO: Hook up stun/disable logic
-        public float CooldownPercent => (_item == null || _item.Def.cooldownSec <= 0) ? 0 : _item.CooldownRemaining / _item.Def.cooldownSec;
+
+        private float _cooldownPercent;
+        public float CooldownPercent
+        {
+            get => _cooldownPercent;
+            private set
+            {
+                if (_cooldownPercent != value)
+                {
+                    _cooldownPercent = value;
+                    OnPropertyChanged(nameof(CooldownPercent));
+                }
+            }
+        }
         public bool IsPotentialMergeTarget => false; // TODO: Hook up merge logic
-        public RuntimeItem ItemData => _item?.RuntimeItem; // New: Expose the RuntimeItem
+        public RuntimeItem ItemData => _item?.RuntimeItem;
     }
 
 
@@ -122,9 +197,9 @@ namespace PirateRoguelike.UI
 
         // --- Event Handlers ---
 
-        private void HandleGoldChanged(int newGold) => _panelView.UpdateGold(newGold);
-        private void HandleLivesChanged(int newLives) => _panelView.UpdateLives(newLives);
-        private void HandleHealthChanged() => _panelView.UpdateHp(GameSession.PlayerShip.CurrentHealth, GameSession.PlayerShip.Def.baseMaxHealth);
+        private void HandleGoldChanged(int newGold) => _viewModel.Gold = newGold;
+        private void HandleLivesChanged(int newLives) => _viewModel.Lives = newLives;
+        private void HandleHealthChanged() => _viewModel.CurrentHp = GameSession.PlayerShip.CurrentHealth;
         private void HandleEquipmentChanged()
         {
             //Debug.Log("PlayerPanelController: HandleEquipmentChanged called.");

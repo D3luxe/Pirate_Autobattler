@@ -1,2 +1,4 @@
-Assets\Scripts\UI\TooltipController.cs(57,19): error CS0266: Cannot implicitly convert type 'UnityEngine.UIElements.VisualElement' to 'UnityEngine.UIElements.Label'. An explicit conversion exists (are you missing a cast?)
+Assets\Scripts\UI\EnemyPanel\EnemyPanelController.cs(84,24): error CS0273: The accessibility modifier of the 'EnemyPanelController.EnemyShipViewData.CurrentHp.set' accessor must be more restrictive than the property or indexer 'EnemyPanelController.EnemyShipViewData.CurrentHp'
+
+Assets\Scripts\UI\PlayerPanel\PlayerPanelController.cs(56,20): error CS0273: The accessibility modifier of the 'PlayerPanelDataViewModel.Lives.set' accessor must be more restrictive than the property or indexer 'PlayerPanelDataViewModel.Lives'
 

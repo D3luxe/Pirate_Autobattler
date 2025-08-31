@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using PirateRoguelike.Runtime; // Added for RuntimeItem
 
+using System.ComponentModel;
+
 namespace PirateRoguelike.UI
 {
     // Represents the visual state of a single slot
-    public interface ISlotViewData
+    public interface ISlotViewData : INotifyPropertyChanged
     {
         int SlotId { get; }
         Sprite Icon { get; }
@@ -19,7 +21,7 @@ namespace PirateRoguelike.UI
     }
 
     // Represents the visual state of the ship panel
-    public interface IShipViewData
+    public interface IShipViewData : INotifyPropertyChanged
     {
         string ShipName { get; }
         Sprite ShipSprite { get; }
@@ -28,7 +30,7 @@ namespace PirateRoguelike.UI
     }
 
     // Represents the visual state of the HUD counters
-    public interface IHudViewData
+    public interface IHudViewData : INotifyPropertyChanged
     {
         int Gold { get; }
         int Lives { get; }
