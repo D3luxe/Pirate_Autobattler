@@ -12,9 +12,12 @@ namespace PirateRoguelike.Runtime
         {
             BaseItemSO = baseItemSO;
             var runtimeAbilities = new List<RuntimeAbility>();
-            foreach (var abilitySO in baseItemSO.abilities)
+            if (baseItemSO.abilities != null) // Check for null abilities
             {
-                runtimeAbilities.Add(new RuntimeAbility(abilitySO));
+                foreach (var abilitySO in baseItemSO.abilities)
+                {
+                    runtimeAbilities.Add(new RuntimeAbility(abilitySO));
+                }
             }
             Abilities = runtimeAbilities;
         }

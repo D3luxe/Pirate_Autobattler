@@ -280,15 +280,15 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
 --- !u!114 &521273920 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5859908670134484872, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
+  m_CorrespondingSourceObject: {fileID: 1420353846479615460, guid: a9450fc5c0d95fe4fa6a45c5e0eb0b87, type: 3}
   m_PrefabInstance: {fileID: 521273919}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d31ec06cbacd8e4abfb69cf2b603761, type: 3}
+  m_Script: {fileID: 11500000, guid: e5e74008e007863448e8cb4dbe453d29, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPanelController
+  m_EditorClassIdentifier: Assembly-CSharp::PirateRoguelike.UI.EnemyPanelController
 --- !u!1 &577502268
 GameObject:
   m_ObjectHideFlags: 0

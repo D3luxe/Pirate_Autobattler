@@ -38,8 +38,6 @@ namespace PirateRoguelike.UI
             _viewModel = new EnemyShipViewData(_enemyShipState); // Instantiate the viewmodel
 
             // Subscribe to ItemManipulationEvents
-            ItemManipulationEvents.OnItemEquipped += HandleItemEquipped;
-            ItemManipulationEvents.OnItemUnequipped += HandleItemUnequipped;
             ItemManipulationEvents.OnItemMoved += HandleItemMoved;
 
             // Initial data bind
@@ -53,8 +51,6 @@ namespace PirateRoguelike.UI
         void OnDestroy()
         {
             // Unsubscribe from ItemManipulationEvents
-            ItemManipulationEvents.OnItemEquipped -= HandleItemEquipped;
-            ItemManipulationEvents.OnItemUnequipped -= HandleItemUnequipped;
             ItemManipulationEvents.OnItemMoved -= HandleItemMoved;
         }
 
@@ -70,16 +66,6 @@ namespace PirateRoguelike.UI
 
         // Event Handlers
         private void HandleItemMoved(ItemInstance item, SlotId from, SlotId to)
-        {
-            UpdateEnemyEquipmentSlots();
-        }
-
-        private void HandleItemEquipped(ItemInstance item, SlotId from, SlotId to)
-        {
-            UpdateEnemyEquipmentSlots();
-        }
-
-        private void HandleItemUnequipped(ItemInstance item, SlotId from, SlotId to)
         {
             UpdateEnemyEquipmentSlots();
         }

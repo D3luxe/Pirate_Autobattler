@@ -65,7 +65,24 @@ public class ShipState
         Equipped = new ItemInstance[Def.baseItemSlots];
         for (int i = 0; i < data.equippedItems.Count; i++)
         {
-            Equipped[i] = new ItemInstance(GameDataRegistry.GetItem(data.equippedItems[i].itemId, data.equippedItems[i].rarity));
+            var itemData = data.equippedItems[i];
+            if (itemData != null)
+            {
+                ItemSO itemSO = GameDataRegistry.GetItem(itemData.itemId, itemData.rarity);
+                if (itemSO != null)
+                {
+                    Equipped[i] = new ItemInstance(itemSO);
+                }
+                else
+                {
+                    Debug.LogWarning($"Could not find ItemSO with ID {itemData.itemId} and Rarity {itemData.rarity} in GameDataRegistry. Treating slot as empty.");
+                    Equipped[i] = null;
+                }
+            }
+            else
+            {
+                Equipped[i] = null;
+            }
         }
 
         RecalculateStats(); // Recalculate stats after loading modifiers
@@ -76,10 +93,7 @@ public class ShipState
         List<SerializableItemInstance> equippedSerializable = new List<SerializableItemInstance>();
         foreach (var item in Equipped)
         {
-            if (item != null)
-            {
-                equippedSerializable.Add(item.ToSerializable());
-            }
+            equippedSerializable.Add(item?.ToSerializable());
         }
         return new SerializableShipState(ShipId, CurrentHealth, CurrentShield, _stunDuration, equippedSerializable, ActiveEffects, _activeStatModifiers);
     }
@@ -163,7 +177,6 @@ public class ShipState
     {
         if (index < 0 || index >= Equipped.Length) return;
         Equipped[index] = item;
-        Debug.Log($"ShipState: Item {item?.Def.displayName ?? "NULL"} set at equipment index {index}. Dispatching event.");
         ItemManipulationEvents.DispatchItemAdded(item, new SlotId(index, SlotContainerType.Equipment));
     }
 
@@ -181,7 +194,6 @@ public class ShipState
 
         ItemInstance itemA_after = Equipped[indexA];
         ItemInstance itemB_after = Equipped[indexB];
-        Debug.Log($"ShipState: Swapped equipment between {indexA} and {indexB}. Item at {indexA}: {Equipped[indexA]?.Def.displayName ?? "NULL"}, Item at {indexB}: {Equipped[indexB]?.Def.displayName ?? "NULL"}. Dispatching event.");
         ItemManipulationEvents.DispatchItemMoved(Equipped[indexA], new SlotId(indexA, SlotContainerType.Equipment), new SlotId(indexB, SlotContainerType.Equipment));
     }
 
@@ -191,7 +203,6 @@ public class ShipState
         {
             ItemInstance item = Equipped[index];
             Equipped[index] = null;
-            Debug.Log($"ShipState: Item {item?.Def.displayName ?? "NULL"} removed from equipment index {index}. Dispatching event.");
             ItemManipulationEvents.DispatchItemRemoved(item, new SlotId(index, SlotContainerType.Equipment));
         }
         else
@@ -205,7 +216,6 @@ public class ShipState
         if (index >= 0 && index < Equipped.Length)
         {
             Equipped[index] = item;
-            Debug.Log($"ShipState: Item {item?.Def.displayName ?? "NULL"} set at equipment index {index}. Dispatching event.");
             ItemManipulationEvents.DispatchItemAdded(item, new SlotId(index, SlotContainerType.Equipment));
         }
         else

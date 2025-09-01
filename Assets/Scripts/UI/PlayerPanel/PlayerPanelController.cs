@@ -148,8 +148,6 @@ namespace PirateRoguelike.UI
 
             // Subscribe to ItemManipulationEvents
             PirateRoguelike.Events.ItemManipulationEvents.OnItemMoved += HandleItemMoved;
-            PirateRoguelike.Events.ItemManipulationEvents.OnItemEquipped += HandleItemEquipped;
-            PirateRoguelike.Events.ItemManipulationEvents.OnItemUnequipped += HandleItemUnequipped;
             PirateRoguelike.Events.ItemManipulationEvents.OnItemAdded += HandleItemAdded;
             PirateRoguelike.Events.ItemManipulationEvents.OnItemRemoved += HandleItemRemoved;
 
@@ -201,7 +199,6 @@ namespace PirateRoguelike.UI
         // --- Item Manipulation Event Handlers ---
         private void HandleItemMoved(ItemInstance item, SlotId from, SlotId to)
         {
-            Debug.Log($"PlayerPanelDataViewModel: HandleItemMoved - Item: {item?.Def.displayName ?? "NULL"}, From: {from.ContainerType} {from.Index}, To: {to.ContainerType} {to.Index}");
             // Clear the old slot
             if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
             {
@@ -223,39 +220,8 @@ namespace PirateRoguelike.UI
             }
         }
 
-        private void HandleItemEquipped(ItemInstance item, SlotId from, SlotId to)
-        {
-            Debug.Log($"PlayerPanelDataViewModel: HandleItemEquipped - Item: {item?.Def.displayName ?? "NULL"}, From: {from.ContainerType} {from.Index}, To: {to.ContainerType} {to.Index}");
-            // Clear the inventory slot
-            if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory) // Added check
-            {
-                (_inventorySlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
-            }
-            // Populate the equipment slot
-            if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment) // Added check
-            {
-                (_equipmentSlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
-            }
-        }
-
-        private void HandleItemUnequipped(ItemInstance item, SlotId from, SlotId to)
-        {
-            Debug.Log($"PlayerPanelDataViewModel: HandleItemUnequipped - Item: {item?.Def.displayName ?? "NULL"}, From: {from.ContainerType} {from.Index}, To: {to.ContainerType} {to.Index}");
-            // Clear the equipment slot
-            if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment) // Added check
-            {
-                (_equipmentSlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
-            }
-            // Populate the inventory slot
-            if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory) // Added check
-            {
-                (_inventorySlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
-            }
-        }
-
         private void HandleItemAdded(ItemInstance item, SlotId to)
         {
-            Debug.Log($"PlayerPanelDataViewModel: HandleItemAdded - Item: {item?.Def.displayName ?? "NULL"}, To: {to.ContainerType} {to.Index}");
             if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
             {
                 (_inventorySlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
@@ -268,7 +234,6 @@ namespace PirateRoguelike.UI
 
         private void HandleItemRemoved(ItemInstance item, SlotId from)
         {
-            Debug.Log($"PlayerPanelDataViewModel: HandleItemRemoved - Item: {item?.Def.displayName ?? "NULL"}, From: {from.ContainerType} {from.Index}");
             if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
             {
                 (_inventorySlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
@@ -326,7 +291,6 @@ namespace PirateRoguelike.UI
             get => _item;
             set
             {
-                Debug.Log($"SlotDataViewModel: CurrentItemInstance setter - SlotId: {SlotId}, New Item: {value?.Def.displayName ?? "NULL"}");
                 if (_item != value)
                 {
                     _item = value;

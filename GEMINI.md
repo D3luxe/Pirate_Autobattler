@@ -195,12 +195,13 @@
 | Severity | Effort | Rationale | Recommendation |
 | :--- | :--- | :--- | :--- |
 | **High** | **M** | `GameSession`'s static global state hinders testability and complicates save/load. | Refactor `GameSession` into a non-static class/MonoBehaviour for improved testability and explicit data flow. |
-| **Medium** | **S** | Direct UI updates (e.g., `CombatController`, `PlayerPanelController` subscribing to `ShipState`) tightly couple game logic and UI. | Introduce a data-binding/view-model layer to decouple UI from game logic. |
+| **Medium** | **S** | Direct UI updates (e.g., `CombatController`, `PlayerPanelController` subscribing to `ShipState`) tightly couple game logic and UI. *Partially mitigated by the new event-driven item manipulation system.* | Introduce a data-binding/view-model layer to decouple UI from game logic. |
 | **Low** | **S** | Unused `items.json` and `EventBus` events create codebase clutter and confusion. | Remove unused `items.json` and `EventBus` events to clean up the project. |
 
 -   **Roadmap:**
     -   **Quick Wins:**
         -   [x] Implement a mouseover tooltip system for items using UI Toolkit.
+        -   [x] Implement a universal item manipulation system.
         -   [ ] Remove `StreamingAssets/items.json`.
         -   [ ] Remove unused events from `EventBus`.
         -   [ ] Optimize `ProcessActiveEffects` to reduce per-tick allocations.

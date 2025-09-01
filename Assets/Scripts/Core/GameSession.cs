@@ -110,9 +110,22 @@ public static class GameSession
         InvokeOnEconomyInitialized(); // NEW
 
         Inventory = new Inventory(config.inventorySize);
-        foreach (var itemData in CurrentRunState.inventoryItems)
+        for (int i = 0; i < CurrentRunState.inventoryItems.Count; i++)
         {
-            Inventory.AddItem(new ItemInstance(GameDataRegistry.GetItem(itemData.itemId, itemData.rarity)));
+            var itemData = CurrentRunState.inventoryItems[i];
+            if (itemData != null)
+            {
+                ItemSO itemSO = GameDataRegistry.GetItem(itemData.itemId, itemData.rarity);
+                if (itemSO != null)
+                {
+                    Inventory.AddItemAt(new ItemInstance(itemSO), i);
+                }
+                else
+                {
+                    Debug.LogWarning($"Could not find ItemSO with ID {itemData.itemId} and Rarity {itemData.rarity} in GameDataRegistry. Treating slot as empty.");
+                    // No need to add null, inventory is already empty at this index
+                }
+            }
         }
         InvokeOnInventoryInitialized(); // Invoke event after Inventory is populated
 

@@ -108,7 +108,6 @@ public class Inventory
             return;
         }
         Slots[index].Item = item;
-        Debug.Log($"Inventory: Item {item?.Def.displayName ?? "NULL"} added at index {index}. Dispatching event.");
         ItemManipulationEvents.DispatchItemAdded(item, new SlotId(index, SlotContainerType.Inventory));
     }
 
@@ -121,7 +120,6 @@ public class Inventory
         }
         ItemInstance _item = Slots[index].Item;
         Slots[index].Item = null;
-        Debug.Log($"Inventory: Item {_item?.Def.displayName ?? "NULL"} removed from index {index}. Dispatching event.");
         ItemManipulationEvents.DispatchItemRemoved(_item, new SlotId(index, SlotContainerType.Inventory));
         return _item;
     }
@@ -141,7 +139,6 @@ public class Inventory
         
         ItemInstance itemA_after = Slots[indexA].Item;
         ItemInstance itemB_after = Slots[indexB].Item;
-        Debug.Log($"Inventory: Swapped items between {indexA} and {indexB}. Item at {indexA}: {Slots[indexA].Item?.Def.displayName ?? "NULL"}, Item at {indexB}: {Slots[indexB].Item?.Def.displayName ?? "NULL"}. Dispatching event.");
         ItemManipulationEvents.DispatchItemMoved(Slots[indexA].Item, new SlotId(indexA, SlotContainerType.Inventory), new SlotId(indexB, SlotContainerType.Inventory));
     }
 
@@ -159,7 +156,6 @@ public class Inventory
             return;
         }
         Slots[index].Item = item;
-        Debug.Log($"Inventory: Item {item?.Def.displayName ?? "NULL"} set at index {index}. Dispatching event.");
         ItemManipulationEvents.DispatchItemAdded(item, new SlotId(index, SlotContainerType.Inventory));
     }
 }

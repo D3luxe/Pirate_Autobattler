@@ -123,19 +123,17 @@ namespace PirateRoguelike.UI
                 {
                     // Same container, so it's a move/swap
                     //Debug.Log($"Same container so firing MoveItem");
-                    PirateRoguelike.Services.ItemManipulationService.Instance.MoveItem(fromSlotId, toSlotId, dropSlotData.CurrentItemInstance ?? null);
+                    PirateRoguelike.Services.ItemManipulationService.Instance.SwapItems(fromSlotId, toSlotId);
                 }
                 else if (fromSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory && toSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
                 {
                     // Equipping from Inventory
-                    //Debug.Log($"Equipping From Inv");
-                    PirateRoguelike.Services.ItemManipulationService.Instance.EquipItem(fromSlotId, toSlotId);
+                    PirateRoguelike.Services.ItemManipulationService.Instance.SwapItems(fromSlotId, toSlotId);
                 }
                 else if (fromSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment && toSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
                 {
                     // Unequipping to Inventory
-                    //Debug.Log($"Unequipping to inv");
-                    PirateRoguelike.Services.ItemManipulationService.Instance.UnequipItem(fromSlotId, toSlotId);
+                    PirateRoguelike.Services.ItemManipulationService.Instance.SwapItems(fromSlotId, toSlotId);
                 }
                 else
                 {

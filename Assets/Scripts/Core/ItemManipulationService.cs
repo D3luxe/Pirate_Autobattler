@@ -27,117 +27,66 @@ namespace PirateRoguelike.Services
         public void Initialize(IGameSession gameSession)
         {
             _gameSession = gameSession;
-            Debug.Log("ItemManipulationService initialized.");
         }
 
-        public void MoveItem(SlotId from, SlotId to, ItemInstance swapItem = null)
+        
+
+        public void SwapItems(SlotId slotA, SlotId slotB)
         {
-            Debug.Log($"ItemManipulationService: MoveItem from {from.ContainerType} {from.Index} to {to.ContainerType} {to.Index}");
+            ItemInstance itemA = null;
+            ItemInstance itemB = null;
 
-            ItemInstance itemToMove = null;
-
-            if(swapItem != null)
+            // Get itemA from slotA and remove it
+            if (slotA.ContainerType == SlotContainerType.Inventory)
             {
-                Debug.Log($"ItemManipulationService: swapItem: {swapItem.Def.displayName}");
-                if(to.ContainerType == SlotContainerType.Inventory)
+                itemA = _gameSession.Inventory.GetItemAt(slotA.Index);
+                _gameSession.Inventory.RemoveItemAt(slotA.Index);
+            }
+            else if (slotA.ContainerType == SlotContainerType.Equipment)
+            {
+                itemA = _gameSession.PlayerShip.GetEquippedItem(slotA.Index);
+                _gameSession.PlayerShip.RemoveEquippedAt(slotA.Index);
+            }
+
+            // Get itemB from slotB and remove it
+            if (slotB.ContainerType == SlotContainerType.Inventory)
+            {
+                itemB = _gameSession.Inventory.GetItemAt(slotB.Index);
+                _gameSession.Inventory.RemoveItemAt(slotB.Index);
+            }
+            else if (slotB.ContainerType == SlotContainerType.Equipment)
+            {
+                itemB = _gameSession.PlayerShip.GetEquippedItem(slotB.Index);
+                _gameSession.PlayerShip.RemoveEquippedAt(slotB.Index);
+            }
+
+            // Place itemB into slotA
+            if (itemB != null)
+            {
+                if (slotA.ContainerType == SlotContainerType.Inventory)
                 {
-                   _gameSession.Inventory.RemoveItemAt(to.Index);
-                   Debug.Log($"  Removed item {swapItem?.Def.displayName ?? "NULL"} from Inventory {to.Index} to prepare for swap");
-                } else if(to.ContainerType == SlotContainerType.Equipment)
+                    _gameSession.Inventory.AddItemAt(itemB, slotA.Index);
+                }
+                else if (slotA.ContainerType == SlotContainerType.Equipment)
                 {
-                   _gameSession.PlayerShip.RemoveEquippedAt(to.Index);
-                   Debug.Log($"  Removed item {swapItem?.Def.displayName ?? "NULL"} from Equipment {to.Index} to prepare for swap");
+                    _gameSession.PlayerShip.SetEquipment(slotA.Index, itemB);
                 }
             }
 
-            // Get item from 'from' slot
-            if (from.ContainerType == SlotContainerType.Inventory)
+            // Place itemA into slotB
+            if (itemA != null)
             {
-                itemToMove = _gameSession.Inventory.GetItemAt(from.Index);
-                _gameSession.Inventory.RemoveItemAt(from.Index);
-                Debug.Log($"  Retrieved item {itemToMove?.Def.displayName ?? "NULL"} from Inventory {from.Index}");
-
-                if(swapItem != null)
+                if (slotB.ContainerType == SlotContainerType.Inventory)
                 {
-                    _gameSession.Inventory.AddItemAt(swapItem, from.Index);
-                    Debug.Log($"  Placed item {swapItem.Def.displayName} in Inventory {from.Index}");
+                    _gameSession.Inventory.AddItemAt(itemA, slotB.Index);
+                }
+                else if (slotB.ContainerType == SlotContainerType.Equipment)
+                {
+                    _gameSession.PlayerShip.SetEquipment(slotB.Index, itemA);
                 }
             }
-            else if (from.ContainerType == SlotContainerType.Equipment)
-            {
-                itemToMove = _gameSession.PlayerShip.GetEquippedItem(from.Index);
-                _gameSession.PlayerShip.RemoveEquippedAt(from.Index);
-                Debug.Log($"  Retrieved item {itemToMove?.Def.displayName ?? "NULL"} from Equipment {from.Index}");
-
-                if(swapItem != null)
-                {
-                    _gameSession.PlayerShip.SetEquipment(from.Index, swapItem);
-                    Debug.Log($"  Placed item {swapItem.Def.displayName} in Equipment {from.Index}");
-                }
-            }
-
-            if (itemToMove == null)
-            {
-                Debug.LogWarning($"ItemManipulationService: No item found at source slot {from.ContainerType} {from.Index}");
-                return;
-            }
-
-            // Place item in 'to' slot
-            if (to.ContainerType == SlotContainerType.Inventory)
-            {
-                _gameSession.Inventory.AddItemAt(itemToMove, to.Index);
-                Debug.Log($"  Placed item {itemToMove.Def.displayName} in Inventory {to.Index}");
-            }
-            else if (to.ContainerType == SlotContainerType.Equipment)
-            {
-                _gameSession.PlayerShip.SetEquipment(to.Index, itemToMove);
-                Debug.Log($"  Placed item {itemToMove.Def.displayName} in Equipment {to.Index}");
-            }
         }
 
-        public void EquipItem(SlotId from, SlotId to)
-        {
-            Debug.Log($"ItemManipulationService: EquipItem from {from.ContainerType} {from.Index} to {to.ContainerType} {to.Index}");
-
-            if (from.ContainerType != SlotContainerType.Inventory || to.ContainerType != SlotContainerType.Equipment)
-            {
-                Debug.LogWarning($"EquipItem: Invalid container types. From: {from.ContainerType}, To: {to.ContainerType}");
-                return;
-            }
-
-            ItemInstance itemToEquip = _gameSession.Inventory.GetItemAt(from.Index);
-            _gameSession.Inventory.RemoveItemAt(from.Index);
-            if (itemToEquip == null)
-            {
-                Debug.LogWarning($"EquipItem: No item found in inventory at index {from.Index}");
-                return;
-            }
-
-            _gameSession.PlayerShip.SetEquipment(to.Index, itemToEquip);
-            Debug.Log($"Equipped {itemToEquip.Def.displayName} from Inventory {from.Index} to Equipment {to.Index}");
-        }
-
-        public void UnequipItem(SlotId from, SlotId to)
-        {
-            Debug.Log($"ItemManipulationService: UnequipItem from {from.ContainerType} {from.Index} to {to.ContainerType} {to.Index}");
-
-            if (from.ContainerType != SlotContainerType.Equipment || to.ContainerType != SlotContainerType.Inventory)
-            {
-                Debug.LogWarning($"UnequipItem: Invalid container types. From: {from.ContainerType}, To: {to.ContainerType}");
-                return;
-            }
-
-            ItemInstance itemToUnequip = _gameSession.PlayerShip.GetEquippedItem(from.Index);
-            _gameSession.PlayerShip.RemoveEquippedAt(from.Index);
-            if (itemToUnequip == null)
-            {
-                Debug.LogWarning($"UnequipItem: No item found in equipment at index {from.Index}");
-                return;
-            }
-
-            _gameSession.Inventory.AddItemAt(itemToUnequip, to.Index);
-            Debug.Log($"Unequipped {itemToUnequip.Def.displayName} from Equipment {from.Index} to Inventory {to.Index}");
-        }
     }
 
     // Define SlotId struct
