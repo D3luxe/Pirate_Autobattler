@@ -25,6 +25,14 @@ public class MapManager : MonoBehaviour
     public MapGraphData GetMapGraphData() => _mapGraphData; // Changed return type
     public List<List<MapNodeData>> GetConvertedMapNodes() => _convertedMapNodes;
 
+    public void ResetMap()
+    {
+        _isMapGenerated = false;
+        _convertedMapNodes = null;
+        _currentMapGraph = null;
+        _mapGraphData = null;
+    }
+
     void Start()
     {
         // Reward checking logic has been moved to RunManager.OnRunSceneLoaded()
@@ -39,6 +47,7 @@ public class MapManager : MonoBehaviour
             return;
         }
         Instance = this;
+        DontDestroyOnLoad(gameObject);
         _runConfig = GameDataRegistry.GetRunConfig();
         if (_runConfig == null)
         {

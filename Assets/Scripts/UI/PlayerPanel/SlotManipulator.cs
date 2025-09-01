@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System;
 using System.Linq; // Added for ToList()
-using PirateRoguelike.UI.Components; // Added for SlotElement
 using PirateRoguelike.Services; // Added for SlotId and SlotContainerType
+using PirateRoguelike.UI.Components; // Added for SlotElement
 
 namespace PirateRoguelike.UI
 {
@@ -45,6 +45,11 @@ namespace PirateRoguelike.UI
 
         private void OnPointerDown(PointerDownEvent evt)
         {
+            if (!UIInteractionService.CanManipulateItem(_fromContainer))
+            {
+                return;
+            }
+
             Debug.Log($"SlotManipulator: OnPointerDown called for Slot ID: {_itemElement.SlotViewData.SlotId}"); // ADD THIS LINE
             if (_isDragging) return;
 
@@ -111,34 +116,16 @@ namespace PirateRoguelike.UI
  
             if (dropTargetElement != null && dropSlotData != null) // Ensure dropSlotData is not null
             {
-                
-
-                // Call ItemManipulationService
                 SlotId fromSlotId = new SlotId(_itemElement.SlotViewData.SlotId, _fromContainer);
                 SlotId toSlotId = new SlotId(dropSlotData.SlotId, toContainer);
 
                 Debug.Log($"OnPointerUp: dropSlotData.CurrentItemInstance: {dropSlotData.CurrentItemInstance?.Def.displayName ?? "NULL"}");
 
-                if (fromSlotId.ContainerType == toSlotId.ContainerType)
+                if (_fromContainer == SlotContainerType.Inventory || _fromContainer == SlotContainerType.Equipment)
                 {
-                    // Same container, so it's a move/swap
-                    //Debug.Log($"Same container so firing MoveItem");
-                    PirateRoguelike.Services.ItemManipulationService.Instance.SwapItems(fromSlotId, toSlotId);
+                    ItemManipulationService.Instance.RequestSwap(fromSlotId, toSlotId);
                 }
-                else if (fromSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory && toSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
-                {
-                    // Equipping from Inventory
-                    PirateRoguelike.Services.ItemManipulationService.Instance.SwapItems(fromSlotId, toSlotId);
-                }
-                else if (fromSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment && toSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
-                {
-                    // Unequipping to Inventory
-                    PirateRoguelike.Services.ItemManipulationService.Instance.SwapItems(fromSlotId, toSlotId);
-                }
-                else
-                {
-                    Debug.LogWarning($"SlotManipulator: Unhandled item manipulation from {fromSlotId.ContainerType} to {toSlotId.ContainerType}");
-                }
+                // else if (_fromContainer == SlotContainerType.Shop) { ... }
             }
 
             CleanUp();

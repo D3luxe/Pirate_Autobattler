@@ -29,9 +29,23 @@ namespace PirateRoguelike.Services
             _gameSession = gameSession;
         }
 
-        
+        public void RequestSwap(SlotId fromSlot, SlotId toSlot)
+        {
+            // Check rules before executing the swap
+            if (!PirateRoguelike.UI.UIInteractionService.CanManipulateItem(fromSlot.ContainerType) || !PirateRoguelike.UI.UIInteractionService.CanManipulateItem(toSlot.ContainerType))
+            {
+                return; 
+            }
+            ExecuteSwap(fromSlot, toSlot);
+        }
 
-        public void SwapItems(SlotId slotA, SlotId slotB)
+        public void RequestPurchase(SlotId shopSlot, SlotId playerSlot)
+        {
+            // TODO: Implement Shop Logic
+            UnityEngine.Debug.Log($"Purchase requested for item in shop slot {shopSlot.Index}.");
+        }
+
+        private void ExecuteSwap(SlotId slotA, SlotId slotB)
         {
             ItemInstance itemA = null;
             ItemInstance itemB = null;
@@ -102,13 +116,11 @@ namespace PirateRoguelike.Services
         }
     }
 
-    // Define SlotContainerType enum (if not already defined elsewhere)
     public enum SlotContainerType
     {
         Inventory,
         Equipment,
         Shop,
-        Crafting,
-        // Add other container types as needed
+        Crafting
     }
 }

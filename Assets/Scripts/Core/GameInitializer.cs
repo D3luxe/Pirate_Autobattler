@@ -39,6 +39,7 @@ public class GameInitializer : MonoBehaviour
                     Debug.LogError("GameInitializer: RunConfig or DebugStartingShip is not assigned for new game fallback!");
                     return;
                 }
+                if (MapManager.Instance != null) MapManager.Instance.ResetMap();
                 GameSession.StartNewRun(runConfig, debugStartingShip);
             }
         }
@@ -50,6 +51,7 @@ public class GameInitializer : MonoBehaviour
                 Debug.LogError("GameInitializer: RunConfig or DebugStartingShip is not assigned for new game!");
                 return;
             }
+            if (MapManager.Instance != null) MapManager.Instance.ResetMap();
             GameSession.StartNewRun(runConfig, debugStartingShip);
         }
 

@@ -233,7 +233,7 @@ namespace PirateRoguelike.UI
             slotElement.Bind(slotData);
 
             // Register PointerEnter and PointerLeave events for tooltip
-            TooltipUtility.RegisterTooltipCallbacks(slotElement, slotData);
+            TooltipUtility.RegisterTooltipCallbacks(slotElement, slotData, _root);
             return slotElement;
         }
 

@@ -6,7 +6,6 @@
                 <ui:VisualElement name="equipment-bar" class="equipment-bar" style="display: flex; flex-direction: row; flex-wrap: nowrap;" />
             </ui:VisualElement>
             <ui:VisualElement name="left-column" style="position: absolute; top: 127px; left: 32px; flex-direction: column; align-items: center;">
-                <ui:Instance template="ShipPanelTemplate" name="ship-panel-instance" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

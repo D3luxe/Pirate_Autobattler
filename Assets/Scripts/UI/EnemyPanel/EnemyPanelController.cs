@@ -29,9 +29,11 @@ namespace PirateRoguelike.UI
             _enemyShipState = enemyShipState;
 
             var root = GetComponent<UIDocument>().rootVisualElement;
+            root.pickingMode = PickingMode.Ignore; // Allow mouse events to pass through the root
+
             // Instantiate ShipDisplayElement directly as it's no longer a UxmlElement
             _shipDisplayElement = new ShipDisplayElement();
-            root.Add(_shipDisplayElement); // Assuming 'root' is the correct parent for the enemy ship display
+            root.Q("left-column").Add(_shipDisplayElement); // Assuming 'root' is the correct parent for the enemy ship display
 
             _equipmentBar = root.Q<VisualElement>("equipment-bar"); // Query equipment bar
 
@@ -140,7 +142,7 @@ namespace PirateRoguelike.UI
             slotElement.Bind(slotData);
 
             // Register PointerEnter and PointerLeave events for tooltip
-            TooltipUtility.RegisterTooltipCallbacks(slotElement, slotData);
+            TooltipUtility.RegisterTooltipCallbacks(slotElement, slotData, this.GetComponent<UIDocument>().rootVisualElement);
             return slotElement;
         }
 

@@ -45,5 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TooltipController
   _tooltipUxml: {fileID: 9197481963319205126, guid: 06904533904b0fc49b2041fb04c98669, type: 3}
+  _tooltipStyleSheet: {fileID: 7433441132597879392, guid: 632d32f1f10e05348b3a18dd87e9e166, type: 3}
   _activeEffectUxml: {fileID: 9197481963319205126, guid: b6d93bbfbd9598d4cbd869b585cc7919, type: 3}
   _passiveEffectUxml: {fileID: 9197481963319205126, guid: cba2b72d36aaaf0408c5080af4a74ff6, type: 3}

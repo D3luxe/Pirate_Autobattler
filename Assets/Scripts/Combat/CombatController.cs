@@ -50,6 +50,9 @@ public class CombatController : MonoBehaviour
         // Dispatch battle start event for the AbilityManager
         var battleStartCtx = new CombatContext { Caster = Player, Target = Enemy };
         EventBus.DispatchBattleStart(battleStartCtx);
+
+        // Set global UI state
+        UIInteractionService.IsInCombat = true;
     }
 
     private void OnDestroy()
