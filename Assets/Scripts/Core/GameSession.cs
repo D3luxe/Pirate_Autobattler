@@ -12,6 +12,10 @@ public static class GameSession
     public static Inventory Inventory { get; set; }
     public static ShipState PlayerShip { get; set; }
 
+    public static event Action OnPlayerShipInitialized; // NEW
+    public static event Action OnInventoryInitialized; // NEW
+    public static event Action OnEconomyInitialized; // NEW
+
     // Flags for loading saved games
     public static bool ShouldLoadSavedGame { get; set; } = false;
     public static RunState SavedRunStateToLoad { get; set; } = null;
@@ -21,6 +25,21 @@ public static class GameSession
     public static void InvokeOnPlayerNodeChanged()
     {
         OnPlayerNodeChanged?.Invoke();
+    }
+
+    public static void InvokeOnPlayerShipInitialized()
+    {
+        OnPlayerShipInitialized?.Invoke();
+    }
+
+    public static void InvokeOnInventoryInitialized()
+    {
+        OnInventoryInitialized?.Invoke();
+    }
+
+    public static void InvokeOnEconomyInitialized()
+    {
+        OnEconomyInitialized?.Invoke();
     }
 
     public static void EndRun()
@@ -53,14 +72,32 @@ public static class GameSession
         int unitySeed = (int)(CurrentRunState.randomSeed & 0xFFFFFFFF) ^ (int)(CurrentRunState.randomSeed >> 32);
         UnityEngine.Random.InitState(unitySeed); // Initialize Unity's random with the main seed
         Economy = new EconomyService(config, CurrentRunState);
+        // Invoke OnEconomyInitialized after Economy is set
+        InvokeOnEconomyInitialized(); // NEW
+
         Inventory = new Inventory(config.inventorySize);
         PlayerShip = new ShipState(startingShip);
+        InvokeOnPlayerShipInitialized(); // Invoke event after PlayerShip is set
 
         // Add starter items to inventory
         ItemSO starterItem1 = GameDataRegistry.GetItem("item_cannon_wood");
-        if (starterItem1 != null) Inventory.AddItem(new ItemInstance(starterItem1));
+        Debug.Log($"GameSession: starterItem1 (cannon_wood) is null: {starterItem1 == null}");
+        if (starterItem1 != null) Debug.Log($"GameSession: AddItem(cannon_wood) success: {Inventory.AddItem(new ItemInstance(starterItem1))}");
         ItemSO starterItem2 = GameDataRegistry.GetItem("item_deckhand");
-        if (starterItem2 != null) Inventory.AddItem(new ItemInstance(starterItem2));
+        Debug.Log($"GameSession: starterItem2 (deckhand) is null: {starterItem2 == null}");
+        if (starterItem2 != null) Debug.Log($"GameSession: AddItem(deckhand) success: {Inventory.AddItem(new ItemInstance(starterItem2))}");
+        Debug.Log($"GameSession: Inventory.Slots.Count after adding: {Inventory.Slots.Count}");
+        foreach (var slot in Inventory.Slots)
+        {
+            if (slot.Item != null) Debug.Log($"GameSession: Inventory item ID: {slot.Item.Def.id}");
+        }
+        InvokeOnInventoryInitialized(); // Invoke event after Inventory is populated
+
+        Debug.Log($"GameSession: PlayerShip.Equipped.Length: {PlayerShip.Equipped.Length}");
+        foreach (var item in PlayerShip.Equipped)
+        {
+            if (item != null) Debug.Log($"GameSession: Equipped item ID: {item.Def.id}");
+        }
     }
 
     // Called to load a saved run
@@ -69,14 +106,18 @@ public static class GameSession
         CurrentRunState = loadedState;
 
         Economy = new EconomyService(config, CurrentRunState);
+        // Invoke OnEconomyInitialized after Economy is set
+        InvokeOnEconomyInitialized(); // NEW
 
         Inventory = new Inventory(config.inventorySize);
         foreach (var itemData in CurrentRunState.inventoryItems)
         {
             Inventory.AddItem(new ItemInstance(GameDataRegistry.GetItem(itemData.itemId, itemData.rarity)));
         }
+        InvokeOnInventoryInitialized(); // Invoke event after Inventory is populated
 
         PlayerShip = new ShipState(CurrentRunState.playerShipState);
+        InvokeOnPlayerShipInitialized(); // Invoke event after PlayerShip is set
 
         Debug.Log("Loading a run. RNG seed: " + CurrentRunState.randomSeed.ToString());
         // Convert ulong seed to int for Unity's Random.InitState by XORing upper and lower 32 bits
@@ -191,11 +232,11 @@ public static class GameSession
         CurrentRunState.playerShipState = PlayerShip.ToSerializable();
 
         List<SerializableItemInstance> inventorySerializable = new List<SerializableItemInstance>();
-        foreach (var item in Inventory.Items)
+        foreach (var slot in Inventory.Slots)
         {
-            if (item != null)
+            if (slot.Item != null)
             {
-                inventorySerializable.Add(item.ToSerializable());
+                inventorySerializable.Add(slot.Item.ToSerializable());
             }
         }
         CurrentRunState.inventoryItems = inventorySerializable;

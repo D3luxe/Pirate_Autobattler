@@ -25,8 +25,10 @@ namespace PirateRoguelike.UI
         public float CooldownPercent { get; private set; }
         public bool IsPotentialMergeTarget { get; private set; }
         public RuntimeItem ItemData { get; private set; }
+        public string ItemInstanceId { get; private set; } // NEW
+        public ItemInstance CurrentItemInstance { get; private set; } // NEW
 
-        public MockSlotViewData(int slotId, Sprite icon, string rarity, bool isEmpty, bool isDisabled, float cooldownPercent, bool isPotentialMergeTarget, RuntimeItem itemData)
+        public MockSlotViewData(int slotId, Sprite icon, string rarity, bool isEmpty, bool isDisabled, float cooldownPercent, bool isPotentialMergeTarget, RuntimeItem itemData, string itemInstanceId, ItemInstance currentItemInstance)
         {
             SlotId = slotId;
             Icon = icon;
@@ -36,6 +38,8 @@ namespace PirateRoguelike.UI
             CooldownPercent = cooldownPercent;
             IsPotentialMergeTarget = isPotentialMergeTarget;
             ItemData = itemData;
+            ItemInstanceId = itemInstanceId;
+            CurrentItemInstance = currentItemInstance;
         }
     }
 
@@ -58,20 +62,20 @@ namespace PirateRoguelike.UI
 
             var mockEquipmentSlots = new ObservableList<ISlotViewData>
             {
-                new MockSlotViewData(0, _theme.emptySlotBackground, "", true, false, 0, false, null),
-                new MockSlotViewData(1, _theme.emptySlotBackground, "", true, false, 0, false, null),
-                new MockSlotViewData(2, _theme.emptySlotBackground, "", true, false, 0, false, null),
-                new MockSlotViewData(3, _theme.emptySlotBackground, "", true, false, 0, false, null)
+                new MockSlotViewData(0, _theme.emptySlotBackground, "", true, false, 0, false, null, null, null),
+                new MockSlotViewData(1, _theme.emptySlotBackground, "", true, false, 0, false, null, null, null),
+                new MockSlotViewData(2, _theme.emptySlotBackground, "", true, false, 0, false, null, null, null),
+                new MockSlotViewData(3, _theme.emptySlotBackground, "", true, false, 0, false, null, null, null)
             };
 
             var mockInventorySlots = new ObservableList<ISlotViewData>
             {
-                new MockSlotViewData(0, _mockItem.icon, _mockItem.rarity.ToString(), false, false, 0.5f, true, new RuntimeItem(_mockItem)),
-                new MockSlotViewData(1, _theme.emptySlotBackground, "", true, false, 0, false, null),
-                new MockSlotViewData(2, _theme.emptySlotBackground, "", true, false, 0, false, null),
-                new MockSlotViewData(3, _theme.emptySlotBackground, "", true, false, 0, false, null),
-                new MockSlotViewData(4, _theme.emptySlotBackground, "", true, false, 0, false, null),
-                new MockSlotViewData(5, _theme.emptySlotBackground, "", true, false, 0, false, null)
+                new MockSlotViewData(0, _mockItem.icon, _mockItem.rarity.ToString(), false, false, 0.5f, true, new RuntimeItem(_mockItem), _mockItem.id, new ItemInstance(_mockItem)),
+                new MockSlotViewData(1, _theme.emptySlotBackground, "", true, false, 0, false, null, null, null),
+                new MockSlotViewData(2, _theme.emptySlotBackground, "", true, false, 0, false, null, null, null),
+                new MockSlotViewData(3, _theme.emptySlotBackground, "", true, false, 0, false, null, null, null),
+                new MockSlotViewData(4, _theme.emptySlotBackground, "", true, false, 0, false, null, null, null),
+                new MockSlotViewData(5, _theme.emptySlotBackground, "", true, false, 0, false, null, null, null)
             };
 
             var mockPlayerPanelData = new MockPlayerPanelData(mockShipData, mockHudData, mockEquipmentSlots, mockInventorySlots);

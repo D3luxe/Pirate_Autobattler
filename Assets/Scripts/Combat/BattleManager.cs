@@ -1,6 +1,7 @@
 using UnityEngine;
 using PirateRoguelike.Data;
 using Pirate.MapGen;
+using PirateRoguelike.UI;
 
 public class BattleManager : MonoBehaviour
 {

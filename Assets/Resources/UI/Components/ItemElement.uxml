@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-uie="UnityEditor.UIElements">
+    <ui:Image name="item-icon" class="item-icon" />
+    <ui:VisualElement name="rarity-frame" class="rarity-frame" />
+    <ui:VisualElement name="cooldown-overlay" class="cooldown-overlay" />
+</ui:UXML>

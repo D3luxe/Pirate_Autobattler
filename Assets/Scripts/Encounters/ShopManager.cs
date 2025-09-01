@@ -86,7 +86,7 @@ public class ShopManager : MonoBehaviour
                     if (!generatedItems.Any(gi => gi.id == candidateItem.id))
                     {
                         // Check for highest rarity owned rule
-                        ItemInstance ownedItem = GameSession.Inventory.Items.FirstOrDefault(invItem => invItem != null && invItem.Def.id == candidateItem.id);
+                        ItemInstance ownedItem = GameSession.Inventory.Slots.FirstOrDefault(invSlot => invSlot.Item != null && invSlot.Item.Def.id == candidateItem.id)?.Item;
                         if (ownedItem != null && ownedItem.Def.rarity > candidateItem.rarity)
                         {
                             // Player owns a higher rarity version, try to get that one or next rarity

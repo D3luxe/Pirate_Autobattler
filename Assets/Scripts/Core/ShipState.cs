@@ -20,7 +20,9 @@ public class ShipState
     private List<StatModifier> _activeStatModifiers; // List of active stat modifiers
 
     public event Action OnHealthChanged;
-    public event Action OnEquipmentChanged;
+    public event Action<int, int> OnEquipmentSwapped;
+    public event Action<int, ItemInstance> OnEquipmentAddedAt;
+    public event Action<int, ItemInstance> OnEquipmentRemovedAt;
 
     public ShipState(ShipSO definition)
     {
@@ -162,33 +164,57 @@ public class ShipState
     {
         if (index < 0 || index >= Equipped.Length) return;
         Equipped[index] = item;
+        OnEquipmentAddedAt?.Invoke(index, item);
     }
 
     public void SwapEquipment(int indexA, int indexB)
     {
-        if (indexA < 0 || indexA >= Equipped.Length || indexB < 0 || indexB >= Equipped.Length) return;
+        Debug.Log($"ShipState.SwapEquipment: Attempting to swap equipment at index {indexA} and {indexB}.");
+        if (indexA < 0 || indexA >= Equipped.Length || indexB < 0 || indexB >= Equipped.Length) 
+        {
+            Debug.LogWarning($"ShipState.SwapEquipment: Invalid indices. indexA: {indexA}, indexB: {indexB}");
+            return;
+        }
+        ItemInstance itemA_before = Equipped[indexA];
+        ItemInstance itemB_before = Equipped[indexB];
+        Debug.Log($"ShipState.SwapEquipment: Before swap - Item at {indexA}: {itemA_before?.Def.id ?? "NULL"}, Item at {indexB}: {itemB_before?.Def.id ?? "NULL"}");
+
         (Equipped[indexA], Equipped[indexB]) = (Equipped[indexB], Equipped[indexA]);
-        OnEquipmentChanged?.Invoke();
-        //Debug.Log("ShipState: OnEquipmentChanged invoked from SwapEquipment.");
+
+        ItemInstance itemA_after = Equipped[indexA];
+        ItemInstance itemB_after = Equipped[indexB];
+        Debug.Log($"ShipState.SwapEquipment: After swap - Item at {indexA}: {itemA_after?.Def.id ?? "NULL"}, Item at {indexB}: {itemB_after?.Def.id ?? "NULL"}");
+
+        OnEquipmentSwapped?.Invoke(indexA, indexB);
     }
 
     public void RemoveEquippedAt(int index)
     {
+        Debug.Log($"ShipState.RemoveEquippedAt: Removing item at index {index}.");
         if (index >= 0 && index < Equipped.Length)
         {
+            ItemInstance item = Equipped[index];
+            Debug.Log($"ShipState.RemoveEquippedAt: Item removed: {item?.Def.id ?? "NULL"}");
             Equipped[index] = null;
-            OnEquipmentChanged?.Invoke();
-            //Debug.Log("ShipState: OnEquipmentChanged invoked from RemoveEquippedAt.");
+            OnEquipmentRemovedAt?.Invoke(index, item);
+        }
+        else
+        {
+            Debug.LogWarning($"ShipState.RemoveEquippedAt: Invalid index {index}");
         }
     }
 
     public void SetEquippedAt(int index, ItemInstance item)
     {
+        Debug.Log($"ShipState.SetEquippedAt: Setting item {item?.Def.id ?? "NULL"} at index {index}.");
         if (index >= 0 && index < Equipped.Length)
         {
             Equipped[index] = item;
-            OnEquipmentChanged?.Invoke();
-            //Debug.Log("ShipState: OnEquipmentChanged invoked from SetEquippedAt.");
+            OnEquipmentAddedAt?.Invoke(index, item);
+        }
+        else
+        {
+            Debug.LogWarning($"ShipState.SetEquippedAt: Invalid index {index}");
         }
     }
 

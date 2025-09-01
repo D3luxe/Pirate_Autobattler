@@ -36,7 +36,9 @@ namespace PirateRoguelike.UI
             _viewModel = new EnemyShipViewData(_enemyShipState); // Instantiate the viewmodel
 
             // Subscribe to enemy ship events (only equipment changed remains)
-            _enemyShipState.OnEquipmentChanged += UpdateEnemyEquipmentSlots;
+            _enemyShipState.OnEquipmentAddedAt += HandleEquipmentAddedAt;
+            _enemyShipState.OnEquipmentRemovedAt += HandleEquipmentRemovedAt;
+            _enemyShipState.OnEquipmentSwapped += HandleEquipmentSwapped;
 
             // Initial data bind
             _shipDisplayElement.Bind(_viewModel); // Bind ShipDisplayElement
@@ -50,7 +52,9 @@ namespace PirateRoguelike.UI
         {
             if (_enemyShipState != null)
             {
-                _enemyShipState.OnEquipmentChanged -= UpdateEnemyEquipmentSlots; // Unsubscribe
+                _enemyShipState.OnEquipmentAddedAt -= HandleEquipmentAddedAt;
+                _enemyShipState.OnEquipmentRemovedAt -= HandleEquipmentRemovedAt;
+                _enemyShipState.OnEquipmentSwapped -= HandleEquipmentSwapped;
             }
         }
 
@@ -62,6 +66,21 @@ namespace PirateRoguelike.UI
             {
                 _enemyEquipmentSlots.Add(slotVm);
             }
+        }
+
+        private void HandleEquipmentSwapped(int indexA, int indexB)
+        {
+            UpdateEnemyEquipmentSlots();
+        }
+
+        private void HandleEquipmentAddedAt(int index, ItemInstance item)
+        {
+            UpdateEnemyEquipmentSlots();
+        }
+
+        private void HandleEquipmentRemovedAt(int index, ItemInstance item)
+        {
+            UpdateEnemyEquipmentSlots();
         }
 
         private void BindEquipmentSlots(VisualElement container, ObservableList<ISlotViewData> slots)

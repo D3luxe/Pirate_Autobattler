@@ -41,8 +41,7 @@ namespace PirateRoguelike.Shared
         protected override void ClearItems()
         {
             base.ClearItems();
-            OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
-            OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
     }
 }

@@ -90,9 +90,10 @@ namespace PirateRoguelike.UI
             _settingsButton.Q<Image>().sprite = _theme.settingsIcon;
             UpdateBattleSpeedIcon();
 
-            // Create and Bind Slots
-            UpdateEquipment(data.EquipmentSlots);
-            UpdatePlayerInventory(data.InventorySlots);
+            // Initial slot binding will now happen via ObservableList events
+            // when PlayerPanelDataViewModel updates its collections.
+            UpdateEquipment(data.EquipmentSlots); // ADDED
+            UpdatePlayerInventory(data.InventorySlots); // ADDED
         }
 
         public void UpdateEquipment(ObservableList<ISlotViewData> slots)
@@ -107,18 +108,7 @@ namespace PirateRoguelike.UI
 
         private void BindSlots(VisualElement container, ObservableList<ISlotViewData> slots)
         {
-            // Clear existing elements and populate initially
-            container.Clear();
-            foreach (var slotData in slots)
-            {
-                SlotElement newSlotElement = CreateSlotElement(slotData);
-                container.Add(newSlotElement);
-                SlotManipulator newManipulator = new SlotManipulator(slotData);
-                newSlotElement.AddManipulator(newManipulator);
-                newSlotElement.Manipulator = newManipulator; // Assign to new property
-            }
-
-            // Subscribe to collection changes
+            // Subscribe to collection changes FIRST
             slots.CollectionChanged += (sender, args) =>
             {
                 switch (args.Action)
@@ -126,49 +116,49 @@ namespace PirateRoguelike.UI
                     case NotifyCollectionChangedAction.Add:
                         foreach (ISlotViewData newItem in args.NewItems)
                         {
-                            container.Insert(args.NewStartingIndex, CreateSlotElement(newItem));
+                            SlotElement newSlotElement = CreateSlotElement(newItem);
+                            container.Insert(args.NewStartingIndex, newSlotElement);
+
+                            if (newItem.CurrentItemInstance != null) // Only create ItemElement if there's an item
+                            {
+                                ItemElement itemElement = new ItemElement();
+                                itemElement.SlotViewData = newItem; // Assign slotData to ItemElement
+                                itemElement.Bind(newItem.CurrentItemInstance); // Bind ItemElement to ItemInstance
+                                newSlotElement.Add(itemElement); // Add ItemElement to SlotElement
+
+                                // Create and add the SlotManipulator to the ItemElement
+                                SlotManipulator newManipulator = new SlotManipulator(itemElement); // Pass ItemElement
+                                itemElement.AddManipulator(newManipulator);
+                                newSlotElement.Manipulator = newManipulator; // Assign to SlotElement's Manipulator property
+                            }
                         }
                         break;
                     case NotifyCollectionChangedAction.Remove:
                         foreach (ISlotViewData oldItem in args.OldItems)
                         {
-                            // Find and remove the corresponding VisualElement
-                            var elementToRemove = container.Children().FirstOrDefault(e => e.userData == oldItem);
-                            if (elementToRemove != null)
+                            // Find and remove the corresponding VisualElement (SlotElement)
+                            var slotElementToRemove = container.Children().FirstOrDefault(e => e.userData == oldItem);
+                            if (slotElementToRemove != null)
                             {
-                                // Dispose manipulator before removing element
-                                if (elementToRemove is SlotElement oldSlotElement && oldSlotElement.Manipulator != null)
+                                // Find the ItemElement inside the SlotElement and remove it
+                                ItemElement itemElementToRemove = slotElementToRemove.Q<ItemElement>();
+                                if (itemElementToRemove != null)
                                 {
-                                    oldSlotElement.Manipulator.Dispose(); // Call Dispose
+                                    itemElementToRemove.RemoveFromHierarchy();
+                                    // Dispose manipulator if it exists
+                                    if (slotElementToRemove is SlotElement oldSlotElement && oldSlotElement.Manipulator != null)
+                                    {
+                                        oldSlotElement.Manipulator.Dispose();
+                                    }
                                 }
-                                container.Remove(elementToRemove);
+                                container.Remove(slotElementToRemove); // Remove the SlotElement
                             }
                         }
                         break;
                     case NotifyCollectionChangedAction.Replace:
-                        // For replace, remove old and add new at the same index
-                        foreach (ISlotViewData oldItem in args.OldItems)
-                        {
-                            var elementToRemove = container.Children().FirstOrDefault(e => e.userData == oldItem);
-                            if (elementToRemove != null)
-                            {
-                                // Dispose manipulator before removing element
-                                if (elementToRemove is SlotElement oldSlotElement && oldSlotElement.Manipulator != null)
-                                {
-                                    oldSlotElement.Manipulator.Dispose(); // Call Dispose
-                                }
-                                container.Remove(elementToRemove);
-                            }
-                        }
-                        foreach (ISlotViewData newItem in args.NewItems)
-                        {
-                            SlotElement newSlotElement = CreateSlotElement(newItem);
-                            container.Insert(args.NewStartingIndex, newSlotElement);
-                            SlotManipulator newManipulator = new SlotManipulator(newItem);
-                            newSlotElement.AddManipulator(newManipulator);
-                            newSlotElement.Manipulator = newManipulator; // Assign to new property
-                        }
+                        Debug.Log($"BindSlots: Replace action. OldItems: {args.OldItems.Count}, NewItems: {args.NewItems.Count}, Index: {args.NewStartingIndex}");
                         break;
+                        
                     case NotifyCollectionChangedAction.Move:
                         // Remove and re-insert for move
                         var elementToMove = container.Children().FirstOrDefault(e => e.userData == args.OldItems[0]);
@@ -193,21 +183,52 @@ namespace PirateRoguelike.UI
                         {
                             SlotElement newSlotElement = CreateSlotElement(slotData);
                             container.Add(newSlotElement);
-                            SlotManipulator newManipulator = new SlotManipulator(slotData);
-                            newSlotElement.AddManipulator(newManipulator);
-                            newSlotElement.Manipulator = newManipulator; // Assign to new property
+
+                            if (slotData.CurrentItemInstance != null) // Only create ItemElement if there's an item
+                            {
+                                ItemElement itemElement = new ItemElement();
+                                itemElement.SlotViewData = slotData; // Assign slotData to ItemElement
+                                itemElement.Bind(slotData.CurrentItemInstance); // Bind ItemElement to ItemInstance
+                                newSlotElement.Add(itemElement); // Add ItemElement to SlotElement
+
+                                // Create and add the SlotManipulator to the ItemElement
+                                SlotManipulator newManipulator = new SlotManipulator(itemElement); // Pass ItemElement
+                                itemElement.AddManipulator(newManipulator);
+                                newSlotElement.Manipulator = newManipulator; // Assign to SlotElement's Manipulator property
+                            }
                         }
                         break;
                 }
             };
+
+            // Clear existing elements and populate initially
+            container.Clear();
+            foreach (var slotData in slots)
+            {
+                SlotElement newSlotElement = CreateSlotElement(slotData); // This only creates the SlotElement
+                container.Add(newSlotElement);
+
+                if (slotData.CurrentItemInstance != null) // Only create ItemElement if there's an item
+                {
+                    ItemElement itemElement = new ItemElement();
+                    itemElement.SlotViewData = slotData; // Assign slotData to ItemElement
+                    itemElement.Bind(slotData.CurrentItemInstance); // Bind ItemElement to ItemInstance
+                    newSlotElement.Add(itemElement); // Add ItemElement to SlotElement
+
+                    // Create and add the SlotManipulator to the ItemElement
+                    SlotManipulator newManipulator = new SlotManipulator(itemElement); // Pass ItemElement
+                    itemElement.AddManipulator(newManipulator);
+                    newSlotElement.Manipulator = newManipulator; // Assign to SlotElement's Manipulator property
+                }
+            }
         }
 
         private SlotElement CreateSlotElement(ISlotViewData slotData)
         {
             SlotElement slotElement = new SlotElement();
             slotElement.userData = slotData; // Store view model in userData for easy lookup
-            //Debug.Log($"CreateSlotElement: Setting userData for slot {slotData.SlotId}. IsEmpty: {slotData.IsEmpty}. UserData type: {slotElement.userData.GetType().Name}");
-            // Manipulator is now added in BindSlots after element is added to container
+
+            // Bind the SlotElement to the SlotDataViewModel
             slotElement.Bind(slotData);
 
             // Register PointerEnter and PointerLeave events for tooltip

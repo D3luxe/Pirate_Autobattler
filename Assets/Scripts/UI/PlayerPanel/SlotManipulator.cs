@@ -11,15 +11,17 @@ namespace PirateRoguelike.UI
         private VisualElement _ghostIcon;
         private Vector2 _startPosition;
         private bool _isDragging;
-        private ISlotViewData _slotData;
-        private SlotContainerType _fromContainer; // New field to store the source container type
-        private VisualElement _lastHoveredSlot;
+        private ISlotViewData _slotData; // Keep this for now, might be needed for drop logic
+        private ItemElement _itemElement; // New field
+        private SlotContainerType _fromContainer; // Re-added field
+        private VisualElement _lastHoveredSlot; // Re-added field
 
-        public SlotManipulator(ISlotViewData slotData)
+        public SlotManipulator(ItemElement itemElement)
         {
-            _slotData = slotData;
+            _itemElement = itemElement;
+            _slotData = itemElement.SlotViewData; // Get SlotData from ItemElement
             _isDragging = false;
-            Debug.Log($"SlotManipulator: Constructor called for Slot ID: {slotData.SlotId}");
+            Debug.Log($"SlotManipulator: Constructor called for ItemElement.");
         }
 
         protected override void RegisterCallbacksOnTarget()
@@ -30,7 +32,7 @@ namespace PirateRoguelike.UI
             target.RegisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
 
             // Determine the container type of the target slot when the manipulator is registered
-            _fromContainer = GetSlotContainerType(target);
+            _fromContainer = GetSlotContainerType(target.parent);
         }
 
         protected override void UnregisterCallbacksFromTarget()
@@ -39,14 +41,15 @@ namespace PirateRoguelike.UI
             target.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
             target.UnregisterCallback<PointerUpEvent>(OnPointerUp);
             target.UnregisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
-            Debug.Log($"SlotManipulator: UnregisterCallbacksFromTarget called for Slot ID: {_slotData.SlotId}");
+            Debug.Log($"SlotManipulator: UnregisterCallbacksFromTarget called.");
         }
 
         private void OnPointerDown(PointerDownEvent evt)
         {
+            Debug.Log($"SlotManipulator: OnPointerDown called for Slot ID: {_itemElement.SlotViewData.SlotId}"); // ADD THIS LINE
             if (_isDragging) return;
 
-            if (_slotData.IsEmpty)
+            if (_itemElement.SlotViewData.IsEmpty)
             {
                 return;
             }
@@ -65,7 +68,7 @@ namespace PirateRoguelike.UI
             float ghostHeight = target.resolvedStyle.height * 0.8f;
             _ghostIcon.style.width = ghostWidth;
             _ghostIcon.style.height = ghostHeight;
-            ((Image)_ghostIcon).sprite = target.Q<Image>("icon").sprite;
+            ((Image)_ghostIcon).sprite = _itemElement.IconElement.sprite;
             _ghostIcon.style.position = Position.Absolute;
             _ghostIcon.pickingMode = PickingMode.Ignore;
             _ghostIcon.style.opacity = 0.8f;
@@ -105,8 +108,8 @@ namespace PirateRoguelike.UI
 
             if (dropTargetElement != null && dropSlotData != null) // Ensure dropSlotData is not null
             {
-                Debug.Log($"OnSlotDropped Event: From Slot ID: {_slotData.SlotId}, From Container: {_fromContainer}, To Slot ID: {dropSlotData.SlotId}, To Container: {toContainer}");
-                PlayerPanelEvents.OnSlotDropped?.Invoke(_slotData.SlotId, _fromContainer, dropSlotData.SlotId, toContainer);
+                Debug.Log($"OnSlotDropped Event: From Slot ID: {_itemElement.SlotViewData.SlotId}, From Container: {_fromContainer}, To Slot ID: {dropSlotData.SlotId}, To Container: {toContainer}");
+                PlayerPanelEvents.OnSlotDropped?.Invoke(_itemElement.SlotViewData.SlotId, _fromContainer, dropSlotData.SlotId, toContainer);
             }
 
             CleanUp();

@@ -57,8 +57,13 @@ public class InventoryUI : MonoBehaviour
             _equipmentSlots.Add(slot);
         }
 
-        GameSession.Inventory.OnInventoryChanged -= RefreshAll; // Unsubscribe to prevent duplicates
-        GameSession.Inventory.OnInventoryChanged += RefreshAll;
+        GameSession.Inventory.OnItemsSwapped -= HandleItemsSwapped; // Unsubscribe to prevent duplicates
+        GameSession.Inventory.OnItemAddedAt -= HandleItemAddedAt;
+        GameSession.Inventory.OnItemRemovedAt -= HandleItemRemovedAt;
+
+        GameSession.Inventory.OnItemsSwapped += HandleItemsSwapped;
+        GameSession.Inventory.OnItemAddedAt += HandleItemAddedAt;
+        GameSession.Inventory.OnItemRemovedAt += HandleItemRemovedAt;
 
         RefreshAll();
     }
@@ -85,7 +90,9 @@ public class InventoryUI : MonoBehaviour
     {
         if (GameSession.Inventory != null)
         {
-            GameSession.Inventory.OnInventoryChanged -= RefreshAll;
+            GameSession.Inventory.OnItemsSwapped -= HandleItemsSwapped;
+            GameSession.Inventory.OnItemAddedAt -= HandleItemAddedAt;
+            GameSession.Inventory.OnItemRemovedAt -= HandleItemRemovedAt;
         }
     }
 
@@ -116,6 +123,21 @@ public class InventoryUI : MonoBehaviour
                 _equipmentSlots[i].SetData(InventorySlotUI.SlotType.Equipped, i, GameSession.PlayerShip.GetEquippedItem(i));
             }
         }
+    }
+
+    private void HandleItemsSwapped(int indexA, int indexB)
+    {
+        RefreshAll();
+    }
+
+    private void HandleItemAddedAt(int index, ItemInstance item)
+    {
+        RefreshAll();
+    }
+
+    private void HandleItemRemovedAt(int index, ItemInstance item)
+    {
+        RefreshAll();
     }
 
     public void HandleItemDrop(InventorySlotUI fromSlot, InventorySlotUI toSlot)

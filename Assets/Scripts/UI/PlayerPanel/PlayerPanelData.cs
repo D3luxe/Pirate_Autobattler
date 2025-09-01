@@ -4,6 +4,7 @@ using UnityEngine;
 using PirateRoguelike.Runtime; // Added for RuntimeItem
 using System.ComponentModel;
 using PirateRoguelike.Shared; // Added for ObservableList
+using PirateRoguelike.Data; // NEW
 
 namespace PirateRoguelike.UI
 {
@@ -12,12 +13,14 @@ namespace PirateRoguelike.UI
     {
         int SlotId { get; }
         Sprite Icon { get; }
-        string Rarity { get; } // e.g., "bronze", "silver"
+        string Rarity { get; }
         bool IsEmpty { get; }
         bool IsDisabled { get; }
-        float CooldownPercent { get; } // 0.0 to 1.0
+        float CooldownPercent { get; }
         bool IsPotentialMergeTarget { get; }
-        RuntimeItem ItemData { get; } // New: Reference to the actual RuntimeItem
+        RuntimeItem ItemData { get; }
+        string ItemInstanceId { get; }
+        ItemInstance CurrentItemInstance { get; } // NEW
     }
 
     // Represents the visual state of the ship panel

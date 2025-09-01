@@ -70,6 +70,78 @@
         -   **`EffectDisplay`**: A helper class used by `TooltipController` to dynamically display individual ability effects within the tooltip.
         -   **`EnemyPanelController`**: Manages the enemy's UI panel, including dynamic equipment slot generation and tooltip integration.
 
+-   **System Initialization Order:**
+    This section details the precise order in which core game systems, view models, and UI components are initialized, ensuring data readiness and proper inter-system communication.
+
+    ```mermaid
+    graph TD
+        A[GameInitializer.Start()] --> B{AbilityManager.Initialize()};
+        A --> C{GameSession.StartNewRun() / LoadRun()};
+        C --> D[GameSession.OnEconomyInitialized];
+        C --> E[GameSession.OnPlayerShipInitialized];
+        C --> F[GameSession.OnInventoryInitialized];
+        A --> G[Instantiate RunManager];
+        G --> H[RunManager.Awake()];
+        H --> I{Instantiate MapManager};
+        I --> J[MapManager.GenerateMapIfNeeded()];
+        J --> K[MapManager.OnMapDataUpdated];
+        H --> L{Instantiate MapView};
+        L --> M[MapView.Awake()];
+        M --> N[MapView subscribes to MapManager.OnMapDataUpdated];
+        M --> O[MapView subscribes to GameSession.OnPlayerNodeChanged];
+        H --> P{Instantiate PlayerPanelController};
+        H --> Q{Instantiate GlobalUIOverlay};
+        H --> R{Instantiate TooltipController};
+        R --> S[TooltipController.Awake()];
+        S --> T[TooltipController.Initialize(GlobalUIOverlay.rootVisualElement)];
+        A --> U[SceneManager.LoadScene("Run")];
+        U --> V[RunManager.Start()];
+        V --> W[PlayerPanelController.Initialize()];
+        W --> X[PlayerPanelDataViewModel.Initialize()];
+        X --> Y[PlayerPanelDataViewModel subscribes to GameSession.On...Initialized events];
+        X --> Z[PlayerPanelDataViewModel subscribes to GameSession.On...Changed events];
+        W --> AA[PlayerPanelView.BindInitialData()];
+
+        K --> N;
+        D --> Y;
+        E --> Y;
+        F --> Y;
+        GameSession.PlayerShip.OnEquipmentChanged --> Z;
+        GameSession.Inventory.OnInventoryChanged --> Z;
+        GameSession.OnPlayerNodeChanged --> O;
+    ```
+
+    **Detailed Initialization Flow:**
+
+    1.  **`GameInitializer.Start()`**:
+        *   Initializes `AbilityManager` by subscribing it to `EventBus` events.
+        *   Initializes `GameSession` (either starting a new run or loading a saved one). This step sets up core game data (`CurrentRunState`, `EconomyService`, `Inventory`, `PlayerShip`) and dispatches `GameSession.OnEconomyInitialized`, `GameSession.OnPlayerShipInitialized`, and `GameSession.OnInventoryInitialized` events.
+        *   Instantiates the `RunManager` prefab, which becomes a persistent singleton.
+
+    2.  **`RunManager.Awake()`**: (Executes immediately after `RunManager` is instantiated)
+        *   Instantiates `MapManager`. `MapManager` then generates the game map data and assigns it to `GameSession.CurrentRunState.mapGraphData`, subsequently invoking `MapManager.OnMapDataUpdated`.
+        *   Instantiates `MapView` (UI component). `MapView.Awake()` runs, setting up its UI elements and subscribing to `MapManager.OnMapDataUpdated` and `GameSession.OnPlayerNodeChanged` to react to data changes.
+        *   Instantiates `PlayerPanelController` (UI component).
+        *   Instantiates `GlobalUIOverlay` (a root UI `UIDocument` for global UI elements).
+        *   Instantiates `TooltipController` (UI component). `TooltipController.Awake()` runs.
+        *   Calls `TooltipController.Initialize()`, passing the `rootVisualElement` of the `GlobalUIOverlay`. This integrates the tooltip UI into the main UI hierarchy.
+
+    3.  **`SceneManager.LoadScene("Run")`**: (Called by `GameInitializer.Start()`)
+        *   Loads the "Run" scene, which contains the main game environment.
+
+    4.  **`RunManager.Start()`**: (Executes after all `Awake()` methods in the scene have completed, and after the "Run" scene is loaded)
+        *   Calls `PlayerPanelController.Initialize()`.
+        *   `PlayerPanelController.Initialize()` instantiates `PlayerPanelDataViewModel` (the view model for the player panel) and `PlayerPanelView` (the view component).
+        *   Crucially, `PlayerPanelDataViewModel.Initialize()` is called, which subscribes to `GameSession.OnPlayerShipInitialized`, `GameSession.OnInventoryInitialized`, and `GameSession.OnEconomyInitialized` events (for initial data binding) as well as `GameSession.PlayerShip.OnEquipmentChanged` and `GameSession.Inventory.OnInventoryChanged` (for ongoing updates).
+        *   `PlayerPanelView.BindInitialData()` is called to perform the initial data binding from the view model to the UI.
+
+    **Event-Driven Data Flow and UI Updates:**
+    *   When `GameSession` invokes its initialization events (`OnPlayerShipInitialized`, `OnInventoryInitialized`, `OnEconomyInitialized`), the `PlayerPanelDataViewModel` reacts by updating its properties. This, in turn, notifies the `PlayerPanelView` to update the UI elements that display player ship, inventory, and economy data.
+    *   When `MapManager` invokes `OnMapDataUpdated`, the `MapView` reacts by calling its `HandleMapDataUpdated()` method, which triggers the layout and rendering of the map nodes and edges.
+    *   Ongoing changes to `GameSession.PlayerShip` (equipment) and `GameSession.Inventory` trigger events that `PlayerPanelDataViewModel` is subscribed to, ensuring the UI remains synchronized with game state.
+
+    This structured initialization sequence, combined with an event-driven data flow, ensures that UI components and view models only attempt to access game data after it has been properly initialized, minimizing the risk of errors and promoting a decoupled architecture.
+
 -   **Combat Tick Walkthrough (`CombatController.HandleTick`):**
     1.  **Sudden Death Check**: Initiates if battle exceeds 30 seconds; ships take increasing damage. (`CombatController.cs:71-86`)
     2.  **Process Active Effects**: Iterates sorted active effects for both player/enemy, calls `Tick()`, removes expired. (`CombatController.cs:111-132`)
