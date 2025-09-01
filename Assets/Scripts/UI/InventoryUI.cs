@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UI; // Added
 using PirateRoguelike.Data; // Added for Tag enum
+using PirateRoguelike.Services; // Added for SlotId
+using PirateRoguelike.Events; // Added for ItemManipulationEvents
 
 public class InventoryUI : MonoBehaviour
 {
@@ -57,13 +59,10 @@ public class InventoryUI : MonoBehaviour
             _equipmentSlots.Add(slot);
         }
 
-        GameSession.Inventory.OnItemsSwapped -= HandleItemsSwapped; // Unsubscribe to prevent duplicates
-        GameSession.Inventory.OnItemAddedAt -= HandleItemAddedAt;
-        GameSession.Inventory.OnItemRemovedAt -= HandleItemRemovedAt;
-
-        GameSession.Inventory.OnItemsSwapped += HandleItemsSwapped;
-        GameSession.Inventory.OnItemAddedAt += HandleItemAddedAt;
-        GameSession.Inventory.OnItemRemovedAt += HandleItemRemovedAt;
+        // Subscribe to ItemManipulationEvents
+        ItemManipulationEvents.OnItemMoved += HandleItemMoved;
+        ItemManipulationEvents.OnItemAdded += HandleItemAdded;
+        ItemManipulationEvents.OnItemRemoved += HandleItemRemoved;
 
         RefreshAll();
     }
@@ -88,12 +87,10 @@ public class InventoryUI : MonoBehaviour
 
     void OnDestroy()
     {
-        if (GameSession.Inventory != null)
-        {
-            GameSession.Inventory.OnItemsSwapped -= HandleItemsSwapped;
-            GameSession.Inventory.OnItemAddedAt -= HandleItemAddedAt;
-            GameSession.Inventory.OnItemRemovedAt -= HandleItemRemovedAt;
-        }
+        // Unsubscribe from ItemManipulationEvents
+        ItemManipulationEvents.OnItemMoved -= HandleItemMoved;
+        ItemManipulationEvents.OnItemAdded -= HandleItemAdded;
+        ItemManipulationEvents.OnItemRemoved -= HandleItemRemoved;
     }
 
     public void RefreshAll()
@@ -125,17 +122,17 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
-    private void HandleItemsSwapped(int indexA, int indexB)
+    private void HandleItemMoved(ItemInstance item, SlotId from, SlotId to)
     {
         RefreshAll();
     }
 
-    private void HandleItemAddedAt(int index, ItemInstance item)
+    private void HandleItemAdded(ItemInstance item, SlotId to)
     {
         RefreshAll();
     }
 
-    private void HandleItemRemovedAt(int index, ItemInstance item)
+    private void HandleItemRemoved(ItemInstance item, SlotId from)
     {
         RefreshAll();
     }

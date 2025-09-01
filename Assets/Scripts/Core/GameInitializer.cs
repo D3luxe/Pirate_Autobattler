@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using PirateRoguelike.Data;
+using PirateRoguelike.Services; // Added for ItemManipulationService
 
 public class GameInitializer : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class GameInitializer : MonoBehaviour
     {
         // Initialize core systems
         AbilityManager.Initialize();
+        ItemManipulationService.Instance.Initialize(new PirateRoguelike.Core.GameSessionWrapper()); // Initialize ItemManipulationService
 
         // Determine whether to load a saved game or start a new one
         if (GameSession.ShouldLoadSavedGame)

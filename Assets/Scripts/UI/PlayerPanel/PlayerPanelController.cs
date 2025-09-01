@@ -6,6 +6,8 @@ using PirateRoguelike.Data; // Added for ItemInstance
 using PirateRoguelike.Runtime; // Added for RuntimeItem
 using PirateRoguelike.Shared; // Added for ObservableList
 using PirateRoguelike.Core; // Added for IGameSession
+using PirateRoguelike.Services; // Added for SlotId
+using PirateRoguelike.Events; // Added for ItemManipulationEvents
 
 namespace PirateRoguelike.UI
 {
@@ -144,14 +146,14 @@ namespace PirateRoguelike.UI
             _gameSession.OnPlayerShipInitialized += UpdateShipData; // NEW
             _gameSession.OnEconomyInitialized += UpdateHudData; // NEW
 
-            // Subscribe to GameSession change events (for ongoing updates)
-            _gameSession.PlayerShip.OnEquipmentSwapped += HandleEquipmentSwapped;
-            _gameSession.PlayerShip.OnEquipmentAddedAt += HandleEquipmentAddedAt;
-            _gameSession.PlayerShip.OnEquipmentRemovedAt += HandleEquipmentRemovedAt;
+            // Subscribe to ItemManipulationEvents
+            PirateRoguelike.Events.ItemManipulationEvents.OnItemMoved += HandleItemMoved;
+            PirateRoguelike.Events.ItemManipulationEvents.OnItemEquipped += HandleItemEquipped;
+            PirateRoguelike.Events.ItemManipulationEvents.OnItemUnequipped += HandleItemUnequipped;
+            PirateRoguelike.Events.ItemManipulationEvents.OnItemAdded += HandleItemAdded;
+            PirateRoguelike.Events.ItemManipulationEvents.OnItemRemoved += HandleItemRemoved;
 
-            _gameSession.Inventory.OnItemsSwapped += HandleInventorySwapped;
-            _gameSession.Inventory.OnItemAddedAt += HandleInventoryAddedAt;
-            _gameSession.Inventory.OnItemRemovedAt += HandleInventoryRemovedAt;
+            // Subscriptions are now handled by ItemManipulationEvents
 
             // Manually trigger initial updates for equipment and inventory slots
             // This ensures the UI is populated even if the GameSession events fired before subscription.
@@ -159,55 +161,6 @@ namespace PirateRoguelike.UI
             PopulateInventorySlots(); // ADD THIS
             UpdateShipData(); // Also update ship data initially
             UpdateHudData(); // Also update HUD data initially
-        }
-
-        public void HandleEquipmentSwapped(int indexA, int indexB)
-        {
-            // Get the ItemSlot objects from the ObservableList
-            var slotA = _equipmentSlots[indexA] as SlotDataViewModel;
-            var slotB = _equipmentSlots[indexB] as SlotDataViewModel;
-
-            // Get the ItemInstances from the GameSession (which has the updated data)
-            var itemA = _gameSession.PlayerShip.GetEquippedItem(indexA);
-            var itemB = _gameSession.PlayerShip.GetEquippedItem(indexB);
-
-            // Update the Item property of the existing SlotDataViewModel objects
-            // This will trigger PropertyChanged events on the SlotDataViewModel,
-            // which SlotElement listens to.
-            slotA.CurrentItemInstance = itemB;
-            slotB.CurrentItemInstance = itemA;
-        }
-
-        public void HandleEquipmentAddedAt(int index, ItemInstance item)
-        {
-            (_equipmentSlots[index] as SlotDataViewModel).CurrentItemInstance = item;
-        }
-
-        public void HandleEquipmentRemovedAt(int index, ItemInstance item)
-        {
-            (_equipmentSlots[index] as SlotDataViewModel).CurrentItemInstance = null; // Set to empty slot
-        }
-
-        public void HandleInventorySwapped(int indexA, int indexB)
-        {
-            var slotA = _inventorySlots[indexA] as SlotDataViewModel;
-            var slotB = _inventorySlots[indexB] as SlotDataViewModel;
-
-            var itemA = _gameSession.Inventory.GetItemAt(indexA);
-            var itemB = _gameSession.Inventory.GetItemAt(indexB);
-
-            slotA.CurrentItemInstance = itemB;
-            slotB.CurrentItemInstance = itemA;
-        }
-
-        public void HandleInventoryAddedAt(int index, ItemInstance item)
-        {
-            (_inventorySlots[index] as SlotDataViewModel).CurrentItemInstance = item;
-        }
-
-        public void HandleInventoryRemovedAt(int index, ItemInstance item)
-        {
-            (_inventorySlots[index] as SlotDataViewModel).CurrentItemInstance = null; // Set to empty slot
         }
 
         private void UpdateHudData()
@@ -242,6 +195,87 @@ namespace PirateRoguelike.UI
             for (int i = 0; i < currentInventory.Count; i++)
             {
                 ((IList<ISlotViewData>)_inventorySlots).Add(new SlotDataViewModel(currentInventory[i].Item, i)); // MODIFIED LINE
+            }
+        }
+
+        // --- Item Manipulation Event Handlers ---
+        private void HandleItemMoved(ItemInstance item, SlotId from, SlotId to)
+        {
+            Debug.Log($"PlayerPanelDataViewModel: HandleItemMoved - Item: {item?.Def.displayName ?? "NULL"}, From: {from.ContainerType} {from.Index}, To: {to.ContainerType} {to.Index}");
+            // Clear the old slot
+            if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
+            {
+                (_inventorySlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
+            }
+            else if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
+            {
+                (_equipmentSlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
+            }
+
+            // Populate the new slot
+            if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
+            {
+                (_inventorySlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
+            }
+            else if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
+            {
+                (_equipmentSlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
+            }
+        }
+
+        private void HandleItemEquipped(ItemInstance item, SlotId from, SlotId to)
+        {
+            Debug.Log($"PlayerPanelDataViewModel: HandleItemEquipped - Item: {item?.Def.displayName ?? "NULL"}, From: {from.ContainerType} {from.Index}, To: {to.ContainerType} {to.Index}");
+            // Clear the inventory slot
+            if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory) // Added check
+            {
+                (_inventorySlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
+            }
+            // Populate the equipment slot
+            if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment) // Added check
+            {
+                (_equipmentSlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
+            }
+        }
+
+        private void HandleItemUnequipped(ItemInstance item, SlotId from, SlotId to)
+        {
+            Debug.Log($"PlayerPanelDataViewModel: HandleItemUnequipped - Item: {item?.Def.displayName ?? "NULL"}, From: {from.ContainerType} {from.Index}, To: {to.ContainerType} {to.Index}");
+            // Clear the equipment slot
+            if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment) // Added check
+            {
+                (_equipmentSlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
+            }
+            // Populate the inventory slot
+            if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory) // Added check
+            {
+                (_inventorySlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
+            }
+        }
+
+        private void HandleItemAdded(ItemInstance item, SlotId to)
+        {
+            Debug.Log($"PlayerPanelDataViewModel: HandleItemAdded - Item: {item?.Def.displayName ?? "NULL"}, To: {to.ContainerType} {to.Index}");
+            if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
+            {
+                (_inventorySlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
+            }
+            else if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
+            {
+                (_equipmentSlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
+            }
+        }
+
+        private void HandleItemRemoved(ItemInstance item, SlotId from)
+        {
+            Debug.Log($"PlayerPanelDataViewModel: HandleItemRemoved - Item: {item?.Def.displayName ?? "NULL"}, From: {from.ContainerType} {from.Index}");
+            if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
+            {
+                (_inventorySlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
+            }
+            else if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
+            {
+                (_equipmentSlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
             }
         }
     }
@@ -292,10 +326,10 @@ namespace PirateRoguelike.UI
             get => _item;
             set
             {
+                Debug.Log($"SlotDataViewModel: CurrentItemInstance setter - SlotId: {SlotId}, New Item: {value?.Def.displayName ?? "NULL"}");
                 if (_item != value)
                 {
                     _item = value;
-                    Debug.Log($"SlotDataViewModel.CurrentItemInstance setter: Item changed to: {value?.Def.id ?? "NULL"}"); // ADD THIS LINE
                     OnPropertyChanged(nameof(CurrentItemInstance));
                     OnPropertyChanged(nameof(Icon)); // Icon might change
                     OnPropertyChanged(nameof(Rarity)); // Rarity might change
@@ -343,7 +377,6 @@ namespace PirateRoguelike.UI
             // Subscriptions are now handled by PlayerPanelDataViewModel
 
             // Subscribe to UI events
-            PlayerPanelEvents.OnSlotDropped += HandleSlotDropped;
             PlayerPanelEvents.OnMapToggleClicked += HandleMapToggleClicked;
 
             _viewModel.Initialize(); // Initialize the view model after GameSession is ready
@@ -358,7 +391,6 @@ namespace PirateRoguelike.UI
             
             // Unsubscriptions are now handled by PlayerPanelDataViewModel
 
-            PlayerPanelEvents.OnSlotDropped -= HandleSlotDropped;
             PlayerPanelEvents.OnMapToggleClicked -= HandleMapToggleClicked;
 
             if (_mapToggleButton != null)
@@ -368,63 +400,6 @@ namespace PirateRoguelike.UI
         }
 
         // --- Event Handlers ---
-        private void HandleSlotDropped(int fromSlotId, SlotContainerType fromContainer, int toSlotId, SlotContainerType toContainer)
-        {
-            Debug.Log($"HandleSlotDropped: fromSlotId={fromSlotId}, fromContainer={fromContainer}, toSlotId={toSlotId}, toContainer={toContainer}");
-            if (fromContainer == SlotContainerType.Inventory && toContainer == SlotContainerType.Inventory)
-            {
-                Debug.Log($"HandleSlotDropped: Calling GameSession.Inventory.SwapItems({fromSlotId}, {toSlotId})");
-                GameSession.Inventory.SwapItems(fromSlotId, toSlotId);
-            }
-            else if (fromContainer == SlotContainerType.Equipment && toContainer == SlotContainerType.Equipment)
-            {
-                Debug.Log($"HandleSlotDropped: Calling GameSession.PlayerShip.SwapEquipment({fromSlotId}, {toSlotId})");
-                GameSession.PlayerShip.SwapEquipment(fromSlotId, toSlotId); // Use SwapEquipment
-            }
-            else if (fromContainer == SlotContainerType.Inventory && toContainer == SlotContainerType.Equipment)
-            {
-                Debug.Log($"HandleSlotDropped: Attempting to equip item from Inventory to Equipment.");
-                ItemInstance itemToEquip = GameSession.Inventory.GetItemAt(fromSlotId);
-                if (itemToEquip != null)
-                {
-                    ItemInstance equippedItem = GameSession.PlayerShip.GetEquippedItem(toSlotId);
-                    if (equippedItem != null)
-                    {
-                        Debug.Log($"HandleSlotDropped: Swapping item {itemToEquip.Def.id} with {equippedItem.Def.id}");
-                        GameSession.PlayerShip.SetEquippedAt(toSlotId, itemToEquip);
-                        GameSession.Inventory.SetItemAt(fromSlotId, equippedItem);
-                    }
-                    else
-                    {
-                        Debug.Log($"HandleSlotDropped: Equipping item {itemToEquip.Def.id}");
-                        GameSession.PlayerShip.SetEquippedAt(toSlotId, itemToEquip);
-                        GameSession.Inventory.RemoveItemAt(fromSlotId);
-                    }
-                }
-            }
-            else if (fromContainer == SlotContainerType.Equipment && toContainer == SlotContainerType.Inventory)
-            {
-                Debug.Log($"HandleSlotDropped: Attempting to unequip item from Equipment to Inventory.");
-                ItemInstance itemToUnequip = GameSession.PlayerShip.GetEquippedItem(fromSlotId);
-                if (itemToUnequip != null)
-                {
-                    ItemInstance inventoryItem = GameSession.Inventory.GetItemAt(toSlotId);
-                    if (inventoryItem != null)
-                    {
-                        Debug.Log($"HandleSlotDropped: Swapping item {itemToUnequip.Def.id} with {inventoryItem.Def.id}");
-                        GameSession.Inventory.SetItemAt(toSlotId, itemToUnequip);
-                        GameSession.PlayerShip.SetEquippedAt(fromSlotId, inventoryItem);
-                    }
-                    else
-                    {
-                        Debug.Log($"HandleSlotDropped: Unequipping item {itemToUnequip.Def.id}");
-                        GameSession.Inventory.AddItemAt(itemToUnequip, toSlotId);
-                        GameSession.PlayerShip.RemoveEquippedAt(fromSlotId);
-                    }
-                }
-            }
-        }
-
         private void HandleMapToggleClicked()
         {
             if (_mapView.IsVisible())

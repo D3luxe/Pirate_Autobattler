@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using PirateRoguelike.Data;
 using UnityEngine;
+using PirateRoguelike.Services; // Added for SlotId
+using PirateRoguelike.Events; // Added for ItemManipulationEvents
 
 public class Inventory
-{
-    public List<ItemSlot> Slots { get; private set; }
-    public int MaxSize { get; private set; }
-
-    public event Action<int, int> OnItemsSwapped;
-    public event Action<int, ItemInstance> OnItemAddedAt;
-    public event Action<int, ItemInstance> OnItemRemovedAt;
+    {
+        public List<ItemSlot> Slots { get; private set; }
+        public int MaxSize { get; private set; }
 
     public Inventory(int maxSize)
     {
@@ -39,7 +37,7 @@ public class Inventory
                     if (upgradedItemSO != null)
                     {
                         Slots[i].Item = new ItemInstance(upgradedItemSO); // Replace with upgraded item
-                        OnItemAddedAt?.Invoke(i, new ItemInstance(upgradedItemSO));
+                        ItemManipulationEvents.DispatchItemAdded(new ItemInstance(upgradedItemSO), new SlotId(i, SlotContainerType.Inventory));
                         return true;
                     }
                 }
@@ -52,7 +50,7 @@ public class Inventory
             if (Slots[i].Item == null)
             {
                 Slots[i].Item = newItem;
-                OnItemAddedAt?.Invoke(i, newItem);
+                ItemManipulationEvents.DispatchItemAdded(newItem, new SlotId(i, SlotContainerType.Inventory));
                 return true;
             }
         }
@@ -104,34 +102,32 @@ public class Inventory
 
     public void AddItemAt(ItemInstance item, int index)
     {
-        Debug.Log($"Inventory.AddItemAt: Adding item {item?.Def.id ?? "NULL"} at index {index}.");
         if (index < 0 || index >= MaxSize) 
         {
             Debug.LogWarning($"Inventory.AddItemAt: Invalid index {index}");
             return;
         }
         Slots[index].Item = item;
-        OnItemAddedAt?.Invoke(index, item);
+        Debug.Log($"Inventory: Item {item?.Def.displayName ?? "NULL"} added at index {index}. Dispatching event.");
+        ItemManipulationEvents.DispatchItemAdded(item, new SlotId(index, SlotContainerType.Inventory));
     }
 
     public ItemInstance RemoveItemAt(int index)
     {
-        Debug.Log($"Inventory.RemoveItemAt: Removing item at index {index}.");
         if (index < 0 || index >= MaxSize) 
         {
             Debug.LogWarning($"Inventory.RemoveItemAt: Invalid index {index}");
             return null;
         }
-        ItemInstance item = Slots[index].Item;
-        Debug.Log($"Inventory.RemoveItemAt: Item removed: {item?.Def.id ?? "NULL"}");
+        ItemInstance _item = Slots[index].Item;
         Slots[index].Item = null;
-        OnItemRemovedAt?.Invoke(index, item);
-        return item;
+        Debug.Log($"Inventory: Item {_item?.Def.displayName ?? "NULL"} removed from index {index}. Dispatching event.");
+        ItemManipulationEvents.DispatchItemRemoved(_item, new SlotId(index, SlotContainerType.Inventory));
+        return _item;
     }
 
     public void SwapItems(int indexA, int indexB)
     {
-        Debug.Log($"Inventory.SwapItems: Attempting to swap items at index {indexA} and {indexB}.");
         if (indexA < 0 || indexA >= MaxSize || indexB < 0 || indexB >= MaxSize) 
         {
             Debug.LogWarning($"Inventory.SwapItems: Invalid indices. indexA: {indexA}, indexB: {indexB}");
@@ -139,16 +135,14 @@ public class Inventory
         }
         ItemInstance itemA_before = Slots[indexA].Item;
         ItemInstance itemB_before = Slots[indexB].Item;
-        Debug.Log($"Inventory.SwapItems: Before swap - Item at {indexA}: {itemA_before?.Def.id ?? "NULL"}, Item at {indexB}: {itemB_before?.Def.id ?? "NULL"}");
 
         // Swap the ItemInstances within the ItemSlot objects
         (Slots[indexA].Item, Slots[indexB].Item) = (Slots[indexB].Item, Slots[indexA].Item);
         
         ItemInstance itemA_after = Slots[indexA].Item;
         ItemInstance itemB_after = Slots[indexB].Item;
-        Debug.Log($"Inventory.SwapItems: After swap - Item at {indexA}: {itemA_after?.Def.id ?? "NULL"}, Item at {indexB}: {itemB_after?.Def.id ?? "NULL"}");
-
-        OnItemsSwapped?.Invoke(indexA, indexB);
+        Debug.Log($"Inventory: Swapped items between {indexA} and {indexB}. Item at {indexA}: {Slots[indexA].Item?.Def.displayName ?? "NULL"}, Item at {indexB}: {Slots[indexB].Item?.Def.displayName ?? "NULL"}. Dispatching event.");
+        ItemManipulationEvents.DispatchItemMoved(Slots[indexA].Item, new SlotId(indexA, SlotContainerType.Inventory), new SlotId(indexB, SlotContainerType.Inventory));
     }
 
     public ItemInstance GetItemAt(int index)
@@ -159,13 +153,13 @@ public class Inventory
 
     public void SetItemAt(int index, ItemInstance item)
     {
-        Debug.Log($"Inventory.SetItemAt: Setting item {item?.Def.id ?? "NULL"} at index {index}.");
         if (index < 0 || index >= MaxSize) 
         {
             Debug.LogWarning($"Inventory.SetItemAt: Invalid index {index}");
             return;
         }
         Slots[index].Item = item;
-        OnItemAddedAt?.Invoke(index, item);
+        Debug.Log($"Inventory: Item {item?.Def.displayName ?? "NULL"} set at index {index}. Dispatching event.");
+        ItemManipulationEvents.DispatchItemAdded(item, new SlotId(index, SlotContainerType.Inventory));
     }
 }

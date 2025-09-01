@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 using System;
 using System.Linq; // Added for ToList()
 using PirateRoguelike.UI.Components; // Added for SlotElement
+using PirateRoguelike.Services; // Added for SlotId and SlotContainerType
 
 namespace PirateRoguelike.UI
 {
@@ -11,15 +12,13 @@ namespace PirateRoguelike.UI
         private VisualElement _ghostIcon;
         private Vector2 _startPosition;
         private bool _isDragging;
-        private ISlotViewData _slotData; // Keep this for now, might be needed for drop logic
         private ItemElement _itemElement; // New field
-        private SlotContainerType _fromContainer; // Re-added field
+        private PirateRoguelike.Services.SlotContainerType _fromContainer; // Re-added field
         private VisualElement _lastHoveredSlot; // Re-added field
 
         public SlotManipulator(ItemElement itemElement)
         {
             _itemElement = itemElement;
-            _slotData = itemElement.SlotViewData; // Get SlotData from ItemElement
             _isDragging = false;
             Debug.Log($"SlotManipulator: Constructor called for ItemElement.");
         }
@@ -61,7 +60,9 @@ namespace PirateRoguelike.UI
             target.CapturePointer(evt.pointerId);
             _isDragging = true;
 
-            PlayerPanelEvents.OnSlotBeginDrag?.Invoke(_slotData.SlotId, evt);
+            _itemElement.style.visibility = Visibility.Hidden; // ADD THIS LINE
+
+            PlayerPanelEvents.OnSlotBeginDrag?.Invoke(_itemElement.SlotViewData.SlotId, evt);
 
             _ghostIcon = new Image();
             float ghostWidth = target.resolvedStyle.width * 0.8f;
@@ -84,7 +85,7 @@ namespace PirateRoguelike.UI
 
             UpdateGhostPosition(evt.position);
 
-            (VisualElement newHoveredSlotElement, ISlotViewData newHoveredSlotData, SlotContainerType newHoveredContainerType) = FindHoveredSlot(evt.position);
+            (VisualElement newHoveredSlotElement, ISlotViewData newHoveredSlotData, PirateRoguelike.Services.SlotContainerType newHoveredContainerType) = FindHoveredSlot(evt.position);
 
             if (newHoveredSlotElement != _lastHoveredSlot)
             {
@@ -100,16 +101,46 @@ namespace PirateRoguelike.UI
 
             _lastHoveredSlot?.RemoveFromClassList("slot--hover");
 
-            (VisualElement dropTargetElement, ISlotViewData dropSlotData, SlotContainerType toContainer) = FindHoveredSlot(evt.position);
+            (VisualElement dropTargetElement, ISlotViewData dropSlotData, PirateRoguelike.Services.SlotContainerType toContainer) = FindHoveredSlot(evt.position);
 
             Debug.Log($"OnPointerUp: Drop Target Element: {dropTargetElement?.name ?? "NULL"} (Type: {dropTargetElement?.GetType().Name ?? "NULL"})");
             Debug.Log($"OnPointerUp: Drop Slot Data: {dropSlotData?.SlotId.ToString() ?? "NULL"} (IsEmpty: {dropSlotData?.IsEmpty.ToString() ?? "NULL"})");
             Debug.Log($"OnPointerUp: To Container: {toContainer}");
 
+            _itemElement.style.visibility = Visibility.Visible; // Make ItemElement visible again
+ 
             if (dropTargetElement != null && dropSlotData != null) // Ensure dropSlotData is not null
             {
-                Debug.Log($"OnSlotDropped Event: From Slot ID: {_itemElement.SlotViewData.SlotId}, From Container: {_fromContainer}, To Slot ID: {dropSlotData.SlotId}, To Container: {toContainer}");
-                PlayerPanelEvents.OnSlotDropped?.Invoke(_itemElement.SlotViewData.SlotId, _fromContainer, dropSlotData.SlotId, toContainer);
+                
+
+                // Call ItemManipulationService
+                SlotId fromSlotId = new SlotId(_itemElement.SlotViewData.SlotId, _fromContainer);
+                SlotId toSlotId = new SlotId(dropSlotData.SlotId, toContainer);
+
+                Debug.Log($"OnPointerUp: dropSlotData.CurrentItemInstance: {dropSlotData.CurrentItemInstance?.Def.displayName ?? "NULL"}");
+
+                if (fromSlotId.ContainerType == toSlotId.ContainerType)
+                {
+                    // Same container, so it's a move/swap
+                    //Debug.Log($"Same container so firing MoveItem");
+                    PirateRoguelike.Services.ItemManipulationService.Instance.MoveItem(fromSlotId, toSlotId, dropSlotData.CurrentItemInstance ?? null);
+                }
+                else if (fromSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory && toSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
+                {
+                    // Equipping from Inventory
+                    //Debug.Log($"Equipping From Inv");
+                    PirateRoguelike.Services.ItemManipulationService.Instance.EquipItem(fromSlotId, toSlotId);
+                }
+                else if (fromSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment && toSlotId.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
+                {
+                    // Unequipping to Inventory
+                    //Debug.Log($"Unequipping to inv");
+                    PirateRoguelike.Services.ItemManipulationService.Instance.UnequipItem(fromSlotId, toSlotId);
+                }
+                else
+                {
+                    Debug.LogWarning($"SlotManipulator: Unhandled item manipulation from {fromSlotId.ContainerType} to {toSlotId.ContainerType}");
+                }
             }
 
             CleanUp();
@@ -129,7 +160,7 @@ namespace PirateRoguelike.UI
         }
 
         // Modified to return ISlotViewData and SlotContainerType
-        private (VisualElement, ISlotViewData, SlotContainerType) FindHoveredSlot(Vector2 pointerPosition)
+        private (VisualElement, ISlotViewData, PirateRoguelike.Services.SlotContainerType) FindHoveredSlot(Vector2 pointerPosition)
         {
             PickingMode originalPickingMode = target.pickingMode;
             target.pickingMode = PickingMode.Ignore;
@@ -161,22 +192,22 @@ namespace PirateRoguelike.UI
         }
 
         // New helper method to determine the slot's container type
-        private SlotContainerType GetSlotContainerType(VisualElement slotElement)
+        private PirateRoguelike.Services.SlotContainerType GetSlotContainerType(VisualElement slotElement)
         {
             VisualElement current = slotElement;
             while (current != null)
             {
                 if (current.ClassListContains("equipment-bar"))
                 {
-                    return SlotContainerType.Equipment;
+                    return PirateRoguelike.Services.SlotContainerType.Equipment;
                 }
                 if (current.name == "inventory-container") // Inventory container has a name, not a class
                 {
-                    return SlotContainerType.Inventory;
+                    return PirateRoguelike.Services.SlotContainerType.Inventory;
                 }
                 current = current.parent;
             }
-            return SlotContainerType.Inventory;
+            return PirateRoguelike.Services.SlotContainerType.Inventory;
         }
 
         private void CleanUp()

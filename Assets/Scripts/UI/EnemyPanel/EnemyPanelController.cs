@@ -8,6 +8,8 @@ using PirateRoguelike.Runtime;
 using PirateRoguelike.UI.Components; // Added for ShipDisplayElement and SlotElement
 using PirateRoguelike.Shared; // Added for ObservableList
 using PirateRoguelike.UI.Utilities; // Added for TooltipUtility
+using PirateRoguelike.Services; // Added for SlotId
+using PirateRoguelike.Events; // Added for ItemManipulationEvents
 
 namespace PirateRoguelike.UI
 {
@@ -35,10 +37,10 @@ namespace PirateRoguelike.UI
 
             _viewModel = new EnemyShipViewData(_enemyShipState); // Instantiate the viewmodel
 
-            // Subscribe to enemy ship events (only equipment changed remains)
-            _enemyShipState.OnEquipmentAddedAt += HandleEquipmentAddedAt;
-            _enemyShipState.OnEquipmentRemovedAt += HandleEquipmentRemovedAt;
-            _enemyShipState.OnEquipmentSwapped += HandleEquipmentSwapped;
+            // Subscribe to ItemManipulationEvents
+            ItemManipulationEvents.OnItemEquipped += HandleItemEquipped;
+            ItemManipulationEvents.OnItemUnequipped += HandleItemUnequipped;
+            ItemManipulationEvents.OnItemMoved += HandleItemMoved;
 
             // Initial data bind
             _shipDisplayElement.Bind(_viewModel); // Bind ShipDisplayElement
@@ -50,12 +52,10 @@ namespace PirateRoguelike.UI
 
         void OnDestroy()
         {
-            if (_enemyShipState != null)
-            {
-                _enemyShipState.OnEquipmentAddedAt -= HandleEquipmentAddedAt;
-                _enemyShipState.OnEquipmentRemovedAt -= HandleEquipmentRemovedAt;
-                _enemyShipState.OnEquipmentSwapped -= HandleEquipmentSwapped;
-            }
+            // Unsubscribe from ItemManipulationEvents
+            ItemManipulationEvents.OnItemEquipped -= HandleItemEquipped;
+            ItemManipulationEvents.OnItemUnequipped -= HandleItemUnequipped;
+            ItemManipulationEvents.OnItemMoved -= HandleItemMoved;
         }
 
         // Event Handlers
@@ -68,17 +68,18 @@ namespace PirateRoguelike.UI
             }
         }
 
-        private void HandleEquipmentSwapped(int indexA, int indexB)
+        // Event Handlers
+        private void HandleItemMoved(ItemInstance item, SlotId from, SlotId to)
         {
             UpdateEnemyEquipmentSlots();
         }
 
-        private void HandleEquipmentAddedAt(int index, ItemInstance item)
+        private void HandleItemEquipped(ItemInstance item, SlotId from, SlotId to)
         {
             UpdateEnemyEquipmentSlots();
         }
 
-        private void HandleEquipmentRemovedAt(int index, ItemInstance item)
+        private void HandleItemUnequipped(ItemInstance item, SlotId from, SlotId to)
         {
             UpdateEnemyEquipmentSlots();
         }
