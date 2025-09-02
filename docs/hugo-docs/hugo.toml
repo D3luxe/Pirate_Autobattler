@@ -3,7 +3,7 @@ languageCode = 'en-us'
 title = 'Pirate Autobattler Documentation'
 [module]
   replacements = "github.com/twbs/bootstrap -> ."
-  
+
   [[module.imports]]
     path = "github.com/google/docsy"
     disable = false
@@ -23,16 +23,16 @@ title = 'Pirate Autobattler Documentation'
   # Mounts for Bootstrap and FontAwesome from node_modules
   [[module.imports.mounts]]
     source = "node_modules/bootstrap/scss"
-    target = "assets/scss/vendor/bootstrap"
+    target = "assets/vendor/bootstrap/scss"
   [[module.imports.mounts]]
     source = "node_modules/bootstrap/dist/js"
-    target = "assets/js/vendor/bootstrap" # This line was correct
+    target = "assets/vendor/bootstrap/dist/js"
   [[module.imports.mounts]]
-    source = "node_modules/@fortawesome/fontawesome-free/css"
-    target = "assets/css/vendor/fontawesome-free" # This line was correct
+    source = "node_modules/@fortawesome/fontawesome-free/scss"
+    target = "assets/vendor/fontawesome-free/scss"
   [[module.imports.mounts]]
     source = "node_modules/@fortawesome/fontawesome-free/webfonts"
-    target = "static/webfonts" # This line was correct
+    target = "assets/vendor/fontawesome-free/webfonts"
 
 # Docsy-specific configurations
 # For more options, see https://www.docsy.dev/docs/getting-started/#configure-hugo
