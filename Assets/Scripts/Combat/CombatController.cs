@@ -4,9 +4,11 @@ using System.Linq;
 using PirateRoguelike.Data;
 using PirateRoguelike.Combat;
 using PirateRoguelike.UI;
+using PirateRoguelike.Core;
 
-
-public class CombatController : MonoBehaviour
+namespace PirateRoguelike.Combat
+{
+    public class CombatController : MonoBehaviour
 {
     public ShipState Player { get; private set; }
     public ShipState Enemy { get; private set; }
@@ -178,4 +180,5 @@ public class CombatController : MonoBehaviour
             }
         }
     }
+}
 }

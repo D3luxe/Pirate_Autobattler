@@ -5,8 +5,11 @@ using PirateRoguelike.Data;
 using UnityEngine;
 using PirateRoguelike.Services; // Added for SlotId
 using PirateRoguelike.Events; // Added for ItemManipulationEvents
+using PirateRoguelike.Core;
 
-public class Inventory
+namespace PirateRoguelike.Services
+{
+    public class Inventory
     {
         public List<ItemSlot> Slots { get; private set; }
         public int MaxSize { get; private set; }
@@ -158,4 +161,5 @@ public class Inventory
         Slots[index].Item = item;
         ItemManipulationEvents.DispatchItemAdded(item, new SlotId(index, SlotContainerType.Inventory));
     }
+}
 }

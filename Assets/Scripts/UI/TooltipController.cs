@@ -11,7 +11,9 @@ public class DummyRuntimeContext : IRuntimeContext
     // Empty implementation
 }
 
-public class TooltipController : MonoBehaviour
+namespace PirateRoguelike.UI
+{
+    public class TooltipController : MonoBehaviour
 {
     public static TooltipController Instance { get; private set; }
 
@@ -147,4 +149,5 @@ public class TooltipController : MonoBehaviour
         _activeTooltipContainer = null; // Clear the active tooltip reference
         _currentTooltipCoroutine = null;
     }
+}
 }

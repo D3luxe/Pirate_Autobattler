@@ -3,253 +3,256 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using PirateRoguelike.Data;
-using Pirate.MapGen; // Added for MapGraph, NodeType, ActSpec, Rules, MapGenerator, GenerationResult
+using PirateRoguelike.Core;
 
-public class MapManager : MonoBehaviour
+namespace Pirate.MapGen
 {
-    public static MapManager Instance { get; private set; }
-
-    public event Action OnMapDataUpdated; // New event
-
-    public RunConfigSO RunConfig => _runConfig;
-    public MapGraph CurrentMapGraph => _currentMapGraph;
-
-    public int mapLength = 15;
-    public Vector2Int nodesPerColumnRange = new Vector2Int(2, 4);
-
-    private MapGraphData _mapGraphData; // Changed to MapGraphData
-    private bool _isMapGenerated = false;
-    private RunConfigSO _runConfig;
-    private List<List<MapNodeData>> _convertedMapNodes;
-
-    public MapGraphData GetMapGraphData() => _mapGraphData; // Changed return type
-    public List<List<MapNodeData>> GetConvertedMapNodes() => _convertedMapNodes;
-
-    public void ResetMap()
+    public class MapManager : MonoBehaviour
     {
-        _isMapGenerated = false;
-        _convertedMapNodes = null;
-        _currentMapGraph = null;
-        _mapGraphData = null;
-    }
+        public static MapManager Instance { get; private set; }
 
-    void Start()
-    {
-        // Reward checking logic has been moved to RunManager.OnRunSceneLoaded()
-        // for more reliable execution timing.
-    }
+        public event Action OnMapDataUpdated; // New event
 
-    void Awake()
-    {
-        if (Instance != null && Instance != this)
+        public RunConfigSO RunConfig => _runConfig;
+        public MapGraph CurrentMapGraph => _currentMapGraph;
+
+        public int mapLength = 15;
+        public Vector2Int nodesPerColumnRange = new Vector2Int(2, 4);
+
+        private MapGraphData _mapGraphData; // Changed to MapGraphData
+        private bool _isMapGenerated = false;
+        private RunConfigSO _runConfig;
+        private List<List<MapNodeData>> _convertedMapNodes;
+
+        public MapGraphData GetMapGraphData() => _mapGraphData; // Changed return type
+        public List<List<MapNodeData>> GetConvertedMapNodes() => _convertedMapNodes;
+
+        public void ResetMap()
         {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-        _runConfig = GameDataRegistry.GetRunConfig();
-        if (_runConfig == null)
-        {
-            Debug.LogError("RunConfigSO not found in GameDataRegistry!");
-        }
-    }
-
-    public void GenerateMapIfNeeded(ulong seed)
-    {
-        if (_isMapGenerated) return;
-        GenerateMapData(seed);
-        _isMapGenerated = true;
-        // PrecomputeReachabilityCache(); // Removed
-    }
-
-    private MapGraph _currentMapGraph; // Store the generated MapGraph
-
-    void GenerateMapData(ulong seed)
-    {
-        ActSpec actSpec = new ActSpec
-        {
-            Rows = mapLength,
-            Columns = nodesPerColumnRange.y,
-            Branchiness = 0.5f
-        };
-
-        MapGenerator mapGenerator = new MapGenerator();
-        GenerationResult result = mapGenerator.GenerateMap(actSpec, _runConfig.rules, seed);
-
-        if (result.Audits.IsValid)
-        {
-            _currentMapGraph = result.Graph;
-            ConvertMapGraphToMapGraphData(result); // Pass result to get subSeeds
-            Debug.Log("Map generated successfully!");
-            OnMapDataUpdated?.Invoke(); // Invoke the event after map data is updated
-        }
-        else
-        {
-            Debug.LogError($"Map generation failed: {string.Join(", ", result.Audits.Violations)}");
+            _isMapGenerated = false;
+            _convertedMapNodes = null;
             _currentMapGraph = null;
+            _mapGraphData = null;
         }
-    }
 
-    private void ConvertMapGraphToMapGraphData(GenerationResult result)
-    {
-        _mapGraphData = new MapGraphData();
-        _mapGraphData.rows = result.Graph.Nodes.Max(n => n.Row) + 1; // Assuming rows are 0-indexed
-        _mapGraphData.nodes = new List<MapGraphData.Node>();
-        _mapGraphData.edges = new List<MapGraphData.Edge>();
-
-        // Populate MapGraphData.nodes
-        foreach (var node in _currentMapGraph.Nodes)
+        void Start()
         {
-            _mapGraphData.nodes.Add(new MapGraphData.Node
+            // Reward checking logic has been moved to RunManager.OnRunSceneLoaded()
+            // for more reliable execution timing.
+        }
+
+        void Awake()
+        {
+            if (Instance != null && Instance != this)
             {
-                id = node.Id,
-                row = node.Row,
-                col = node.Col,
-                type = node.Type.ToString(), // Convert NodeType enum to string
-                tags = node.Tags,
-                PathIndices = node.PathIndices // Copy path indices
-            });
-        }
-
-        // Populate MapGraphData.edges
-        foreach (var edge in _currentMapGraph.Edges)
-        {
-            _mapGraphData.edges.Add(new MapGraphData.Edge
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            _runConfig = GameDataRegistry.GetRunConfig();
+            if (_runConfig == null)
             {
-                fromId = edge.FromId,
-                toId = edge.ToId,
-                PathIndices = edge.PathIndices // Copy path indices
-            });
+                Debug.LogError("RunConfigSO not found in GameDataRegistry!");
+            }
         }
 
-        // Populate subSeeds and constants
-        _mapGraphData.subSeeds = new MapGraphData.SubSeeds
+        public void GenerateMapIfNeeded(ulong seed)
         {
-            decorations = result.SubSeeds.Decorations // Assuming Decorations is available in SubSeeds
-        };
-
-        _mapGraphData.constants = new MapGraphData.Constants
-        {
-            rowHeight = 160f, // Placeholder, tune as needed
-            laneWidth = 140f, // Placeholder, tune as needed
-            mapPaddingX = 80f, // Placeholder, tune as needed
-            mapPaddingY = 80f, // Placeholder, tune as needed
-            minHorizontalSeparation = 70f, // Placeholder, tune as needed
-            jitter = 18f // Placeholder, tune as needed
-        };
-
-        // Assign the generated map data to GameSession
-        GameSession.CurrentRunState.mapGraphData = _mapGraphData;
-
-        // Now, convert to List<List<MapNodeData>> for GameSession and MapPanel
-        _convertedMapNodes = new List<List<MapNodeData>>();
-
-        // Initialize columns
-        for (int i = 0; i < _mapGraphData.rows; i++)
-        {
-            _convertedMapNodes.Add(new List<MapNodeData>());
+            if (_isMapGenerated) return;
+            GenerateMapData(seed);
+            _isMapGenerated = true;
+            // PrecomputeReachabilityCache(); // Removed
         }
 
-        foreach (var node in _currentMapGraph.Nodes)
+        private MapGraph _currentMapGraph; // Store the generated MapGraph
+
+        void GenerateMapData(ulong seed)
         {
-            MapNodeData mapNode = new MapNodeData
+            ActSpec actSpec = new ActSpec
             {
-                columnIndex = node.Row,
-                rowIndex = node.Col,
-                nodeType = (NodeType)Enum.Parse(typeof(NodeType), node.Type.ToString()), // Convert string to NodeType enum
-                nextNodeIndices = new List<int>(),
-                reachableNodeIndices = new List<int>()
+                Rows = mapLength,
+                Columns = nodesPerColumnRange.y,
+                Branchiness = 0.5f
             };
 
-            // Determine EncounterSO based on NodeType
-            EncounterSO encounter = null;
-            NodeType resolvedNodeType = mapNode.nodeType;
+            MapGenerator mapGenerator = new MapGenerator();
+            GenerationResult result = mapGenerator.GenerateMap(actSpec, _runConfig.rules, seed);
 
-            
-
-            switch (resolvedNodeType)
+            if (result.Audits.IsValid)
             {
-                case NodeType.Battle:
-                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && !e.isElite);
-                    break;
-                case NodeType.Elite:
-                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Elite); // Now uses Elite type
-                    break;
-                case NodeType.Boss:
-                    encounter = GameDataRegistry.GetEncounter("enc_boss"); // Assuming a specific boss encounter
-                    break;
-                case NodeType.Shop:
-                    encounter = GameDataRegistry.GetEncounter("enc_shop"); // Assuming a specific shop encounter
-                    break;
-                case NodeType.Event:
-                    encounter = GameDataRegistry.GetEncounter("enc_event"); // Assuming a specific event encounter
-                    break;
-                case NodeType.Treasure:
-                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Treasure); // Assuming a specific treasure encounter
-                    break;
-                default:
-                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && !e.isElite); // Default to Battle
-                    break;
-            }
-
-            if (encounter != null)
-            {
-                mapNode.encounter = encounter;
-                mapNode.iconPath = encounter.iconPath;
-                mapNode.tooltipText = encounter.tooltipText;
-                mapNode.isElite = encounter.isElite;
+                _currentMapGraph = result.Graph;
+                ConvertMapGraphToMapGraphData(result); // Pass result to get subSeeds
+                Debug.Log("Map generated successfully!");
+                OnMapDataUpdated?.Invoke(); // Invoke the event after map data is updated
             }
             else
             {
-                Debug.LogWarning($"Could not find a suitable encounter for node type {mapNode.nodeType}. Please ensure an EncounterSO for {mapNode.nodeType} is configured in GameDataRegistry.");
+                Debug.LogError($"Map generation failed: {string.Join(", ", result.Audits.Violations)}");
+                _currentMapGraph = null;
             }
-
-            _convertedMapNodes[node.Row].Add(mapNode);
         }
 
-        // Now, populate nextNodeIndices for each node
-        foreach (var edge in _currentMapGraph.Edges)
+        private void ConvertMapGraphToMapGraphData(GenerationResult result)
         {
-            // Find the actual Node objects using FromId and ToId
-            var fromNode = _currentMapGraph.Nodes.FirstOrDefault(n => n.Id == edge.FromId);
-            var toNode = _currentMapGraph.Nodes.FirstOrDefault(n => n.Id == edge.ToId);
+            _mapGraphData = new MapGraphData();
+            _mapGraphData.rows = result.Graph.Nodes.Max(n => n.Row) + 1; // Assuming rows are 0-indexed
+            _mapGraphData.nodes = new List<MapGraphData.Node>();
+            _mapGraphData.edges = new List<MapGraphData.Edge>();
 
-            if (fromNode != null && toNode != null)
+            // Populate MapGraphData.nodes
+            foreach (var node in _currentMapGraph.Nodes)
             {
-                // Find the source MapNodeData in _convertedMapNodes
-                MapNodeData sourceMapNodeData = _convertedMapNodes[fromNode.Row].FirstOrDefault(n => n.rowIndex == fromNode.Col);
-                if (sourceMapNodeData != null)
+                _mapGraphData.nodes.Add(new MapGraphData.Node
                 {
-                    // Add the rowIndex of the destination node to nextNodeIndices
-                    sourceMapNodeData.nextNodeIndices.Add(toNode.Col);
+                    id = node.Id,
+                    row = node.Row,
+                    col = node.Col,
+                    type = node.Type.ToString(), // Convert NodeType enum to string
+                    tags = node.Tags,
+                    PathIndices = node.PathIndices // Copy path indices
+                });
+            }
+
+            // Populate MapGraphData.edges
+            foreach (var edge in _currentMapGraph.Edges)
+            {
+                _mapGraphData.edges.Add(new MapGraphData.Edge
+                {
+                    fromId = edge.FromId,
+                    toId = edge.ToId,
+                    PathIndices = edge.PathIndices // Copy path indices
+                });
+            }
+
+            // Populate subSeeds and constants
+            _mapGraphData.subSeeds = new MapGraphData.SubSeeds
+            {
+                decorations = result.SubSeeds.Decorations // Assuming Decorations is available in SubSeeds
+            };
+
+            _mapGraphData.constants = new MapGraphData.Constants
+            {
+                rowHeight = 160f, // Placeholder, tune as needed
+                laneWidth = 140f, // Placeholder, tune as needed
+                mapPaddingX = 80f, // Placeholder, tune as needed
+                mapPaddingY = 80f, // Placeholder, tune as needed
+                minHorizontalSeparation = 70f, // Placeholder, tune as needed
+                jitter = 18f // Placeholder, tune as needed
+            };
+
+            // Assign the generated map data to GameSession
+            GameSession.CurrentRunState.mapGraphData = _mapGraphData;
+
+            // Now, convert to List<List<MapNodeData>> for GameSession and MapPanel
+            _convertedMapNodes = new List<List<MapNodeData>>();
+
+            // Initialize columns
+            for (int i = 0; i < _mapGraphData.rows; i++)
+            {
+                _convertedMapNodes.Add(new List<MapNodeData>());
+            }
+
+            foreach (var node in _currentMapGraph.Nodes)
+            {
+                MapNodeData mapNode = new MapNodeData
+                {
+                    columnIndex = node.Row,
+                    rowIndex = node.Col,
+                    nodeType = (NodeType)Enum.Parse(typeof(NodeType), node.Type.ToString()), // Convert string to NodeType enum
+                    nextNodeIndices = new List<int>(),
+                    reachableNodeIndices = new List<int>()
+                };
+
+                // Determine EncounterSO based on NodeType
+                EncounterSO encounter = null;
+                NodeType resolvedNodeType = mapNode.nodeType;
+
+                
+
+                switch (resolvedNodeType)
+                {
+                    case NodeType.Battle:
+                        encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && !e.isElite);
+                        break;
+                    case NodeType.Elite:
+                        encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Elite); // Now uses Elite type
+                        break;
+                    case NodeType.Boss:
+                        encounter = GameDataRegistry.GetEncounter("enc_boss"); // Assuming a specific boss encounter
+                        break;
+                    case NodeType.Shop:
+                        encounter = GameDataRegistry.GetEncounter("enc_shop"); // Assuming a specific shop encounter
+                        break;
+                    case NodeType.Event:
+                        encounter = GameDataRegistry.GetEncounter("enc_event"); // Assuming a specific event encounter
+                        break;
+                    case NodeType.Treasure:
+                        encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Treasure); // Assuming a specific treasure encounter
+                        break;
+                    default:
+                        encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == EncounterType.Battle && !e.isElite); // Default to Battle
+                        break;
+                }
+
+                if (encounter != null)
+                {
+                    mapNode.encounter = encounter;
+                    mapNode.iconPath = encounter.iconPath;
+                    mapNode.tooltipText = encounter.tooltipText;
+                    mapNode.isElite = encounter.isElite;
+                }
+                else
+                {
+                    Debug.LogWarning($"Could not find a suitable encounter for node type {mapNode.nodeType}. Please ensure an EncounterSO for {mapNode.nodeType} is configured in GameDataRegistry.");
+                }
+
+                _convertedMapNodes[node.Row].Add(mapNode);
+            }
+
+            // Now, populate nextNodeIndices for each node
+            foreach (var edge in _currentMapGraph.Edges)
+            {
+                // Find the actual Node objects using FromId and ToId
+                var fromNode = _currentMapGraph.Nodes.FirstOrDefault(n => n.Id == edge.FromId);
+                var toNode = _currentMapGraph.Nodes.FirstOrDefault(n => n.Id == edge.ToId);
+
+                if (fromNode != null && toNode != null)
+                {
+                    // Find the source MapNodeData in _convertedMapNodes
+                    MapNodeData sourceMapNodeData = _convertedMapNodes[fromNode.Row].FirstOrDefault(n => n.rowIndex == fromNode.Col);
+                    if (sourceMapNodeData != null)
+                    {
+                        // Add the rowIndex of the destination node to nextNodeIndices
+                        sourceMapNodeData.nextNodeIndices.Add(toNode.Col);
+                    }
                 }
             }
         }
-    }
 
-    // Removed unused methods:
-    // GetRandomEncounterType
-    // EncounterProbability
-    // PrecomputeReachabilityCache
-    // CalculateReachableNodes
+        // Removed unused methods:
+        // GetRandomEncounterType
+        // EncounterProbability
+        // PrecomputeReachabilityCache
+        // CalculateReachableNodes
 
-    public MapNodeData GetMapNodeData(string nodeId)
-    {
-        var graphNode = _mapGraphData.nodes.FirstOrDefault(n => n.id == nodeId);
-        if (graphNode == null)
+        public MapNodeData GetMapNodeData(string nodeId)
         {
-            Debug.LogError($"MapGraphData.Node with ID {nodeId} not found.");
+            var graphNode = _mapGraphData.nodes.FirstOrDefault(n => n.id == nodeId);
+            if (graphNode == null)
+            {
+                Debug.LogError($"MapGraphData.Node with ID {nodeId} not found.");
+                return null;
+            }
+
+            // Assuming _convertedMapNodes is populated correctly and matches the structure of _mapGraphData.nodes
+            if (graphNode.row < _convertedMapNodes.Count && graphNode.col < _convertedMapNodes[graphNode.row].Count)
+            {
+                return _convertedMapNodes[graphNode.row].FirstOrDefault(n => n.columnIndex == graphNode.row && n.rowIndex == graphNode.col);
+            }
+            
+            Debug.LogError($"Converted MapNodeData not found for node ID {nodeId} at row {graphNode.row}, col {graphNode.col}.");
             return null;
         }
-
-        // Assuming _convertedMapNodes is populated correctly and matches the structure of _mapGraphData.nodes
-        if (graphNode.row < _convertedMapNodes.Count && graphNode.col < _convertedMapNodes[graphNode.row].Count)
-        {
-            return _convertedMapNodes[graphNode.row].FirstOrDefault(n => n.columnIndex == graphNode.row && n.rowIndex == graphNode.col);
-        }
-        
-        Debug.LogError($"Converted MapNodeData not found for node ID {nodeId} at row {graphNode.row}, col {graphNode.col}.");
-        return null;
     }
 }

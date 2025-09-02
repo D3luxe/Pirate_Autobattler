@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using PirateRoguelike.Data; // For ItemInstance
 using PirateRoguelike.Runtime; // For RuntimeItem
+using PirateRoguelike.Services;
 
 namespace PirateRoguelike.Core
 {

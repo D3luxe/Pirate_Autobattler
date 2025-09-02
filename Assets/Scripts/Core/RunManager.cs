@@ -2,8 +2,13 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using PirateRoguelike.Data;
 using UnityEngine.InputSystem;
+using PirateRoguelike.Saving;
+using Pirate.MapGen;
+using PirateRoguelike.UI;
 
-public class RunManager : MonoBehaviour
+namespace PirateRoguelike.Core
+{
+    public class RunManager : MonoBehaviour
 {
     public static RunManager Instance { get; private set; }
 
@@ -24,7 +29,6 @@ public class RunManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
         _saveHotkeyAction = new InputAction("SaveGame", type: InputActionType.Button, binding: "<Keyboard>/s");
         _saveHotkeyAction.performed += OnSaveHotkeyPerformed;
 
@@ -57,7 +61,6 @@ public class RunManager : MonoBehaviour
     {
         _saveHotkeyAction.Enable();
     }
-
     void OnDisable()
     {
         _saveHotkeyAction.Disable();
@@ -189,4 +192,5 @@ public class RunManager : MonoBehaviour
             UIManager.Instance.InitializeRunUI();
         }
     }
+}
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using Pirate.MapGen;
 
 public class CreateMapManagerPrefab
 {

@@ -1,3 +1,5 @@
+using PirateRoguelike.Core;
+
 namespace PirateRoguelike.Combat
 {
     /// <summary>

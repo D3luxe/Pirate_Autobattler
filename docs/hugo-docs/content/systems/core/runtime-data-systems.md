@@ -20,23 +20,27 @@ To overcome these limitations, a new layer of runtime C# classes has been introd
 
 ### 2.1. Core Components
 
-*   **`ItemInstance` (`Assets/Scripts/Combat/ItemInstance.cs`):** - This is the primary class representing a unique instance of an item in the game. For more details on how items interact within combat, refer to the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}).
+*   **`ItemInstance` (`PirateRoguelike.Data.ItemInstance`):**
+    >   File Path: Assets/Scripts/Combat/ItemInstance.cs
     *   The primary class representing a unique instance of an item in the game (e.g., in an inventory or equipped on a ship).
     *   Holds a reference to its `ItemSO` blueprint for base data.
     *   Contains mutable fields for instance-specific state like `CooldownRemaining` and `StunDuration`.
     *   Crucially, it holds a reference to a `RuntimeItem` instance.
 
-*   **`RuntimeItem` (`Assets/Scripts/Runtime/RuntimeItem.cs`):**
+*   **`RuntimeItem` (`PirateRoguelike.Runtime.RuntimeItem`):**
+    >   File Path: Assets/Scripts/Runtime/RuntimeItem.cs
     *   Represents the dynamic abilities and actions of an `ItemInstance`.
     *   Itself created from an `ItemSO` blueprint.
     *   Manages a collection of `RuntimeAbility` instances. This is where dynamic modifications to an item's *behavior* would be applied.
 
-*   **`RuntimeAbility` (`Assets/Scripts/Runtime/RuntimeAbility.cs`):**
+*   **`RuntimeAbility` (`PirateRoguelike.Runtime.RuntimeAbility`):**
+    >   File Path: Assets/Scripts/Runtime/RuntimeAbility.cs
     *   Represents a unique instance of an ability associated with a `RuntimeItem`.
     *   Holds a reference to its `AbilitySO` blueprint.
     *   Manages a collection of `RuntimeAction` instances.
 
-*   **`RuntimeAction` (`Assets/Scripts/Runtime/RuntimeAction.cs`):** - This abstract base class defines the behavior of all unique action instances. For more details on how actions are processed in combat, refer to the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}).
+*   **`RuntimeAction` (`PirateRoguelike.Runtime.RuntimeAction`):**
+    >   File Path: Assets/Scripts/Runtime/RuntimeAction.cs
     *   An abstract base class for all unique action instances.
     *   Holds a reference to its `ActionSO` blueprint.
     *   Defines the `BuildDescription(IRuntimeContext context)` method for dynamic tooltip text generation.

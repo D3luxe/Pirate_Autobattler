@@ -2,7 +2,9 @@ using System;
 using PirateRoguelike.Data;
 using PirateRoguelike.Combat;
 
-public static class EventBus
+namespace PirateRoguelike.Core
+{
+    public static class EventBus
 {
     // System-wide events
     public static event Action<CombatContext> OnBattleStart;
@@ -106,4 +108,5 @@ public static class EventBus
                 break;
         }
     }
+}
 }

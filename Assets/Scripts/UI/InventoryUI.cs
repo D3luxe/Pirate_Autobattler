@@ -5,8 +5,11 @@ using UnityEngine.UI; // Added
 using PirateRoguelike.Data; // Added for Tag enum
 using PirateRoguelike.Services; // Added for SlotId
 using PirateRoguelike.Events; // Added for ItemManipulationEvents
+using PirateRoguelike.Core;
 
-public class InventoryUI : MonoBehaviour
+namespace PirateRoguelike.UI
+{
+    public class InventoryUI : MonoBehaviour
 {
     public static InventoryUI Instance { get; private set; }
 
@@ -273,4 +276,5 @@ public class InventoryUI : MonoBehaviour
             }
         }
     }
+}
 }

@@ -1,7 +1,11 @@
 using System;
 using UnityEngine;
+using PirateRoguelike.Data;
+using PirateRoguelike.Saving;
 
-public class EconomyService
+namespace PirateRoguelike.Services
+{
+    public class EconomyService
 {
     public static event Action<int> OnGoldChanged;
     public static event Action<int> OnLivesChanged;
@@ -91,4 +95,5 @@ public class EconomyService
         _rerollsThisShop = 0;
         _freeRerollAvailable = false; // Reset for next shop
     }
+}
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PirateRoguelike.Data; // Added for EncounterType
 using UnityEngine;
+using PirateRoguelike.Utility;
 
 namespace Pirate.MapGen
 {

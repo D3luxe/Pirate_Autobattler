@@ -1,8 +1,12 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
+using PirateRoguelike.Core;
+using PirateRoguelike.Saving;
 
-public class MainMenuController : MonoBehaviour
+namespace PirateRoguelike.UI
+{
+    public class MainMenuController : MonoBehaviour
 {
     public VisualTreeAsset mainMenuUXML; // Assign your MainMenu.uxml here in the Inspector
 
@@ -97,4 +101,5 @@ public class MainMenuController : MonoBehaviour
         Application.Quit();
 #endif
     }
+}
 }

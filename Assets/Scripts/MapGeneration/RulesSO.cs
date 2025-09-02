@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine; // Added for ScriptableObject
 using PirateRoguelike.Data; // Added for EncounterType
+using PirateRoguelike.Utility;
 
 namespace Pirate.MapGen
 {

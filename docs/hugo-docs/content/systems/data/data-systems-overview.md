@@ -16,7 +16,9 @@ To define immutable, static game content such as items, ships, enemies, and game
 `ScriptableObject` assets are stored under `Assets/Resources/GameData/` in various subdirectories (e.g., `Items`, `Ships`, `Encounters`, `Abilities`, `Actions`, `Effects`).
 
 ### Loading Mechanism (`GameDataRegistry.cs`)
-*   `GameDataRegistry` is a static class responsible for loading all `ScriptableObject` data into memory at application startup.
+*   **`GameDataRegistry` (`PirateRoguelike.Core.GameDataRegistry`):**
+    *   File Path: Assets/Scripts/Core/GameDataRegistry.cs
+    *   A static class responsible for loading all `ScriptableObject` data into memory at application startup.
 *   The `Initialize()` method, marked with `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]`, ensures that all data is loaded *before* any scene loads.
 *   It uses `Resources.LoadAll<T>("GameData/...")` to load all assets of a specific type from the designated `Resources` folder paths.
 *   Loaded assets are stored in `Dictionary<string, T>` for quick lookup by their `id` (e.g., `_items`, `_ships`, `_encounters`).
@@ -34,10 +36,18 @@ Provides static `Get` methods (e.g., `GetItem(string id)`, `GetShip(string id)`,
 `ScriptableObject`s are static. To handle dynamic changes to item properties (e.g., temporary buffs, cooldowns, stun durations) and to display real-time values in UI, a runtime layer is necessary.
 
 ### Core Components (detailed in [Runtime Data Systems]({{< myrelref "../core/runtime-data-systems.md" >}})):
-*   **`ItemInstance` (`Assets/Scripts/Combat/ItemInstance.cs`):** The primary runtime object representing a unique instance of an item. It holds a reference to its `ItemSO` blueprint and mutable fields like `CooldownRemaining` and `StunDuration`. Crucially, it contains a `RuntimeItem`.
-*   **`RuntimeItem` (`Assets/Scripts/Runtime/RuntimeItem.cs`):** Represents the dynamic abilities and actions of an `ItemInstance`. It's created from an `ItemSO` and manages a collection of `RuntimeAbility` instances.
-*   **`RuntimeAbility` (`Assets/Scripts/Runtime/RuntimeAbility.cs`):** Represents a unique instance of an ability, created from an `AbilitySO`, and manages a collection of `RuntimeAction` instances.
-*   **`RuntimeAction` (`Assets/Scripts/Runtime/RuntimeAction.cs`):** An abstract base class for all unique action instances (e.g., `RuntimeDamageAction`, `RuntimeHealAction`). These wrap their `ActionSO` blueprints and hold mutable, runtime-specific values (e.g., `CurrentDamageAmount`).
+*   **`ItemInstance` (`PirateRoguelike.Data.ItemInstance`):**
+    *   File Path: Assets/Scripts/Combat/ItemInstance.cs
+    *   The primary runtime object representing a unique instance of an item. It holds a reference to its `ItemSO` blueprint and mutable fields like `CooldownRemaining` and `StunDuration`. Crucially, it contains a `RuntimeItem`.
+*   **`RuntimeItem` (`PirateRoguelike.Runtime.RuntimeItem`):**
+    *   File Path: Assets/Scripts/Runtime/RuntimeItem.cs
+    *   Represents the dynamic abilities and actions of an `ItemInstance`. It's created from an `ItemSO` and manages a collection of `RuntimeAbility` instances.
+*   **`RuntimeAbility` (`PirateRoguelike.Runtime.RuntimeAbility`):**
+    *   File Path: Assets/Scripts/Runtime/RuntimeAbility.cs
+    *   Represents a unique instance of an ability, created from an `AbilitySO`, and manages a collection of `RuntimeAction` instances.
+*   **`RuntimeAction` (`PirateRoguelike.Runtime.RuntimeAction`):**
+    *   File Path: Assets/Scripts/Runtime/RuntimeAction.cs
+    *   An abstract base class for all unique action instances (e.g., `RuntimeDamageAction`, `RuntimeHealAction`). These wrap their `ActionSO` blueprints and hold mutable, runtime-specific values (e.g., `CurrentDamageAmount`).
 
 ### How it Works
 When an item is needed, an `ItemInstance` is created. This, in turn, recursively creates `RuntimeItem`, `RuntimeAbility`, and `RuntimeAction` objects. Dynamic modifications are applied to the mutable fields within these runtime objects.

@@ -2,79 +2,84 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using PirateRoguelike.Data;
 using PirateRoguelike.Services; // Added for ItemManipulationService
+using Pirate.MapGen;
+using PirateRoguelike.UI;
 
-public class GameInitializer : MonoBehaviour
+namespace PirateRoguelike.Core
 {
-    [Header("Prefabs")]
-    [SerializeField] private GameObject runManagerPrefab;
-    [SerializeField] private GameObject uiManagerPrefab; // ADDED
-    [SerializeField] private RunConfigSO runConfig;
-    [SerializeField] private ShipSO debugStartingShip; // Add this field
-
-    void Start()
+    public class GameInitializer : MonoBehaviour
     {
-        // Initialize core systems
-        AbilityManager.Initialize();
-        ItemManipulationService.Instance.Initialize(new PirateRoguelike.Core.GameSessionWrapper()); // Initialize ItemManipulationService
+        [Header("Prefabs")]
+        [SerializeField] private GameObject runManagerPrefab;
+        [SerializeField] private GameObject uiManagerPrefab; // ADDED
+        [SerializeField] private RunConfigSO runConfig;
+        [SerializeField] private ShipSO debugStartingShip; // Add this field
 
-        // Determine whether to load a saved game or start a new one
-        if (GameSession.ShouldLoadSavedGame)
+        void Start()
         {
-            if (GameSession.SavedRunStateToLoad != null)
+            // Initialize core systems
+            AbilityManager.Initialize();
+            ItemManipulationService.Instance.Initialize(new PirateRoguelike.Core.GameSessionWrapper()); // Initialize ItemManipulationService
+
+            // Determine whether to load a saved game or start a new one
+            if (GameSession.ShouldLoadSavedGame)
             {
-                if (runConfig == null)
+                if (GameSession.SavedRunStateToLoad != null)
                 {
-                    Debug.LogError("GameInitializer: RunConfigSO is not assigned. Cannot load saved game.");
-                    return;
+                    if (runConfig == null)
+                    {
+                        Debug.LogError("GameInitializer: RunConfigSO is not assigned. Cannot load saved game.");
+                        return;
+                    }
+                    GameSession.LoadRun(GameSession.SavedRunStateToLoad, runConfig);
+                    GameSession.ShouldLoadSavedGame = false; // Reset flag
+                    GameSession.SavedRunStateToLoad = null; // Clear saved state
                 }
-                GameSession.LoadRun(GameSession.SavedRunStateToLoad, runConfig);
-                GameSession.ShouldLoadSavedGame = false; // Reset flag
-                GameSession.SavedRunStateToLoad = null; // Clear saved state
+                else
+                {
+                    Debug.LogError("GameInitializer: ShouldLoadSavedGame is true but SavedRunStateToLoad is null. Starting new game instead.");
+                    // Fallback to starting a new game if saved state is missing
+                    if (runConfig == null || debugStartingShip == null)
+                    {
+                        Debug.LogError("GameInitializer: RunConfig or DebugStartingShip is not assigned for new game fallback!");
+                        return;
+                    }
+                    if (MapManager.Instance != null) MapManager.Instance.ResetMap();
+                    GameSession.StartNewRun(runConfig, debugStartingShip);
+                }
             }
             else
             {
-                Debug.LogError("GameInitializer: ShouldLoadSavedGame is true but SavedRunStateToLoad is null. Starting new game instead.");
-                // Fallback to starting a new game if saved state is missing
+                // Start a new game
                 if (runConfig == null || debugStartingShip == null)
                 {
-                    Debug.LogError("GameInitializer: RunConfig or DebugStartingShip is not assigned for new game fallback!");
+                    Debug.LogError("GameInitializer: RunConfig or DebugStartingShip is not assigned for new game!");
                     return;
                 }
                 if (MapManager.Instance != null) MapManager.Instance.ResetMap();
                 GameSession.StartNewRun(runConfig, debugStartingShip);
             }
-        }
-        else
-        {
-            // Start a new game
-            if (runConfig == null || debugStartingShip == null)
+
+            // Instantiate persistent UI and managers *after* GameSession is initialized
+            if (runManagerPrefab != null && RunManager.Instance == null)
             {
-                Debug.LogError("GameInitializer: RunConfig or DebugStartingShip is not assigned for new game!");
-                return;
+                Instantiate(runManagerPrefab);
+                RunManager.Instance.Initialize(); // Explicitly initialize managers
             }
-            if (MapManager.Instance != null) MapManager.Instance.ResetMap();
-            GameSession.StartNewRun(runConfig, debugStartingShip);
+
+            if (uiManagerPrefab != null && UIManager.Instance == null)
+            {
+                Instantiate(uiManagerPrefab);
+                UIManager.Instance.Initialize(); // Explicitly initialize UI
+            }
+
+            SceneManager.LoadScene("Run");
         }
 
-        // Instantiate persistent UI and managers *after* GameSession is initialized
-        if (runManagerPrefab != null && RunManager.Instance == null)
+        private void OnApplicationQuit()
         {
-            Instantiate(runManagerPrefab);
-            RunManager.Instance.Initialize(); // Explicitly initialize managers
+            // Ensure systems are shut down properly
+            AbilityManager.Shutdown();
         }
-
-        if (uiManagerPrefab != null && UIManager.Instance == null)
-        {
-            Instantiate(uiManagerPrefab);
-            UIManager.Instance.Initialize(); // Explicitly initialize UI
-        }
-
-        SceneManager.LoadScene("Run");
-    }
-
-    private void OnApplicationQuit()
-    {
-        // Ensure systems are shut down properly
-        AbilityManager.Shutdown();
     }
 }

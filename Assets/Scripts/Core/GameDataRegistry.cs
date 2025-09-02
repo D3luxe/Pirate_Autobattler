@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using PirateRoguelike.Data;
 
-// A central, load-once repository for all ScriptableObject game data.
-public static class GameDataRegistry
+namespace PirateRoguelike.Core
+{
+    // A central, load-once repository for all ScriptableObject game data.
+    public static class GameDataRegistry
 {
     private static Dictionary<string, ItemSO> _items;
     private static Dictionary<string, ShipSO> _ships;
@@ -119,4 +121,5 @@ public static class GameDataRegistry
 
         return interpolatedProbabilities;
     }
+}
 }

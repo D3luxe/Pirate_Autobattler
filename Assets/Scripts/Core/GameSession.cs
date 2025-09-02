@@ -4,8 +4,12 @@ using UnityEngine;
 using PirateRoguelike.Data;
 using Pirate.MapGen; // NEW: Added for MapGraphData
 using System.Linq; // Added for LINQ extension methods
+using PirateRoguelike.Services;
+using PirateRoguelike.Saving;
 
-public static class GameSession
+namespace PirateRoguelike.Core
+{
+    public static class GameSession
 {
     public static RunState CurrentRunState { get; set; }
     public static EconomyService Economy { get; set; }
@@ -254,4 +258,5 @@ public static class GameSession
         }
         CurrentRunState.inventoryItems = inventorySerializable;
     }
+}
 }

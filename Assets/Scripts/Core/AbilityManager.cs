@@ -4,7 +4,9 @@ using PirateRoguelike.Data;
 using PirateRoguelike.Data.Abilities;
 using PirateRoguelike.Combat; // Required for CombatContext
 
-public static class AbilityManager
+namespace PirateRoguelike.Core
+{
+    public static class AbilityManager
 {
     private static bool _isInitialized = false;
     // A dictionary mapping a trigger type to all abilities that use that trigger.
@@ -202,4 +204,5 @@ public static class AbilityManager
             }
         }
     }
+}
 }

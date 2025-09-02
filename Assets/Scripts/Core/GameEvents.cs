@@ -1,6 +1,8 @@
 using System;
 
-public static class GameEvents
+namespace PirateRoguelike.Events
+{
+    public static class GameEvents
 {
     public static event Action OnMapToggleRequested;
 
@@ -8,4 +10,5 @@ public static class GameEvents
     {
         OnMapToggleRequested?.Invoke();
     }
+}
 }

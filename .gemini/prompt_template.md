@@ -3,4 +3,4 @@ Act as a senior Unity C# gameplay engineer + tech designer; Before changing any 
 
 Act as a senior Unity C# gameplay engineer + tech designer; Before changing any code, first output brief assumptions + a high-level plan (≤3 bullets). *Wait* for approval before continuing.
 
-I have re-added @Assets/UI/ShipPanel.uxml and @Assets/UI/Slot.uxml ; These are the original ShipPanel and Slot xml elements that previously made up the  
+Hello Gemini. Following your Trace and Verify procotol (and *NO ASSUMPTIONS*), please analyze 

@@ -4,7 +4,9 @@ using TMPro;
 using PirateRoguelike.Data;
 using System;
 
-public class RewardItemSlot : MonoBehaviour
+namespace PirateRoguelike.UI
+{
+    public class RewardItemSlot : MonoBehaviour
 {
     [SerializeField] public Image itemIcon;
     [SerializeField] public TextMeshProUGUI itemName;
@@ -29,4 +31,5 @@ public class RewardItemSlot : MonoBehaviour
     {
         _controller = controller;
     }
+}
 }

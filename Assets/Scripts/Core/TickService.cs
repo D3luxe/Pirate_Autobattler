@@ -1,7 +1,9 @@
 using System;
 using UnityEngine;
 
-public class TickService : MonoBehaviour, ITickService
+namespace PirateRoguelike.Core
+{
+    public class TickService : MonoBehaviour, ITickService
 {
     public event Action OnTick;
     public float IntervalSec => 0.1f; // 100ms
@@ -45,4 +47,5 @@ public class TickService : MonoBehaviour, ITickService
     {
         Time.timeScale = multiplier;
     }
+}
 }

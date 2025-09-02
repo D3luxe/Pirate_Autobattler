@@ -249,12 +249,12 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":true,"gridCellCount":{"x":3.0,"y":2.0},"gridSpriteSize":{"x":206.0,"y":230.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      MapBackground_0: -127726080
-      MapBackground_1: 144722299
-      MapBackground_2: 1343987647
-      MapBackground_3: -895880183
-      MapBackground_4: -1585006750
-      MapBackground_5: -1344281518
+      MapBackground_0: -376074837
+      MapBackground_1: -1904186258
+      MapBackground_2: -1225244649
+      MapBackground_3: -32565955
+      MapBackground_4: -805174023
+      MapBackground_5: -1807479130
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

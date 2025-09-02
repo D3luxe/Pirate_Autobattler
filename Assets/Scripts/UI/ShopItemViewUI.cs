@@ -1,10 +1,12 @@
-
 using UnityEngine;
 using UnityEngine.UIElements;
 using PirateRoguelike.Data;
+using PirateRoguelike.Encounters;
 
-[UxmlElement]
-public partial class ShopItemViewUI : VisualElement
+namespace PirateRoguelike.UI
+{
+    [UxmlElement]
+    public partial class ShopItemViewUI : VisualElement
 {
     private VisualElement _itemIcon;
     private Label _itemName;
@@ -69,4 +71,5 @@ public partial class ShopItemViewUI : VisualElement
     {
         TooltipController.Instance.Hide();
     }
+}
 }

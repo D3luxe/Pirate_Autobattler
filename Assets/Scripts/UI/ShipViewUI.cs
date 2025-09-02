@@ -2,10 +2,11 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using PirateRoguelike.Data;
 using System.ComponentModel;
-using PirateRoguelike.UI; // Added
 
-[UxmlElement]
-public partial class ShipViewUI : VisualElement
+namespace PirateRoguelike.UI
+{
+    [UxmlElement]
+    public partial class ShipViewUI : VisualElement
 {
     private VisualElement _shipIcon;
     private Label _shipName;
@@ -66,4 +67,5 @@ public partial class ShipViewUI : VisualElement
             }
         }
     }
+}
 }

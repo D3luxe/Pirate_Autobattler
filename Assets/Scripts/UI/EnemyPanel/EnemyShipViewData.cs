@@ -2,6 +2,7 @@ using UnityEngine;
 using System.ComponentModel;
 using PirateRoguelike.Data;
 using PirateRoguelike.Runtime;
+using PirateRoguelike.Core;
 
 namespace PirateRoguelike.UI
 {

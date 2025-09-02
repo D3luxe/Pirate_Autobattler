@@ -12,25 +12,32 @@ The save/load system is designed around a central RunState object that acts as a
 
 ### 1.1. Core Components
 
-*   **`SaveManager` (`Assets/Scripts/Saving/SaveManager.cs`):**
+*   **`SaveManager` (`PirateRoguelike.Saving.SaveManager`):**
+    >   File Path: Assets/Scripts/Saving/SaveManager.cs
     *   A static class responsible for the physical file operations.
     *   Handles serializing the `RunState` object to JSON and writing it to `run.json` in the game's persistent data path.
     *   Handles reading the JSON file and deserializing it back into a `RunState` object.
 
-*   **`GameSession` (`Assets/Scripts/Core/GameSession.cs`):**
+*   **`GameSession` (`PirateRoguelike.Core.GameSession`):**
+    >   File Path: Assets/Scripts/Core/GameSession.cs
     *   The central static class holding the live, in-memory game state (e.g., `PlayerShip`, `Inventory`, `Economy`).
     *   Orchestrates the saving process by populating a `RunState` object with data from the live state before passing it to the `SaveManager`.
     *   Orchestrates the loading process by taking a `RunState` object and using it to re-initialize the live game state (creating new `ShipState`, `Inventory`, etc.).
 
-*   **`RunState` (Defined in `GameSession.cs`):**
+*   **`RunState` (`PirateRoguelike.Core.RunState`):**
+    >   File Path: Assets/Scripts/Core/GameSession.cs (Defined within GameSession.cs)
     *   A serializable class that acts as the root data container for a save file. It holds all the data that needs to be persisted between sessions.
 
 ### 1.2. Serializable Data Objects
 
 To facilitate serialization with `JsonUtility`, the live game objects are converted to and from simple, serializable plain C# objects:
 
-*   **`SerializableShipState` (`Assets/Scripts/Saving/SerializableShipState.cs`):** Captures the state of a ship (player or enemy), including health, shield, and a list of its equipped items.
-*   **`SerializableItemInstance` (`Assets/Scripts/Saving/SerializableItemInstance.cs`):** Captures the state of a single item instance.
+*   **`SerializableShipState` (`PirateRoguelike.Saving.SerializableShipState`):**
+    >   File Path: Assets/Scripts/Saving/SerializableShipState.cs
+    *   Captures the state of a ship (player or enemy), including health, shield, and a list of its equipped items.
+*   **`SerializableItemInstance` (`PirateRoguelike.Saving.SerializableItemInstance`):**
+    >   File Path: Assets/Scripts/Saving/SerializableItemInstance.cs
+    *   Captures the state of a single item instance.
 
 ## 2. Data Flow
 

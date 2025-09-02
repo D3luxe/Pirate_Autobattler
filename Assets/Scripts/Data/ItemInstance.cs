@@ -1,6 +1,6 @@
 using UnityEngine;
-using PirateRoguelike.Data; // Changed from PirateRoguelike.Data.Items
 using PirateRoguelike.Runtime; // Added for RuntimeItem
+using PirateRoguelike.Saving; // Added for SerializableItemInstance
 
 namespace PirateRoguelike.Data
 {

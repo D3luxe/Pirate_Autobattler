@@ -1,8 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro; // Add this
+using PirateRoguelike.Core;
 
-public class ShipStateView : MonoBehaviour
+namespace PirateRoguelike.Combat
+{
+    public class ShipStateView : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Image shipSprite;
@@ -85,4 +88,5 @@ public class ShipStateView : MonoBehaviour
         Debug.Log($"Displaying +{amount} heal text on {ShipState.Def.displayName}");
         // TODO: Implement actual floating text UI
     }
+}
 }

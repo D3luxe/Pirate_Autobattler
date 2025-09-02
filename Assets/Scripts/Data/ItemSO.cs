@@ -1,61 +1,64 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using PirateRoguelike.Data;
 using PirateRoguelike.Data.Abilities; // Using the new AbilitySO
 
-[CreateAssetMenu(fileName = "NewItem", menuName = "Pirate/Data/Item")]
-public class ItemSO : ScriptableObject
+namespace PirateRoguelike.Data
 {
-    [Header("Identity")]
-    public string id;
-    public string displayName;
-    [TextArea] public string description;
-    public Sprite icon;
-
-    [Header("Stats")]
-    public Rarity rarity;
-    public bool isActive;
-    public float cooldownSec;
-    public List<AbilitySO> abilities; // Switched to AbilitySO
-
-    [Header("Gameplay")]
-    public List<Tag> tags;
-    public List<SynergyRule> synergyRules;
-
-    [Header("Shop")]
-    public int Cost
+    [CreateAssetMenu(fileName = "NewItem", menuName = "Pirate/Data/Item")]
+    public class ItemSO : ScriptableObject
     {
-        get
+        [Header("Identity")]
+        public string id;
+        public string displayName;
+        [TextArea] public string description;
+        public Sprite icon;
+
+        [Header("Stats")]
+        public Rarity rarity;
+        public bool isActive;
+        public float cooldownSec;
+        public List<AbilitySO> abilities; // Switched to AbilitySO
+
+        [Header("Gameplay")]
+        public List<Tag> tags;
+        public List<SynergyRule> synergyRules;
+
+        [Header("Shop")]
+        public int Cost
         {
-            switch (rarity)
+            get
             {
-                case Rarity.Bronze: return 5;
-                case Rarity.Silver: return 10;
-                case Rarity.Gold: return 15;
-                case Rarity.Diamond: return 25;
-                default: return 0;
+                switch (rarity)
+                {
+                    case Rarity.Bronze: return 5;
+                    case Rarity.Silver: return 10;
+                    case Rarity.Gold: return 15;
+                    case Rarity.Diamond: return 25;
+                    default: return 0;
+                }
             }
         }
-    }
 
-    public float GetValueForRarity(List<RarityTieredValue> tieredValues, Rarity itemRarity)
-    {
-        // Find the value for the exact rarity
-        RarityTieredValue foundValue = tieredValues.FirstOrDefault(rtv => rtv.rarity == itemRarity);
-        if (foundValue != null) return foundValue.value;
-
-        // If not found, try to find the next lower rarity
-        for (int i = (int)itemRarity - 1; i >= 0; i--)
+        public float GetValueForRarity(List<RarityTieredValue> tieredValues, Rarity itemRarity)
         {
-            foundValue = tieredValues.FirstOrDefault(rtv => (int)rtv.rarity == i);
+            // Find the value for the exact rarity
+            RarityTieredValue foundValue = tieredValues.FirstOrDefault(rtv => rtv.rarity == itemRarity);
             if (foundValue != null) return foundValue.value;
+
+            // If not found, try to find the next lower rarity
+            for (int i = (int)itemRarity - 1; i >= 0; i--)
+            {
+                foundValue = tieredValues.FirstOrDefault(rtv => (int)rtv.rarity == i);
+                if (foundValue != null) return foundValue.value;
+            }
+
+            // Fallback to the lowest rarity value if nothing else is found
+            foundValue = tieredValues.OrderBy(rtv => rtv.rarity).FirstOrDefault();
+            if (foundValue != null) return foundValue.value;
+
+            return 0f; // Default if no values are defined
         }
-
-        // Fallback to the lowest rarity value if nothing else is found
-        foundValue = tieredValues.OrderBy(rtv => rtv.rarity).FirstOrDefault();
-        if (foundValue != null) return foundValue.value;
-
-        return 0f; // Default if no values are defined
     }
 }
+

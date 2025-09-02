@@ -1,11 +1,11 @@
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using PirateRoguelike.UI;
 using UnityEngine.UIElements;
 using PirateRoguelike.Core;
 
-public class UIManager : MonoBehaviour
+namespace PirateRoguelike.UI
+{
+    public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
@@ -127,4 +127,5 @@ public class UIManager : MonoBehaviour
             Debug.LogError("MapView instance is null in OnRunSceneLoaded!");
         }
     }
+}
 }

@@ -10,67 +10,74 @@
     ```mermaid
     graph TD
         subgraph App Start
-            A[MainMenu.unity] --> B{MainMenuController};
+            A[MainMenu.unity] --> B{PirateRoguelike.UI.MainMenuController};
         end
 
         subgraph Game Initialization
             B -- OnStartGameClicked --> C[SceneManager.LoadScene("Boot")];
             C --> D[Boot.unity];
-            D --> E{GameInitializer};
-            E --> F[GameSession.StartNewRun / LoadRun];
-            E -- Instantiates --> G((RunManager));
-            G -- Instantiates --> H((MapManager));
+            D --> E{PirateRoguelike.Core.GameInitializer};
+            E --> F[PirateRoguelike.Core.GameSession.StartNewRun / LoadRun];
+            E -- Instantiates --> G((PirateRoguelike.Core.RunManager));
+            G -- Instantiates --> H((Pirate.MapGen.MapManager));
             E --> I[SceneManager.LoadScene("Run")];
         end
 
         subgraph Main Game Loop
             I --> J[Run.unity];
-            J --> K{RunManager};
-            K -- Manages --> L{MapView};
-            K -- Manages --> M{PlayerPanelController};
+            J --> K{PirateRoguelike.Core.RunManager};
+            K -- Manages --> L{PirateRoguelike.UI.MapView};
+            K -- Manages --> M{PirateRoguelike.UI.PlayerPanelController};
             L -- OnNodeClicked --> N[Start Encounter];
         end
 
         subgraph Combat
             N -- Loads --> O[Battle.unity];
-            O --> P{BattleManager};
-            P --> Q{CombatController};
-            R((TickService)) -- OnTick (100ms) --> Q;
-            Q -- Updates --> S{ShipState};
-            Q -- Updates --> T{BattleUIController};
+            O --> P{PirateRoguelike.Combat.BattleManager};
+            P --> Q{PirateRoguelike.Combat.CombatController};
+            R((PirateRoguelike.Core.TickService)) -- OnTick (100ms) --> Q;
+            Q -- Updates --> S{PirateRoguelike.Core.ShipState};
+            Q -- Updates --> T{PirateRoguelike.UI.BattleUIController};
         end
 
         subgraph Global Systems
-            U[GameDataRegistry] -- Provides --> AllSystems[All Systems];
-            V[EventBus] -- Mediates --> AllSystems;
-            W[GameSession] -- Holds --> X[RunState];
+            U[PirateRoguelike.Core.GameDataRegistry] -- Provides --> AllSystems[All Systems];
+            V[PirateRoguelike.Core.EventBus] -- Mediates --> AllSystems;
+            W[PirateRoguelike.Core.GameSession] -- Holds --> X[PirateRoguelike.Saving.RunState];
         end
     ```
 
 -   **Module Overviews:**
     -   **Core:** Manages game lifecycle, session state, and core services.
-        -   **`GameSession`**: Static class, central repository for current run's state (`RunState`).
-        -   **`RunManager`**: Persistent singleton, manages main game flow, scene transitions, and UI.
-        -   **`MapManager`**: Persistent singleton, manages map generation and provides map node data. Its state is reset at the start of each new run.
-        -   **`GameInitializer`**: Runs in `Boot` scene, initializes `GameSession` and `RunManager`.
-        -   **`TickService`**: `MonoBehaviour` providing a fixed 100ms update tick for combat.
-        -   **`GameDataRegistry`**: Static class, loads all `ScriptableObject` data from `Resources` at startup.
-        -   **`EventBus`**: Static global event dispatcher, decouples systems.
+        -   **`PirateRoguelike.Core.GameSession`**: Static class, central repository for current run's state (`PirateRoguelike.Saving.RunState`).
+        -   **`PirateRoguelike.Core.RunManager`**: Persistent singleton, manages main game flow, scene transitions, and UI.
+        -   **`Pirate.MapGen.MapManager`**: Persistent singleton, manages map generation and provides map node data. Its state is reset at the start of each new run.
+        -   **`PirateRoguelike.Core.GameInitializer`**: Runs in `Boot` scene, initializes `PirateRoguelike.Core.GameSession` and `PirateRoguelike.Core.RunManager`.
+        -   **`PirateRoguelike.Core.TickService`**: `MonoBehaviour` providing a fixed 100ms update tick for combat.
+        -   **`PirateRoguelike.Core.GameDataRegistry`**: Static class, loads all `ScriptableObject` data from `Resources` at startup.
+        -   **`PirateRoguelike.Core.EventBus`**: Static global event dispatcher, decouples systems.
     -   **Combat:** Handles turn-based player vs. enemy battles.
-        -   **`CombatController`**: Orchestrates battle (effects, cooldowns, end conditions), driven by `TickService`.
-        -   **`ShipState`**: Holds runtime ship state (health, items, effects).
-        -   **`AbilityManager`**: Subscribes to `EventBus` events to trigger `AbilitySO` actions.
-    -   **Data:** `ScriptableObject` definitions for game content (`ItemSO`, `ShipSO`, `EnemySO`, etc.).
-    -   **UI:** Manages UI using UI Toolkit (`MainMenuController`, `PlayerPanelController`, `MapView`, `BattleUIController`).
+        -   **`PirateRoguelike.Combat.CombatController`**: Orchestrates battle (effects, cooldowns, end conditions), driven by `PirateRoguelike.Core.TickService`.
+        -   **`PirateRoguelike.Core.ShipState`**: Holds runtime ship state (health, items, effects).
+        -   **`PirateRoguelike.Core.AbilityManager`**: Subscribes to `PirateRoguelike.Core.EventBus` events to trigger `AbilitySO` actions.
+    -   **Data:** `ScriptableObject` definitions for game content.
+        -   **`PirateRoguelike.Data.ItemSO`**
+        -   **`PirateRoguelike.Data.ShipSO`**
+        -   **`PirateRoguelike.Data.EnemySO`**
+    -   **UI:** Manages UI using UI Toolkit.
+        -   **`PirateRoguelike.UI.MainMenuController`**
+        -   **`PirateRoguelike.UI.PlayerPanelController`**
+        -   **`PirateRoguelike.UI.MapView`**
+        -   **`PirateRoguelike.UI.BattleUIController`**
 
     -   **UI Systems:** Manages various UI elements and their interactions using UI Toolkit.
-        -   **`PlayerPanelController`**: Orchestrates the player's main UI. It is responsible for creating the `PlayerPanelView` (the view) and the `PlayerPanelDataViewModel` (the view model), and injecting the `IGameSession` dependency into the view model. This ensures the UI is decoupled from the static `GameSession` state.
-        -   **`TooltipController`**: A singleton `MonoBehaviour` responsible for managing the lifecycle, content population, positioning, and visibility of the item tooltip. It dynamically instantiates tooltip elements from UXML assets and attaches them to the main UI `rootVisualElement` (Player Panel's `UIDocument`'s root) to ensure correct z-ordering.
+        -   **`PirateRoguelike.UI.PlayerPanelController`**: Orchestrates the player's main UI. It is responsible for creating the `PlayerPanelView` (the view) and the `PlayerPanelDataViewModel` (the view model), and injecting the `IGameSession` dependency into the view model. This ensures the UI is decoupled from the static `GameSession` state.
+        -   **`PirateRoguelike.UI.TooltipController`**: A singleton `MonoBehaviour` responsible for managing the lifecycle, content population, positioning, and visibility of the item tooltip. It dynamically instantiates tooltip elements from UXML assets and attaches them to the main UI `rootVisualElement` (Player Panel's `UIDocument`'s root) to ensure correct z-ordering.
             -   **Visibility Management**: Employs a `IsTooltipVisible` flag to track its state, preventing redundant show/hide calls.
             -   **Smooth Transitions**: Utilizes coroutines (`_currentTooltipCoroutine`) to manage smooth fade-in/fade-out animations, ensuring only one animation is active at a time.
             -   **CSS Integration**: Works in conjunction with `TooltipPanelStyle.uss` for opacity transitions, with `visibility` controlled directly in C# to ensure proper animation sequencing.
-        -   **`EffectDisplay`**: A helper class used by `TooltipController` to dynamically display individual ability effects within the tooltip.
-        -   **`EnemyPanelController`**: Manages the enemy's UI panel, including dynamic equipment slot generation and tooltip integration.
+        -   **`PirateRoguelike.UI.EffectDisplay`**: A helper class used by `PirateRoguelike.UI.TooltipController` to dynamically display individual ability effects within the tooltip.
+        -   **`PirateRoguelike.UI.EnemyPanelController`**: Manages the enemy's UI panel, including dynamic equipment slot generation and tooltip integration.
 
 -   **System Initialization Order:**
     This section details the precise order in which core game systems, view models, and UI components are initialized, ensuring data readiness and proper inter-system communication.
@@ -115,73 +122,73 @@
 
     **Detailed Initialization Flow:**
 
-    1.  **`GameInitializer.Start()`**:
-        *   Initializes `AbilityManager` by subscribing it to `EventBus` events.
-        *   Calls `MapManager.Instance.ResetMap()` to clear any previous map state.
-        *   Initializes `GameSession` (either starting a new run or loading a saved one). This step sets up core game data (`CurrentRunState`, `EconomyService`, `Inventory`, `PlayerShip`) and dispatches `GameSession.OnEconomyInitialized`, `GameSession.OnPlayerShipInitialized`, and `GameSession.OnInventoryInitialized` events.
-        *   Instantiates the `RunManager` prefab, which becomes a persistent singleton, and explicitly calls `RunManager.Instance.Initialize()` to set up core game managers (like `MapManager`).
-        *   Instantiates the `UIManager` prefab, which becomes a persistent singleton, and explicitly calls `UIManager.Instance.Initialize()` to set up global UI elements.
+    1.  **`PirateRoguelike.Core.GameInitializer.Start()`**:
+        *   Initializes `PirateRoguelike.Core.AbilityManager` by subscribing it to `PirateRoguelike.Core.EventBus` events.
+        *   Calls `Pirate.MapGen.MapManager.Instance.ResetMap()` to clear any previous map state.
+        *   Initializes `PirateRoguelike.Core.GameSession` (either starting a new run or loading a saved one). This step sets up core game data (`PirateRoguelike.Saving.RunState`, `PirateRoguelike.Services.EconomyService`, `PirateRoguelike.Services.Inventory`, `PirateRoguelike.Core.ShipState`) and dispatches `PirateRoguelike.Core.GameSession.OnEconomyInitialized`, `PirateRoguelike.Core.GameSession.OnPlayerShipInitialized`, and `PirateRoguelike.Core.GameSession.OnInventoryInitialized` events.
+        *   Instantiates the `PirateRoguelike.Core.RunManager` prefab, which becomes a persistent singleton, and explicitly calls `PirateRoguelike.Core.RunManager.Instance.Initialize()` to set up core game managers (like `Pirate.MapGen.MapManager`).
+        *   Instantiates the `PirateRoguelike.UI.UIManager` prefab, which becomes a persistent singleton, and explicitly calls `PirateRoguelike.UI.UIManager.Instance.Initialize()` to set up global UI elements.
 
-    2.  **`RunManager.Awake()`**: (Executes immediately after `RunManager` is instantiated)
-        *   Sets up the `RunManager` singleton and subscribes to `SceneManager.sceneLoaded` and `GameSession.OnPlayerNodeChanged`.
+    2.  **`PirateRoguelike.Core.RunManager.Awake()`**: (Executes immediately after `PirateRoguelike.Core.RunManager` is instantiated)
+        *   Sets up the `PirateRoguelike.Core.RunManager` singleton and subscribes to `SceneManager.sceneLoaded` and `PirateRoguelike.Core.GameSession.OnPlayerNodeChanged`.
 
-    3.  **`RunManager.Initialize()`**: (Called explicitly by `GameInitializer.Start()`)
-        *   Instantiates `MapManager`. `MapManager` then generates the game map data and assigns it to `GameSession.CurrentRunState.mapGraphData`, subsequently invoking `MapManager.OnMapDataUpdated`.
+    3.  **`PirateRoguelike.Core.RunManager.Initialize()`**: (Called explicitly by `PirateRoguelike.Core.GameInitializer.Start()`)
+        *   Instantiates `Pirate.MapGen.MapManager`. `Pirate.MapGen.MapManager` then generates the game map data and assigns it to `PirateRoguelike.Core.GameSession.CurrentRunState.mapGraphData`, subsequently invoking `Pirate.MapGen.MapManager.OnMapDataUpdated`.
         *   Instantiates `RewardUI`.
 
-    4.  **`UIManager.Awake()`**: (Executes immediately after `UIManager` is instantiated)
-        *   Sets up the `UIManager` singleton.
+    4.  **`PirateRoguelike.UI.UIManager.Awake()`**: (Executes immediately after `PirateRoguelike.UI.UIManager` is instantiated)
+        *   Sets up the `PirateRoguelike.UI.UIManager` singleton.
 
-    5.  **`UIManager.Initialize()`**: (Called explicitly by `GameInitializer.Start()`)
-        *   Instantiates `GlobalUIOverlay`, `PlayerPanelController`, `MapView`, and `TooltipController`.
-        *   Performs initial hookups between UI components (e.g., `PlayerPanelController.SetMapPanel`).
-        *   Initializes `TooltipController`.
+    5.  **`PirateRoguelike.UI.UIManager.Initialize()`**: (Called explicitly by `PirateRoguelike.Core.GameInitializer.Start()`)
+        *   Instantiates `GlobalUIOverlay`, `PirateRoguelike.UI.PlayerPanelController`, `PirateRoguelike.UI.MapView`, and `PirateRoguelike.UI.TooltipController`.
+        *   Performs initial hookups between UI components (e.g., `PirateRoguelike.UI.PlayerPanelController.SetMapPanel`).
+        *   Initializes `PirateRoguelike.UI.TooltipController`.
 
-    6.  **`SceneManager.LoadScene("Run")`**: (Called by `GameInitializer.Start()`)
+    6.  **`SceneManager.LoadScene("Run")`**: (Called by `PirateRoguelike.Core.GameInitializer.Start()`)
         *   Loads the "Run" scene, which contains the main game environment.
 
-    7.  **`RunManager.OnSceneLoaded()`**: (Executes when the "Run" scene is loaded)
+    7.  **`PirateRoguelike.Core.RunManager.OnSceneLoaded()`**: (Executes when the "Run" scene is loaded)
         *   Calls `OnRunSceneLoaded()`.
 
-    8.  **`RunManager.OnRunSceneLoaded()`**: (Executes after the "Run" scene is loaded and `MapManager` has generated data)
+    8.  **`PirateRoguelike.Core.RunManager.OnRunSceneLoaded()`**: (Executes after the "Run" scene is loaded and `Pirate.MapGen.MapManager` has generated data)
         *   Checks for battle rewards.
-        *   Ensures `MapManager` has generated map data (if not, it generates it).
-        *   Ensures `GameSession.Economy` is initialized.
-        *   **Crucially, calls `UIManager.Instance.InitializeRunUI()` to initialize and display the UI for the "Run" scene.**
+        *   Ensures `Pirate.MapGen.MapManager` has generated map data (if not, it generates it).
+        *   Ensures `PirateRoguelike.Core.GameSession.Economy` is initialized.
+        *   **Crucially, calls `PirateRoguelike.UI.UIManager.Instance.InitializeRunUI()` to initialize and display the UI for the "Run" scene.**
 
-    9.  **`UIManager.InitializeRunUI()`**: (Called explicitly by `RunManager.OnRunSceneLoaded()`)
-        *   Initializes the `PlayerPanelController` with the current `GameSession` data.
-        *   Calls `MapView.Show()` to display the map.
+    9.  **`PirateRoguelike.UI.UIManager.InitializeRunUI()`**: (Called explicitly by `PirateRoguelike.Core.RunManager.OnRunSceneLoaded()`)
+        *   Initializes the `PirateRoguelike.UI.PlayerPanelController` with the current `PirateRoguelike.Core.GameSession` data.
+        *   Calls `PirateRoguelike.UI.MapView.Show()` to display the map.
 
     **Event-Driven Data Flow and UI Updates:**
-    *   When `GameSession` invokes its initialization events (`OnPlayerShipInitialized`, `OnInventoryInitialized`, `OnEconomyInitialized`), the `PlayerPanelDataViewModel` reacts by updating its properties. This, in turn, notifies the `PlayerPanelView` to update the UI elements that display player ship, inventory, and economy data.
-    *   When `MapManager` invokes `OnMapDataUpdated`, the `MapView` reacts by calling its `HandleMapDataUpdated()` method, which triggers the layout and rendering of the map nodes and edges.
-    *   Ongoing changes to `GameSession.PlayerShip` (equipment) and `GameSession.Inventory` trigger events that `PlayerPanelDataViewModel` is subscribed to, ensuring the UI remains synchronized with game state.
+    *   When `PirateRoguelike.Core.GameSession` invokes its initialization events (`OnPlayerShipInitialized`, `OnInventoryInitialized`, `OnEconomyInitialized`), the `PlayerPanelDataViewModel` reacts by updating its properties. This, in turn, notifies the `PlayerPanelView` to update the UI elements that display player ship, inventory, and economy data.
+    *   When `Pirate.MapGen.MapManager` invokes `OnMapDataUpdated`, the `PirateRoguelike.UI.MapView` reacts by calling its `HandleMapDataUpdated()` method, which triggers the layout and rendering of the map nodes and edges.
+    *   Ongoing changes to `PirateRoguelike.Core.GameSession.PlayerShip` (equipment) and `PirateRoguelike.Services.Inventory` trigger events that `PlayerPanelDataViewModel` is subscribed to, ensuring the UI remains synchronized with game state.
 
     This structured initialization sequence, combined with an event-driven data flow, ensures that UI components and view models only attempt to access game data after it has been properly initialized, minimizing the risk of errors and promoting a decoupled architecture.
 
--   **Combat Tick Walkthrough (`CombatController.HandleTick`):**
-    1.  **Sudden Death Check**: Initiates if battle exceeds 30 seconds; ships take increasing damage. (`CombatController.cs:71-86`)
-    2.  **Process Active Effects**: Iterates sorted active effects for both player/enemy, calls `Tick()`, removes expired. (`CombatController.cs:111-132`)
-    3.  **Reduce Stun Duration**: Calls `Player.ReduceStun()` and `Enemy.ReduceStun()`. (`CombatController.cs:94-95`)
-    4.  **Dispatch Tick Event**: `EventBus.DispatchTick()` for system reactions (e.g., `AbilityManager`). (`CombatController.cs:99`)
-    5.  **Check Battle End Conditions**: Ends battle if either ship's health is zero or below. (`CombatController.cs:135-168`)
+-   **Combat Tick Walkthrough (`PirateRoguelike.Combat.CombatController.HandleTick`):**
+    1.  **Sudden Death Check**: Initiates if battle exceeds 30 seconds; ships take increasing damage. (`PirateRoguelike.Combat.CombatController.cs:71-86`)
+    2.  **Process Active Effects**: Iterates sorted active effects for both player/enemy, calls `Tick()`, removes expired. (`PirateRoguelike.Combat.CombatController.cs:111-132`)
+    3.  **Reduce Stun Duration**: Calls `Player.ReduceStun()` and `Enemy.ReduceStun()`. (`PirateRoguelike.Combat.CombatController.cs:94-95`)
+    4.  **Dispatch Tick Event**: `PirateRoguelike.Core.EventBus.DispatchTick()` for system reactions (e.g., `PirateRoguelike.Core.AbilityManager`). (`PirateRoguelike.Combat.CombatController.cs:99`)
+    5.  **Check Battle End Conditions**: Ends battle if either ship's health is zero or below. (`PirateRoguelike.Combat.CombatController.cs:135-168`)
 
 -   **Event Catalog:**
 
 | Event Name | Publisher(s) (Class:Line) | Subscriber(s) (Class:Line) | Notes |
 | :--- | :--- | :--- | :--- |
-| `OnTick` (TickService) | `TickService:38` | `CombatController:29` | Main driver for combat. |
-| `OnBattleStart` | `CombatController:48` | `AbilityManager:48` | Signals battle start. |
-| `OnSuddenDeathStarted` | `CombatController:74` | `BattleUIController:41` | Fired when sudden death begins. |
-| `OnDamageReceived` | `ShipState:224` | `ShipView:18`, `AbilityManager:50` | Fired when ship takes damage. |
-| `OnHeal` | `ShipState:239` | `ShipView:19`, `AbilityManager:51` | Fired when ship is healed. |
-| `OnTick` (EventBus) | `CombatController:99` | `AbilityManager:52` | General combat tick update. |
-| `OnHealthChanged` | `ShipState:102, 223, 238` | `CombatController:38, 39`, `ShipView:17`, `PlayerPanelController:87` | Direct C# event on `ShipState` for UI. |
+| `OnTick` (PirateRoguelike.Core.TickService) | `PirateRoguelike.Core.TickService:38` | `PirateRoguelike.Combat.CombatController:29` | Main driver for combat. |
+| `OnBattleStart` | `PirateRoguelike.Combat.CombatController:48` | `PirateRoguelike.Core.AbilityManager:48` | Signals battle start. |
+| `OnSuddenDeathStarted` | `PirateRoguelike.Combat.CombatController:74` | `PirateRoguelike.UI.BattleUIController:41` | Fired when sudden death begins. |
+| `OnDamageReceived` | `PirateRoguelike.Core.ShipState:224` | `ShipView:18`, `PirateRoguelike.Core.AbilityManager:50` | Fired when ship takes damage. |
+| `OnHeal` | `PirateRoguelike.Core.ShipState:239` | `ShipView:19`, `PirateRoguelike.Core.AbilityManager:51` | Fired when ship is healed. |
+| `OnTick` (PirateRoguelike.Core.EventBus) | `PirateRoguelike.Combat.CombatController:99` | `PirateRoguelike.Core.AbilityManager:52` | General combat tick update. |
+| `OnHealthChanged` | `PirateRoguelike.Core.ShipState:102, 223, 238` | `PirateRoguelike.Combat.CombatController:38, 39`, `ShipView:17`, `PlayerPanelController:87` | Direct C# event on `ShipState` for UI. |
 | `OnEncounterEnd` | *None found* | *None found* | Unused in `EventBus`. |
-| `OnItemReady` | `EventBus` | `AbilityManager` | Triggers item abilities. |
-| `OnAllyActivate` | `EventBus` | *None found* | Unused in `EventBus`. |
-| `OnDamageDealt` | `EventBus` | `AbilityManager:49` | Triggers abilities on damage dealt. |
+| `OnItemReady` | `PirateRoguelike.Core.EventBus` | `PirateRoguelike.Core.AbilityManager` | Triggers item abilities. |
+| `OnAllyActivate` | `PirateRoguelike.Core.EventBus` | *None found* | Unused in `EventBus`. |
+| `OnDamageDealt` | `PirateRoguelike.Core.EventBus` | `PirateRoguelike.Core.AbilityManager:49` | Triggers abilities on damage dealt. |
 | `OnShieldGained` | *None found* | *None found* | Unused in `EventBus`. |
 | `OnDebuffApplied` | *None found* | *None found* | Unused in `EventBus`. |
 | `OnBuffApplied` | *None found* | *None found* | Unused in `EventBus`. |
@@ -231,11 +238,11 @@
         -   [ ] Refactor `GameSession` to be a non-static class.
 
 -   **Glossary & File Index:**
-    -   **`GameSession`**: (`Assets/Scripts/Core/GameSession.cs`) Static class holding current run's state.
-    -   **`RunManager`**: (`Assets/Scripts/Core/RunManager.cs`) Persistent singleton managing game loop.
-    -   **`CombatController`**: (`Assets/Scripts/Combat/CombatController.cs`) Manages a single battle.
-    -   **`GameDataRegistry`**: (`Assets/Scripts/Core/GameDataRegistry.cs`) Loads/provides `ScriptableObject` data.
-    -   **`EventBus`**: (`Assets/Scripts/Core/EventBus.cs`) Global static event dispatcher.
+    -   **`PirateRoguelike.Core.GameSession`**: (`Assets/Scripts/Core/GameSession.cs`) Static class holding current run's state.
+    -   **`PirateRoguelike.Core.RunManager`**: (`Assets/Scripts/Core/RunManager.cs`) Persistent singleton managing game loop.
+    -   **`PirateRoguelike.Combat.CombatController`**: (`Assets/Scripts/Combat/CombatController.cs`) Manages a single battle.
+    -   **`PirateRoguelike.Core.GameDataRegistry`**: (`Assets/Scripts/Core/GameDataRegistry.cs`) Loads/provides `ScriptableObject` data.
+    -   **`PirateRoguelike.Core.EventBus`**: (`Assets/Scripts/Core/EventBus.cs`) Global static event dispatcher.
 
 -   **Open Questions:**
     -   Intended use of `OnAllyActivate`?

@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Pirate.MapGen; // For NodeType
+using PirateRoguelike.Utility;
 
 [CustomPropertyDrawer(typeof(SerializableDictionary<,>))]
 public class SerializableDictionaryPropertyDrawer : PropertyDrawer

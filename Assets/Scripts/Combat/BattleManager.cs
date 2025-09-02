@@ -2,8 +2,11 @@ using UnityEngine;
 using PirateRoguelike.Data;
 using Pirate.MapGen;
 using PirateRoguelike.UI;
+using PirateRoguelike.Core;
 
-public class BattleManager : MonoBehaviour
+namespace PirateRoguelike.Combat
+{
+    public class BattleManager : MonoBehaviour
 {
     [Header("Scene References")]
     [SerializeField] private CombatController combatController;
@@ -91,4 +94,5 @@ public class BattleManager : MonoBehaviour
 
         Debug.Log($"Battle started: {playerState.Def.displayName} vs {enemyState.Def.displayName}");
     }
+}
 }

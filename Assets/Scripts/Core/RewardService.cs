@@ -2,8 +2,11 @@ using System.Collections.Generic;
 using PirateRoguelike.Data;
 using System.Linq;
 using UnityEngine;
+using PirateRoguelike.Core;
 
-public static class RewardService
+namespace PirateRoguelike.Services
+{
+    public static class RewardService
 {
     public static List<ItemSO> GenerateBattleRewards(int currentDepth, RunConfigSO config, int mapLength, bool isElite)
     {
@@ -17,7 +20,7 @@ public static class RewardService
         }
 
         // Determine rarity probabilities for the current depth using the new interpolated system
-        List<RarityWeight> rarityProbabilities = GameDataRegistry.GetRarityProbabilitiesForFloor(currentDepth, mapLength, isElite);
+                List<RarityWeight> rarityProbabilities = GameDataRegistry.GetRarityProbabilitiesForFloor(currentDepth, mapLength, isElite);
 
         if (rarityProbabilities == null || rarityProbabilities.Count == 0)
         {
@@ -71,4 +74,5 @@ public static class RewardService
         }
         return probabilities.Last().rarity; // Fallback
     }
+}
 }

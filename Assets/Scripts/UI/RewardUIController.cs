@@ -3,8 +3,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using PirateRoguelike.Data;
+using PirateRoguelike.Core;
+using PirateRoguelike.Saving;
 
-public class RewardUIController : MonoBehaviour
+namespace PirateRoguelike.UI
+{
+    public class RewardUIController : MonoBehaviour
 {
     [Header("UI Elements")]
     [SerializeField] private GameObject rewardPanel;
@@ -118,4 +122,5 @@ public class RewardUIController : MonoBehaviour
         // The player is already in the Run scene, so we just need to hide this UI.
         // The MapUI and other elements should be revealed automatically.
     }
+}
 }

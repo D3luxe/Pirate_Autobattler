@@ -1,8 +1,12 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using PirateRoguelike.Combat;
+using PirateRoguelike.Core;
 
-public class BattleUIController : MonoBehaviour
+namespace PirateRoguelike.UI
+{
+    public class BattleUIController : MonoBehaviour
 {
     [Header("Ship Views")]
     [SerializeField] private ShipStateView playerShipStateView;
@@ -109,4 +113,4 @@ public class BattleUIController : MonoBehaviour
 
     // TODO: Add methods to update item cooldowns, etc.
 }
-
+}

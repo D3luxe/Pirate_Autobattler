@@ -1,8 +1,10 @@
 using UnityEngine;
 using PirateRoguelike.Data.Effects;
 
-[System.Serializable]
-public class ActiveCombatEffect
+namespace PirateRoguelike.Combat
+{
+    [System.Serializable]
+    public class ActiveCombatEffect
 {
     public EffectSO Def { get; private set; }
     public int Stacks { get; private set; }
@@ -56,4 +58,5 @@ public class ActiveCombatEffect
     {
         return RemainingDuration <= 0;
     }
+}
 }

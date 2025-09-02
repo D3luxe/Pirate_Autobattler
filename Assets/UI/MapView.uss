@@ -20,7 +20,7 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    z-index: 0;
+    
 }
 
 .map-scroll {
@@ -59,28 +59,23 @@
 .scroll-top-roll {
     width: 100%;
     background-image: url("project://database/Assets/Art/parchment_scroll_sliced.png?fileID=21300000&guid=0a9d777caae2021449334e9881ca992f&type=3#parchment_scroll_sliced");
-    background-image-slice: 50 50 50 50;
     background-repeat: stretch;
     position: relative;
-    z-index: 0;
 }
 
 .scroll-center {
     width: 100%;
     background-image: url("project://database/Assets/Art/parchment_scroll_sliced.png?fileID=21300000&guid=0a9d777caae2021449334e9881ca992f&type=3#parchment_scroll_sliced");
-    background-image-slice: 50 50 50 50;
     background-repeat: stretch;
     position: relative;
-    z-index: 0;
 }
 
 .scroll-bottom-roll {
     width: 100%;
     background-image: url("project://database/Assets/Art/parchment_scroll_sliced.png?fileID=21300000&guid=0a9d777caae2021449334e9881ca992f&type=3#parchment_scroll_sliced");
-    background-image-slice: 50 50 50 50;
     background-repeat: stretch;
     position: relative;
-    z-index: 0;
+    
 }
 
 .scroll-top-roll {
@@ -104,7 +99,7 @@
     left: 0;
     width: 100%;
     height: 6000px;
-    z-index: 1;
+    
 }
 
 .edge-layer {

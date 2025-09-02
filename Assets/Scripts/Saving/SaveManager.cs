@@ -1,45 +1,48 @@
 using UnityEngine;
 using System.IO;
 
-public static class SaveManager
+namespace PirateRoguelike.Saving
 {
-    private static readonly string saveFileName = "run.json";
-
-    private static string GetSavePath()
+    public static class SaveManager
     {
-        return Path.Combine(Application.persistentDataPath, saveFileName);
-    }
+        private static readonly string saveFileName = "run.json";
 
-    public static void SaveRun(RunState state)
-    {
-        string json = JsonUtility.ToJson(state, true);
-        File.WriteAllText(GetSavePath(), json);
-        Debug.Log("Run saved to " + GetSavePath());
-    }
-
-    public static RunState LoadRun()
-    {
-        string path = GetSavePath();
-        if (File.Exists(path))
+        private static string GetSavePath()
         {
-            string json = File.ReadAllText(path);
-            RunState state = JsonUtility.FromJson<RunState>(json);
-            Debug.Log("Run loaded from " + path);
-            return state;
+            return Path.Combine(Application.persistentDataPath, saveFileName);
         }
-        return null;
-    }
 
-    public static bool SaveFileExists()
-    {
-        return File.Exists(GetSavePath());
-    }
-
-    public static void DeleteSave()
-    {
-        if (SaveFileExists())
+        public static void SaveRun(RunState state)
         {
-            File.Delete(GetSavePath());
+            string json = JsonUtility.ToJson(state, true);
+            File.WriteAllText(GetSavePath(), json);
+            Debug.Log("Run saved to " + GetSavePath());
+        }
+
+        public static RunState LoadRun()
+        {
+            string path = GetSavePath();
+            if (File.Exists(path))
+            {
+                string json = File.ReadAllText(path);
+                RunState state = JsonUtility.FromJson<RunState>(json);
+                Debug.Log("Run loaded from " + path);
+                return state;
+            }
+            return null;
+        }
+
+        public static bool SaveFileExists()
+        {
+            return File.Exists(GetSavePath());
+        }
+
+        public static void DeleteSave()
+        {
+            if (SaveFileExists())
+            {
+                File.Delete(GetSavePath());
+            }
         }
     }
 }

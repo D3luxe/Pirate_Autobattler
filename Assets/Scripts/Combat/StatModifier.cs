@@ -1,7 +1,9 @@
 using PirateRoguelike.Data;
 
-[System.Serializable]
-public class StatModifier
+namespace PirateRoguelike.Combat
+{
+    [System.Serializable]
+    public class StatModifier
 {
     public StatType StatType;
     public StatModifierType ModifierType;
@@ -13,4 +15,5 @@ public class StatModifier
         ModifierType = modifierType;
         Value = value;
     }
+}
 }

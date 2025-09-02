@@ -125,3 +125,7 @@ disableKinds = ["taxonomyTerm"]
 [caches]
   [caches.images]
     dir = ':cacheDir/images'
+
+[markup]
+  [markup.highlight]
+      style = "nord"

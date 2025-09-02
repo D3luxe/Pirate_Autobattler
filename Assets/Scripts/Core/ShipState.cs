@@ -6,8 +6,12 @@ using PirateRoguelike.Data;
 using PirateRoguelike.Data.Effects;
 using PirateRoguelike.Services; // Added for SlotId
 using PirateRoguelike.Events; // Added for ItemManipulationEvents
+using PirateRoguelike.Combat;
+using PirateRoguelike.Saving; // Added for SerializableItemInstance
 
-public class ShipState
+namespace PirateRoguelike.Core
+{
+    public class ShipState
 {
     public ShipSO Def { get; }
     public string ShipId { get; private set; }
@@ -270,4 +274,5 @@ public class ShipState
         OnHealthChanged?.Invoke();
         EventBus.DispatchHeal(this, amount);
     }
+}
 }

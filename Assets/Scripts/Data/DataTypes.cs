@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using PirateRoguelike.Combat;
+using PirateRoguelike.Saving;
 
 namespace PirateRoguelike.Data
 {
@@ -80,26 +82,5 @@ namespace PirateRoguelike.Data
 
     public enum TargetingStrategy { Player, LowestHealth, HighestDamage }
 
-    [Serializable]
-    public class SerializableShipState
-    {
-        public string shipId;
-        public int currentHealth;
-        public float currentShield;
-        public float stunDuration;
-        public List<SerializableItemInstance> equippedItems;
-        public List<ActiveCombatEffect> activeEffects;
-        public List<StatModifier> activeStatModifiers;
-
-        public SerializableShipState(string shipId, int currentHealth, float currentShield, float stunDuration, List<SerializableItemInstance> equippedItems, List<ActiveCombatEffect> activeEffects, List<StatModifier> activeStatModifiers)
-        {
-            this.shipId = shipId;
-            this.currentHealth = currentHealth;
-            this.currentShield = currentShield;
-            this.stunDuration = stunDuration;
-            this.equippedItems = equippedItems;
-            this.activeEffects = activeEffects;
-            this.activeStatModifiers = activeStatModifiers;
-        }
-    }
+    
 }

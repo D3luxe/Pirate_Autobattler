@@ -5,7 +5,9 @@ using UnityEngine.EventSystems;
 using System.Linq;
 using PirateRoguelike.Data; // Added for ItemInstance
 
-public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerEnterHandler, IPointerExitHandler
+namespace PirateRoguelike.UI
+{
+    public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public enum SlotType { Inventory, Equipped }
 
@@ -150,4 +152,5 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         // Clear merge preview
         // TODO: Clear visual merge preview
     }
+}
 }

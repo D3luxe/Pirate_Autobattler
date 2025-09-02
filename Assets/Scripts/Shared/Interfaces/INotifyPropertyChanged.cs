@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace PirateRoguelike.UI
+namespace PirateRoguelike.Shared
 {
     public interface INotifyPropertyChanged : System.ComponentModel.INotifyPropertyChanged
     {

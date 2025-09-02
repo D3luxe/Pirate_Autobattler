@@ -10,6 +10,7 @@ using PirateRoguelike.Shared; // Added for ObservableList
 using PirateRoguelike.UI.Utilities; // Added for TooltipUtility
 using PirateRoguelike.Services; // Added for SlotId
 using PirateRoguelike.Events; // Added for ItemManipulationEvents
+using PirateRoguelike.Core;
 
 namespace PirateRoguelike.UI
 {

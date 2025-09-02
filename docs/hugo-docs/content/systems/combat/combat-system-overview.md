@@ -13,13 +13,16 @@ The combat system in Pirate Autobattler is a real-time, tick-based simulation or
 
 ## 2. Core Components
 
-*   **`CombatController` (`Assets/Scripts/Combat/CombatController.cs`):**
+*   **`CombatController` (`PirateRoguelike.Combat.CombatController`):**
+    >   File Path: Assets/Scripts/Combat/CombatController.cs
     The central manager for a single battle. It handles battle initialization, processes each combat tick, applies effects, and determines battle end conditions.
 
-*   **`TickService` (`Assets/Scripts/Core/TickService.cs`):**
+*   **`TickService` (`PirateRoguelike.Core.TickService`):**
+    >   File Path: Assets/Scripts/Core/TickService.cs
     A `MonoBehaviour` that provides a consistent, fixed-interval (100ms) tick to drive the combat simulation. The `CombatController` subscribes to its `OnTick` event.
 
-*   **`ShipState` (`Assets/Scripts/Core/ShipState.cs`):**
+*   **`ShipState` (`PirateRoguelike.Core.ShipState`):**
+    >   File Path: Assets/Scripts/Core/ShipState.cs
     Represents the runtime state of a ship (player or enemy). It manages:
     *   `CurrentHealth`, `CurrentShield`
     *   `ActiveEffects` (a list of `ActiveCombatEffect` instances)
@@ -27,17 +30,24 @@ The combat system in Pirate Autobattler is a real-time, tick-based simulation or
     *   `_stunDuration` and `_activeStatModifiers`
     It also provides methods for `TakeDamage`, `Heal`, `ApplyEffect`, and dispatches `OnHealthChanged` for UI updates.
 
-*   **`ItemInstance` (`Assets/Scripts/Combat/ItemInstance.cs`):**
+*   **`ItemInstance` (`PirateRoguelike.Data.ItemInstance`):**
+    >   File Path: Assets/Scripts/Combat/ItemInstance.cs
     Represents a runtime instance of an item. It holds a reference to its `ItemSO` definition and, crucially, contains a `RuntimeItem` which handles the item's dynamic abilities and actions. It also tracks `CooldownRemaining` and `StunDuration`.
 
-*   **`RuntimeItem`, `RuntimeAbility`, `RuntimeAction` (`Assets/Scripts/Runtime/*.cs`):**
+*   **`RuntimeItem` (`PirateRoguelike.Runtime.RuntimeItem`):**
+    >   File Path: Assets/Scripts/Runtime/RuntimeItem.cs
+*   **`RuntimeAbility` (`PirateRoguelike.Runtime.RuntimeAbility`):**
+    >   File Path: Assets/Scripts/Runtime/RuntimeAbility.cs
+*   **`RuntimeAction` (`PirateRoguelike.Runtime.RuntimeAction`):**
+    >   File Path: Assets/Scripts/Runtime/RuntimeAction.cs
     These classes form the [dynamic item system]({{< myrelref "../core/runtime-data-systems.md" >}}).
     *   `RuntimeItem` wraps an `ItemSO` and contains `RuntimeAbility` instances.
     *   `RuntimeAbility` wraps an `AbilitySO` and contains `RuntimeAction` instances.
     *   `RuntimeAction` is an abstract base class for concrete actions (e.g., `RuntimeDamageAction`, `RuntimeHealAction`, `RuntimeApplyEffectAction`).
     This system allows for dynamic modification of item properties and behaviors at runtime, which is critical for combat effects and tooltips.
 
-*   **`EventBus` (`Assets/Scripts/Core/EventBus.cs`):**
+*   **`EventBus` (`PirateRoguelike.Core.EventBus`):**
+    >   File Path: Assets/Scripts/Core/EventBus.cs
     A static class for global event dispatching. It facilitates communication between various combat-related systems by broadcasting events like `OnBattleStart`, `OnDamageReceived`, and `OnHeal`.
 
 *   **[UI Components]({{< myrelref "../ui/ui-systems.md" >}}) (BattleUIController, EnemyPanelController, ShipStateView):**

@@ -9,7 +9,7 @@ using PirateRoguelike.Data; // NEW
 namespace PirateRoguelike.UI
 {
     // Represents the visual state of a single slot
-    public interface ISlotViewData : INotifyPropertyChanged
+    public interface ISlotViewData : PirateRoguelike.Shared.INotifyPropertyChanged
     {
         int SlotId { get; }
         Sprite Icon { get; }
@@ -24,7 +24,7 @@ namespace PirateRoguelike.UI
     }
 
     // Represents the visual state of the ship panel
-    public interface IShipViewData : INotifyPropertyChanged
+    public interface IShipViewData : PirateRoguelike.Shared.INotifyPropertyChanged
     {
         string ShipName { get; }
         Sprite ShipSprite { get; }
@@ -33,7 +33,7 @@ namespace PirateRoguelike.UI
     }
 
     // Represents the visual state of the HUD counters
-    public interface IHudViewData : INotifyPropertyChanged
+    public interface IHudViewData : PirateRoguelike.Shared.INotifyPropertyChanged
     {
         int Gold { get; }
         int Lives { get; }
