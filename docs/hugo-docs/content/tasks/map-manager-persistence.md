@@ -4,6 +4,7 @@ weight: 10
 system: ["map", "core"]
 types: ["task", "plan", "bug-fix", "implementation"]
 tags: ["MapManager", "DontDestroyOnLoad", "Singleton", "SceneManager", "Persistence"]
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 # MapManager Persistence Plan

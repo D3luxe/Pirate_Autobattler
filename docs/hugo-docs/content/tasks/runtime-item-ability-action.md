@@ -4,6 +4,7 @@ weight: 10
 system: ["combat", "data", "ui"]
 types: ["task", "plan", "implementation", "refactoring"]
 tags: ["RuntimeItem", "RuntimeAbility", "RuntimeAction", "ScriptableObject", "IRuntimeContext", "TooltipController", "AbilitySO", "ActionSO", "ItemSO"]
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 # Runtime Item, Ability, and Action System Implementation Plan

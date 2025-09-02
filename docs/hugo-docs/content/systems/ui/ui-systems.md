@@ -5,10 +5,6 @@ system: ["ui"]
 types: ["system-overview"]
 ---
 
-# UI Systems Overview
-
-This document provides an overview of the core UI systems in the project, including the Universal Tooltip System, the Universal Item Manipulation System, and Enemy Panel Integration.
-
 ## 1. Universal Tooltip System
 
 This section details the implementation of the dynamic tooltip description system. It leverages the runtime item system (detailed in `runtime-data-systems.md`) to display real-time, updated values in UI elements.

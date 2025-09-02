@@ -4,6 +4,7 @@ weight: 10
 system: ["ui", "map"]
 types: ["task", "plan", "feature"]
 tags: ["MapView", "PlayerPanelController", "UI Toolkit", "UXML", "USS", "GameEvents", "Button", "Toggle"]
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 # Map Panel Close Button and Toggle Functionality Plan

@@ -4,6 +4,7 @@ weight: 10
 system: ["core", "ui"]
 types: ["task", "plan", "refactoring", "implementation"]
 tags: ["ItemManipulationService", "ItemManipulationEvents", "SlotManipulator", "PlayerPanelController", "PlayerPanelDataViewModel", "GameSession", "Inventory", "ShipState", "UI Toolkit", "ItemElement", "SlotElement", "Drag and Drop"]
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 # Universal Item Manipulation Library Refactoring Plan

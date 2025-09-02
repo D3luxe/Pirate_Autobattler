@@ -2,7 +2,7 @@
 title: "UI ViewModel Complete Analysis"
 weight: 10
 system: ["ui"]
-types: ["analysis", "architecture", "overview"]
+types: ["analysis", "architecture", "overview","system-overview"]
 status: "archived"
 discipline: ["engineering", "design"]
 stage: ["production"]

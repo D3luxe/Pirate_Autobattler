@@ -1,0 +1,60 @@
+<div id="tasks-table-container">
+  <input type="text" id="task-search" placeholder="Search tasks...">
+  <select id="task-filter-stage">
+    <option value="">All Stages</option>
+    <option value="Planned">Planned</option>
+    <option value="In Progress">In Progress</option>
+    <option value="Completed">Completed</option>
+    <option value="Blocked">Blocked</option>
+  </select>
+
+  <div id="stage-toggles" style="margin-top: 15px; margin-bottom: 15px;">
+    <label><input type="checkbox" class="stage-toggle" value="Planned" checked> Planned</label>
+    <label><input type="checkbox" class="stage-toggle" value="In Progress" checked> In Progress</label>
+    <label><input type="checkbox" class="stage-toggle" value="Completed" checked> Completed</label>
+    <label><input type="checkbox" class="stage-toggle" value="Blocked" checked> Blocked</label>
+  </div>
+  <table id="tasks-table" class="td-initial table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th data-sort="title">Task</th>
+        <th data-sort="stage">Stage</th>
+        <th data-sort="system">System</th>
+        <th data-sort="tags">Tags</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ range ( .Site.GetPage "section" "tasks" ).Pages }}
+      <tr>
+        <td><a href="{{ .RelPermalink }}">{{ .Title }}</a></td>
+        {{ $currentStage := "" }}
+        {{ if reflect.IsSlice .Params.stage }}
+          {{ $currentStage = index .Params.stage 0 }}
+        {{ else }}
+          {{ $currentStage = .Params.stage }}
+        {{ end }}
+        {{ $variantClass := "" }}
+        {{ if eq $currentStage "Planned" }}
+          {{ $variantClass = "table-warning" }}
+        {{ else if eq $currentStage "In Progress" }}
+          {{ $variantClass = "table-info" }}
+        {{ else if eq $currentStage "Completed" }}
+          {{ $variantClass = "table-success" }}
+        {{ else if eq $currentStage "Blocked" }}
+          {{ $variantClass = "table-danger" }}
+        {{ end }}
+        <td class="task-stage {{ $variantClass }}">{{ $currentStage }}</td>
+        <td>{{ delimit .Params.system ", " }}</td>
+        <td>{{ delimit .Params.tags ", " }}</td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+{{ $script := resources.Get "js/tasks-table.js" }}
+{{ if $script }}
+<script src="{{ $script.RelPermalink }}"></script>
+{{ else }}
+<!-- Handle case where script is not found, e.g., log an error -->
+{{ errorf "tasks-table.js not found in assets/js/" }}
+{{ end }}

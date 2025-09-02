@@ -2,7 +2,7 @@
 title: "Map Generation Refactor Recommendations"
 weight: 10
 system: ["map"]
-types: ["analysis", "recommendation", "plan"]
+types: ["analysis", "recommendation", "plan","system-overview"]
 status: "archived"
 discipline: ["engineering", "design"]
 stage: ["pre-production"]

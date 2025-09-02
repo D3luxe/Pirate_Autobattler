@@ -4,6 +4,7 @@ weight: 10
 system: ["ui"]
 types: ["task", "plan", "integration"]
 tags: ["EnemyPanelController", "TooltipController", "RuntimeItem", "UI Toolkit"]
+stage: ["InProgress"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 # Plan: Integrate Tooltip Functionality into EnemyPanelController

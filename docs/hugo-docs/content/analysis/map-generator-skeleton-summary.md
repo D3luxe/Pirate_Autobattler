@@ -2,7 +2,7 @@
 title: "Generate Skeleton Summary"
 weight: 10
 system: ["map"]
-types: ["analysis", "summary"]
+types: ["analysis", "summary","system-overview"]
 status: "archived"
 discipline: ["engineering"]
 stage: ["production"]

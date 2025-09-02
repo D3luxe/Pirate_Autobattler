@@ -4,6 +4,7 @@ weight: 10
 system: ["map"]
 types: ["task", "plan", "refactoring"]
 tags: ["MapGenerator", "GenerateSkeleton", "Path Generation", "Backtracking", "Determinism", "IRandomNumberGenerator"]
+stage: ["completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 # Condensed Refactoring Plan for `GenerateSkeleton` Function

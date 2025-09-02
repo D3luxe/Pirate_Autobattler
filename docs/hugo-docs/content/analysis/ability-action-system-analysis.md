@@ -2,7 +2,7 @@
 title: "Ability Action System"
 weight: 10
 system: ["combat"]
-types: ["analysis"]
+types: ["analysis","system-overview"]
 status: "archived"
 discipline: ["engineering"]
 stage: ["production"]

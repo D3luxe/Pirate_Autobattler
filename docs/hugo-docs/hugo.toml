@@ -99,13 +99,12 @@ disableKinds = ["taxonomyTerm"]
 
 [params.ui]
   # Enable or disable the sidebar on the homepage
-  sidebar_about_description = ""
-  sidebar_footer = ""
-  sidebar_menu_foldable = true
+  sidebar_menu_foldable = false
   sidebar_menu_compact = false
   sidebar_menu_collapsible = true
-  sidebar_menu_depth = 4 # How many levels of content to show in the sidebar
   sidebar_menu_show_all = true # Show all content in the sidebar, even if not explicitly linked
+  ul_show = 3
+  showLightDarkModeMenu = true
 
 [params.ui.navbar]
   # Docsy navbar options

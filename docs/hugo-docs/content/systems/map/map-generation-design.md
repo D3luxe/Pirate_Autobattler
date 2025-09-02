@@ -4,11 +4,8 @@ weight: 10
 system: ["map"]
 types: ["system-overview"]
 status: "approved"
+
 ---
-
-# Map Generation Design
-
-This document outlines the architecture of the map generation system.
 
 ## Core Philosophy
 

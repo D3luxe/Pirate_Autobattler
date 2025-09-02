@@ -4,6 +4,7 @@ weight: 10
 system: ["ui", "map"]
 types: ["task", "plan", "implementation", "visual", "algorithm"]
 tags: ["MapView", "MapPanel", "UXML", "USS", "MapNode", "Visual Layout", "Barycentric Sort", "Bezier Curve", "UI Toolkit"]
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 # Visual Row Compaction Implementation Plan

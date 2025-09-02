@@ -4,6 +4,7 @@ weight: 10
 system: ["data", "economy"]
 types: ["task", "plan", "redesign", "refactoring"]
 tags: ["Rarity", "ScriptableObject", "GameDataRegistry", "RunConfigSO", "ShopManager", "RewardService", "RunConfigSOEditor", "EliteModifier"]
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 # Rarity System Redesign Plan

@@ -4,6 +4,7 @@ weight: 10
 system: ["ui", "map"]
 types: ["task", "plan", "implementation", "visual"]
 tags: ["MapView", "Sprite", "UI Toolkit", "USS", "UXML", "EncounterType", "MapNode"]
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 # Map Node Sprite Implementation Plan (Final)

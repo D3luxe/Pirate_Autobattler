@@ -4,6 +4,7 @@ weight: 10
 system: ["ui", "core"]
 types: ["task", "plan", "implementation", "refactoring", "architecture"]
 tags: ["ViewModel", "INotifyPropertyChanged", "ObservableList", "UI Toolkit", "PlayerPanelDataViewModel", "EnemyShipViewData", "SlotDataViewModel", "BindingUtility", "UXML"]
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 **Revised Plan for UI ViewModel Implementation**

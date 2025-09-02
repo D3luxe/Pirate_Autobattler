@@ -1,0 +1,76 @@
+#tasks-table-container {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: var(--td-light-background); // Use Docsy's background variable
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    input[type="text"],
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid var(--td-border-color);
+        border-radius: 4px;
+        box-sizing: border-box; // Include padding and border in the element's total width and height
+        background-color: var(--td-code-background); // Use Docsy's code background for input
+        color: var(--td-text-color);
+    }
+
+    select {
+        cursor: pointer;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--td-border-color);
+        }
+
+        th {
+            background-color: var(--td-sidebar-bg); // Use Docsy's sidebar background
+            color: var(--td-sidebar-fg); // Use Docsy's sidebar foreground
+            cursor: pointer;
+            position: relative; // For sort indicators
+            &:hover {
+                background-color: darken(var(--td-sidebar-bg), 5%);
+            }
+
+            &.asc::after {
+                content: ' ▲';
+                position: absolute;
+                right: 5px;
+            }
+            &.desc::after {
+                content: ' ▼';
+                position: absolute;
+                right: 5px;
+            }
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--td-code-background); // Alternate row color
+        }
+
+        tbody tr:hover {
+            background-color: var(--td-code-background-hover); // Hover effect
+        }
+    }
+}
+
+// Stage-specific styling
+#tasks-table-container .task-stage {
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 3px;
+    display: inline-block;
+    text-align: center;
+    min-width: 80px;
+}
+
+// Add more stages as needed

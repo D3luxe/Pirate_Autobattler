@@ -6,10 +6,6 @@ types: ["system-overview"]
 status: "approved"
 ---
 
-# Save/Load System
-
-This document outlines the architecture and data flow of the game's save and load system. It also highlights critical gaps that need to be addressed to fully support the runtime item system.
-
 ## 1. System Architecture
 
 The save/load system is designed around a central `RunState` object that acts as a snapshot of the entire game session. A single save slot is used, stored in a JSON file.
@@ -54,9 +50,9 @@ To facilitate serialization with `JsonUtility`, the live game objects are conver
 3.  This `RunState` object is passed to `GameSession.LoadRun()`.
 4.  `GameSession.LoadRun()` rehydrates the live game state:
     *   It creates a new `PlayerShip` (`ShipState`) and a new `Inventory`.
-    *   When re-populating the slots, it iterates through the saved item data. For each entry, it first verifies that the item's ID from the save file exists in the `GameDataRegistry`.
-    *   If the item exists, a new `ItemInstance` is created and placed in the correct slot, preserving empty slots.
-    *   If the item does not exist (e.g., it was removed in a game update), a warning is logged and the slot is left empty, preventing a crash.
+    *   **For Inventory:** When re-populating inventory slots, it iterates through the saved `CurrentRunState.inventoryItems`. For each non-null entry, it verifies the item's existence in `GameDataRegistry` and creates a new `ItemInstance` in the correct slot. Empty slots in the saved data (due to omission during saving) will remain `null` in the `Inventory` as it is pre-initialized with empty slots.
+    *   **For Equipped Items:** When loading equipped items via `PlayerShip = new ShipState(CurrentRunState.playerShipState)`, the `ShipState` constructor iterates through `SerializableShipState.equippedItems`. It explicitly handles `null` entries by setting the corresponding `Equipped` slot to `null`, ensuring that empty equipped slots are correctly preserved.
+    *   If an item's definition does not exist in `GameDataRegistry` (e.g., it was removed in a game update), a warning is logged, and the slot is treated as empty (either by omission for inventory or by explicit `null` assignment for equipped items).
 
 ## 3. Serialized Data Hierarchy
 

@@ -4,6 +4,7 @@ weight: 10
 system: ["ui", "combat"]
 types: ["task", "plan", "implementation", "refactoring", "bug-fix"]
 tags: ["TooltipController", "ItemManipulationService", "UIInteractionService", "CombatController", "SlotManipulator", "ShopController", "UI Toolkit", "Tooltip", "Item Manipulation", "Combat State"]
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 This plan has been successfully implemented. The final architecture is described in the **UI Interaction System** documentation (`docs/ui-interaction-system.md`).

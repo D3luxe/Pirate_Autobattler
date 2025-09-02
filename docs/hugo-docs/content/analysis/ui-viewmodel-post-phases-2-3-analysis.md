@@ -2,7 +2,7 @@
 title: "UI ViewModel Post Phases 2-3 Analysis"
 weight: 10
 system: ["ui"]
-types: ["analysis", "recommendation", "assessment"]
+types: ["analysis", "recommendation", "assessment","system-overview"]
 status: "archived"
 discipline: ["engineering", "design"]
 stage: ["production"]

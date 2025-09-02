@@ -2,7 +2,7 @@
 title: "GameSession Injection Analysis"
 weight: 10
 system: ["core", "ui"]
-types: ["analysis", "refactoring"]
+types: ["analysis", "refactoring","system-overview"]
 status: "archived"
 discipline: ["engineering"]
 stage: ["production"]

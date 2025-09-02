@@ -4,6 +4,7 @@ weight: 10
 system: ["map"]
 types: ["task", "plan", "refactoring", "feature"]
 tags: ["MapGenerator", "MapManager", "NodeType", "UnknownNodeResolver", "Rules"]
+stage: ["Planned"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 # Map Generation Plan

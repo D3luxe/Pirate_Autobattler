@@ -2,7 +2,7 @@
 title: "Map Player Panel Interaction Analysis"
 weight: 10
 system: ["ui", "map"]
-types: ["analysis", "bug-fix", "troubleshooting"]
+types: ["analysis", "bug-fix", "troubleshooting","system-overview"]
 status: "archived"
 discipline: ["engineering", "qa"]
 stage: ["production"]

@@ -6,10 +6,6 @@ types: ["system-overview"]
 status: "approved"
 ---
 
-# Runtime Data Systems: Items, Abilities, and Actions
-
-This document details the implementation of the runtime item, ability, and action system, which provides dynamic state management for game data.
-
 ## 1. Problem Statement
 
 Previously, game items, abilities, and actions were primarily defined by `ScriptableObject` assets. While excellent for defining static, immutable data templates, this approach proved rigid when dealing with dynamic gameplay scenarios such as:
@@ -66,17 +62,11 @@ To overcome these limitations, a new layer of runtime C# classes has been introd
 
 ## 4. Key Files Involved
 
-### Core Systems & Data
-*   `Assets/Scripts/Core/ItemManipulationService.cs`
-*   `Assets/Scripts/Core/ItemManipulationEvents.cs`
-*   `Assets/Scripts/Core/GameSession.cs`
-*   `Assets/Scripts/Core/Inventory.cs`
-*   `Assets/Scripts/Core/ShipState.cs`
-*   `Assets/Scripts/Saving/SerializableItemInstance.cs`
-
-### Runtime Item Representation
 *   `Assets/Scripts/Combat/ItemInstance.cs` (Primary runtime object)
 *   `Assets/Scripts/Runtime/RuntimeItem.cs` (Handles abilities/actions)
 *   `Assets/Scripts/Runtime/RuntimeAbility.cs`
 *   `Assets/Scripts/Runtime/RuntimeAction.cs`
 *   `Assets/Scripts/Combat/IRuntimeContext.cs`
+*   `Assets/Scripts/Runtime/RuntimeDamageAction.cs` (Example concrete action)
+*   `Assets/Scripts/Runtime/RuntimeHealAction.cs` (Example concrete action)
+*   `Assets/Scripts/Runtime/RuntimeApplyEffectAction.cs` (Example concrete action)
