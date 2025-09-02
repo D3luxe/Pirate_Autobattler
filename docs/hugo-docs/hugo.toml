@@ -18,19 +18,19 @@ title = 'Pirate Autobattler Documentation'
     source = "static"
     target = "static"
 
-    # Mounts for Bootstrap and FontAwesome from node_modules
+  # Mounts for Bootstrap and FontAwesome from node_modules
   [[module.imports.mounts]]
-    source = "node_modules/bootstrap/dist/css"
-    target = "assets/vendor/bootstrap/dist/css"
+    source = "node_modules/bootstrap/scss"
+    target = "assets/scss/vendor/bootstrap"
   [[module.imports.mounts]]
     source = "node_modules/bootstrap/dist/js"
-    target = "assets/vendor/bootstrap/dist/js"
+    target = "assets/js/vendor/bootstrap" # This line was correct
   [[module.imports.mounts]]
     source = "node_modules/@fortawesome/fontawesome-free/css"
-    target = "assets/vendor/@fortawesome/fontawesome-free/css"
+    target = "assets/css/vendor/fontawesome-free" # This line was correct
   [[module.imports.mounts]]
     source = "node_modules/@fortawesome/fontawesome-free/webfonts"
-    target = "static/webfonts"
+    target = "static/webfonts" # This line was correct
 
 # Docsy-specific configurations
 # For more options, see https://www.docsy.dev/docs/getting-started/#configure-hugo
