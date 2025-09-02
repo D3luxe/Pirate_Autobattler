@@ -63,13 +63,6 @@ jobs:
           echo "Go: $(go version)"
           echo "Hugo: $(hugo version)"
           echo "Node.js: $(node --version)"
-      - name: Verify file structure
-        working-directory: ./docs/hugo-docs
-        run: |
-          echo "--- Listing node_modules contents ---"
-          ls -l node_modules/bootstrap/scss/vendor
-          echo "--- Current Hugo config ---"
-          cat hugo.toml
       - name: Initialize Hugo Modules
         working-directory: ./docs/hugo-docs
         run: hugo mod get -u
