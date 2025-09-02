@@ -119,24 +119,39 @@
         *   Initializes `AbilityManager` by subscribing it to `EventBus` events.
         *   Calls `MapManager.Instance.ResetMap()` to clear any previous map state.
         *   Initializes `GameSession` (either starting a new run or loading a saved one). This step sets up core game data (`CurrentRunState`, `EconomyService`, `Inventory`, `PlayerShip`) and dispatches `GameSession.OnEconomyInitialized`, `GameSession.OnPlayerShipInitialized`, and `GameSession.OnInventoryInitialized` events.
-        *   Instantiates the `RunManager` prefab, which becomes a persistent singleton.
+        *   Instantiates the `RunManager` prefab, which becomes a persistent singleton, and explicitly calls `RunManager.Instance.Initialize()` to set up core game managers (like `MapManager`).
+        *   Instantiates the `UIManager` prefab, which becomes a persistent singleton, and explicitly calls `UIManager.Instance.Initialize()` to set up global UI elements.
 
     2.  **`RunManager.Awake()`**: (Executes immediately after `RunManager` is instantiated)
-        *   Instantiates `MapManager`. `MapManager` then generates the game map data and assigns it to `GameSession.CurrentRunState.mapGraphData`, subsequently invoking `MapManager.OnMapDataUpdated`.
-        *   Instantiates `MapView` (UI component). `MapView.Awake()` runs, setting up its UI elements and subscribing to `MapManager.OnMapDataUpdated` and `GameSession.OnPlayerNodeChanged` to react to data changes.
-        *   Instantiates `PlayerPanelController` (UI component).
-        *   Instantiates `GlobalUIOverlay` (a root UI `UIDocument` for global UI elements).
-        *   Instantiates `TooltipController` (UI component). `TooltipController.Awake()` runs.
-        *   Calls `TooltipController.Initialize()`, passing the `rootVisualElement` of the `GlobalUIOverlay`. This integrates the tooltip UI into the main UI hierarchy.
+        *   Sets up the `RunManager` singleton and subscribes to `SceneManager.sceneLoaded` and `GameSession.OnPlayerNodeChanged`.
 
-    3.  **`SceneManager.LoadScene("Run")`**: (Called by `GameInitializer.Start()`)
+    3.  **`RunManager.Initialize()`**: (Called explicitly by `GameInitializer.Start()`)
+        *   Instantiates `MapManager`. `MapManager` then generates the game map data and assigns it to `GameSession.CurrentRunState.mapGraphData`, subsequently invoking `MapManager.OnMapDataUpdated`.
+        *   Instantiates `RewardUI`.
+
+    4.  **`UIManager.Awake()`**: (Executes immediately after `UIManager` is instantiated)
+        *   Sets up the `UIManager` singleton.
+
+    5.  **`UIManager.Initialize()`**: (Called explicitly by `GameInitializer.Start()`)
+        *   Instantiates `GlobalUIOverlay`, `PlayerPanelController`, `MapView`, and `TooltipController`.
+        *   Performs initial hookups between UI components (e.g., `PlayerPanelController.SetMapPanel`).
+        *   Initializes `TooltipController`.
+
+    6.  **`SceneManager.LoadScene("Run")`**: (Called by `GameInitializer.Start()`)
         *   Loads the "Run" scene, which contains the main game environment.
 
-    4.  **`RunManager.Start()`**: (Executes after all `Awake()` methods in the scene have completed, and after the "Run" scene is loaded)
-        *   Calls `PlayerPanelController.Initialize()` and passes the `IGameSession` dependency.
-        *   `PlayerPanelController.Initialize()` instantiates `PlayerPanelDataViewModel` (the view model for the player panel) and `PlayerPanelView` (the view component).
-        *   Crucially, `PlayerPanelDataViewModel.Initialize()` is called, which subscribes to `GameSession.OnPlayerShipInitialized`, `GameSession.OnInventoryInitialized`, and `GameSession.OnEconomyInitialized` events (for initial data binding) as well as `GameSession.PlayerShip.OnEquipmentChanged` and `GameSession.Inventory.OnInventoryChanged` (for ongoing updates).
-        *   `PlayerPanelView.BindInitialData()` is called to perform the initial data binding from the view model to the UI. The `Bind` methods within custom UI components (like `ShipDisplayElement`) are responsible for performing an immediate update to display the initial state, preventing timing issues where initial data is missed.
+    7.  **`RunManager.OnSceneLoaded()`**: (Executes when the "Run" scene is loaded)
+        *   Calls `OnRunSceneLoaded()`.
+
+    8.  **`RunManager.OnRunSceneLoaded()`**: (Executes after the "Run" scene is loaded and `MapManager` has generated data)
+        *   Checks for battle rewards.
+        *   Ensures `MapManager` has generated map data (if not, it generates it).
+        *   Ensures `GameSession.Economy` is initialized.
+        *   **Crucially, calls `UIManager.Instance.InitializeRunUI()` to initialize and display the UI for the "Run" scene.**
+
+    9.  **`UIManager.InitializeRunUI()`**: (Called explicitly by `RunManager.OnRunSceneLoaded()`)
+        *   Initializes the `PlayerPanelController` with the current `GameSession` data.
+        *   Calls `MapView.Show()` to display the map.
 
     **Event-Driven Data Flow and UI Updates:**
     *   When `GameSession` invokes its initialization events (`OnPlayerShipInitialized`, `OnInventoryInitialized`, `OnEconomyInitialized`), the `PlayerPanelDataViewModel` reacts by updating its properties. This, in turn, notifies the `PlayerPanelView` to update the UI elements that display player ship, inventory, and economy data.
@@ -200,6 +215,7 @@
 | **High** | **M** | `GameSession`'s static global state hinders testability and complicates save/load. | Refactor `GameSession` into a non-static class/MonoBehaviour for improved testability and explicit data flow. |
 | **Medium** | **S** | Direct UI updates (e.g., `CombatController`, `PlayerPanelController` subscribing to `ShipState`) tightly couple game logic and UI. *Partially mitigated by the new event-driven item manipulation system.* | Introduce a data-binding/view-model layer to decouple UI from game logic. |
 | **Medium** | **S** | Custom UI components that don't refresh on binding can miss initial state. | Ensure custom UI components (like `ShipDisplayElement`) perform a full refresh in their `Bind()` method to prevent timing issues where initial data is missed. |
+| **Low** | **L** | Current synchronous initialization chain can become brittle with complex loading. | Consider refactoring the initialization sequence to use an asynchronous, callback-based pattern (e.g., `IEnumerator` coroutines or `async/await Task`) to ensure robust, sequential loading of interdependent systems. |
 | **Low** | **S** | Unused `items.json` and `EventBus` events create codebase clutter and confusion. | Remove unused `items.json` and `EventBus` events to clean up the project. |
 
 -   **Roadmap:**

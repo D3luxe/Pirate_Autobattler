@@ -7,6 +7,7 @@ public class GameInitializer : MonoBehaviour
 {
     [Header("Prefabs")]
     [SerializeField] private GameObject runManagerPrefab;
+    [SerializeField] private GameObject uiManagerPrefab; // ADDED
     [SerializeField] private RunConfigSO runConfig;
     [SerializeField] private ShipSO debugStartingShip; // Add this field
 
@@ -59,6 +60,13 @@ public class GameInitializer : MonoBehaviour
         if (runManagerPrefab != null && RunManager.Instance == null)
         {
             Instantiate(runManagerPrefab);
+            RunManager.Instance.Initialize(); // Explicitly initialize managers
+        }
+
+        if (uiManagerPrefab != null && UIManager.Instance == null)
+        {
+            Instantiate(uiManagerPrefab);
+            UIManager.Instance.Initialize(); // Explicitly initialize UI
         }
 
         SceneManager.LoadScene("Run");

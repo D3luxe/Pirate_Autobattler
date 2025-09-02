@@ -5,12 +5,8 @@ system: [""] # e.g., "core", "ui", "map", "combat", "data", "crosscutting"
 types: [""] # e.g., "system-overview", "analysis", "plan", "reference"
 status: "draft" # e.g., "draft", "in-review", "approved", "deprecated"
 discipline: [""] # e.g., "engineering", "design", "ux", "production", "qa"
-stage: ["live"] # e.g., "prototype", "pre-production", "production", "alpha", "beta", "live"
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
-
-# {{ replace .Name "-" " " | title }}
-
-This document provides details about the {{ replace .Name "-" " " | title }} system.
 
 ## Overview
 

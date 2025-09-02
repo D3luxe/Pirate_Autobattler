@@ -48,7 +48,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: 70d3fb67e52315244904fe831dd66591, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 761e9c5b2b618bf4f85a464dc1dd32a3, type: 3}
-  m_SortingOrder: 0
+  m_SortingOrder: 50
   m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
@@ -69,6 +69,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PirateRoguelike.UI.PlayerPanelController
   _theme: {fileID: 11400000, guid: 6b72f910c6f902b46a8cf6379e0be46e, type: 2}
-  _shipDisplayElementUXML: {fileID: 9197481963319205126, guid: d18484afd89158449b7a691bb72f974a, type: 3}
-  _slotElementUXML: {fileID: 9197481963319205126, guid: 2d7f6a79a692f804f9771cebdd1fbc1a, type: 3}
-  _shopItemElementUXML: {fileID: 9197481963319205126, guid: a8423fa223e2f694b8dd2d58ec9a1f90, type: 3}

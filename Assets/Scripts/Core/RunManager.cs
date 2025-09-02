@@ -1,10 +1,7 @@
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using PirateRoguelike.Data;
-using PirateRoguelike.UI; // Import the UI namespace
-using UnityEngine.UIElements;
-using UnityEngine.InputSystem; // NEW: Input System namespace
+using UnityEngine.InputSystem;
 
 public class RunManager : MonoBehaviour
 {
@@ -13,19 +10,10 @@ public class RunManager : MonoBehaviour
     [Header("Configuration")]
     [SerializeField] private RunConfigSO runConfig;
     [SerializeField] private ShipSO debugStartingShip; // For testing
-    [SerializeField] private GameObject playerPanelPrefab; // NEW: Player Panel UI
-    [SerializeField] private GameObject mapViewPrefab; // NEW: Map View UI Prefab
     [SerializeField] private GameObject rewardUIPrefab;
     [SerializeField] private GameObject mapManagerPrefab;
-    [SerializeField] private GameObject tooltipManagerPrefab; // NEW: Tooltip Manager Prefab
-    [SerializeField] private GameObject _globalUIOverlayPrefab; // NEW: Global UI Overlay Prefab
 
-    private PlayerPanelController _playerPanelController;
-    private MapView _mapView;
-    private TooltipController _tooltipController; // NEW: Tooltip Controller reference
-    private UIDocument _globalUIOverlayDocument; // NEW: Reference to the Global UI Overlay UIDocument
-
-    private InputAction _saveHotkeyAction; // NEW: Input Action for save hotkey
+    private InputAction _saveHotkeyAction;
 
     void Awake()
     {
@@ -37,52 +25,22 @@ public class RunManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        // NEW: Initialize save hotkey action
         _saveHotkeyAction = new InputAction("SaveGame", type: InputActionType.Button, binding: "<Keyboard>/s");
         _saveHotkeyAction.performed += OnSaveHotkeyPerformed;
 
-        // Instantiate MapManager
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        GameSession.OnPlayerNodeChanged += HandlePlayerNodeChanged;
+    }
+
+    public void Initialize()
+    {
         if (mapManagerPrefab != null)
         {
             Instantiate(mapManagerPrefab, transform);
-            // Generate map data immediately after MapManager is instantiated
-            if (MapManager.Instance != null)
-            {
-                // Pass the seed from GameSession to MapManager
-                if (GameSession.CurrentRunState != null)
-                {
-                    MapManager.Instance.GenerateMapIfNeeded(GameSession.CurrentRunState.randomSeed);
-                }
-                else
-                {
-                    Debug.LogError("GameSession.CurrentRunState is null in RunManager.Awake()! Cannot generate map with seed.");
-                }
-            }
-            else
-            {
-                Debug.LogError("MapManager Instance is null after instantiation!");
-            }
         }
         else
         {
             Debug.LogError("MapManager Prefab is not assigned in RunManager!");
-        }
-
-        // Instantiate MapView UI from prefab
-        if (mapViewPrefab != null)
-        {
-            GameObject mapViewInstance = Instantiate(mapViewPrefab, transform);
-            _mapView = mapViewInstance.GetComponent<MapView>();
-            // The UIDocument reference will now be handled by the prefab setup
-        }
-        else
-        {
-            Debug.LogError("MapView Prefab is not assigned in RunManager!");
-        }
-
-        if (_playerPanelController != null && _mapView != null)
-        {
-            _playerPanelController.SetMapPanel(_mapView);
         }
 
         if (rewardUIPrefab != null)
@@ -93,75 +51,25 @@ public class RunManager : MonoBehaviour
         {
             Debug.LogError("RewardUI Prefab is not assigned in RunManager!");
         }
-
-        // Instantiate PlayerPanel UI
-        if (playerPanelPrefab != null)
-        {
-            GameObject panelInstance = Instantiate(playerPanelPrefab, transform);
-            _playerPanelController = panelInstance.GetComponent<PlayerPanelController>();
-        }
-        else
-        {
-            Debug.LogError("PlayerPanel Prefab is not assigned in RunManager!");
-        }
-
-        // Instantiate Global UI Overlay
-        if (_globalUIOverlayPrefab != null)
-        {
-            GameObject globalUIInstance = Instantiate(_globalUIOverlayPrefab, transform);
-            _globalUIOverlayDocument = globalUIInstance.GetComponent<UIDocument>();
-            if (_globalUIOverlayDocument == null)
-            {
-                Debug.LogError("GlobalUIOverlay Prefab does not have a UIDocument component!");
-            }
-        }
-        else
-        {
-            Debug.LogError("GlobalUIOverlay Prefab is not assigned in RunManager!");
-        }
-
-        // Instantiate TooltipManager UI
-        if (tooltipManagerPrefab != null)
-        {
-            GameObject tooltipInstance = Instantiate(tooltipManagerPrefab);
-            _tooltipController = tooltipInstance.GetComponent<TooltipController>();
-        }
-        else
-        {
-            Debug.LogError("TooltipManager Prefab is not assigned in RunManager!");
-        }
-
-        // Initialize TooltipController using the Global UI Overlay's rootVisualElement
-        if (_tooltipController != null && _globalUIOverlayDocument != null)
-        {
-            _tooltipController.Initialize(_globalUIOverlayDocument.rootVisualElement);
-        }
-        else
-        {
-            Debug.LogError("TooltipController or Global UI Overlay Document is null. Cannot initialize tooltip.");
-        }
-
-        SceneManager.sceneLoaded += OnSceneLoaded;
-        GameSession.OnPlayerNodeChanged += HandlePlayerNodeChanged; // NEW: Subscribe to node change event
     }
 
     void OnEnable()
     {
-        _saveHotkeyAction.Enable(); // NEW: Enable the input action
+        _saveHotkeyAction.Enable();
     }
 
     void OnDisable()
     {
-        _saveHotkeyAction.Disable(); // NEW: Disable the input action
+        _saveHotkeyAction.Disable();
     }
 
     void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-        GameSession.OnPlayerNodeChanged -= HandlePlayerNodeChanged; // NEW: Unsubscribe from node change event
-        _saveHotkeyAction.performed -= OnSaveHotkeyPerformed; // NEW: Unsubscribe from event
-        _saveHotkeyAction.Dispose(); // NEW: Dispose the input action
-        if (Instance == this) // Only reset if this is the persistent instance
+        GameSession.OnPlayerNodeChanged -= HandlePlayerNodeChanged;
+        _saveHotkeyAction.performed -= OnSaveHotkeyPerformed;
+        _saveHotkeyAction.Dispose();
+        if (Instance == this)
         {
             GameSession.EndRun();
         }
@@ -171,34 +79,13 @@ public class RunManager : MonoBehaviour
     {
         if (GameSession.CurrentRunState != null)
         {
-            GameSession.UpdateCurrentRunStateForSaving(); // Update the run state with current inventory and equipped items
+            GameSession.UpdateCurrentRunStateForSaving();
             SaveManager.SaveRun(GameSession.CurrentRunState);
             Debug.Log("Game saved via hotkey!");
         }
         else
         {
             Debug.LogWarning("Cannot save: No active run state.");
-        }
-    }
-
-    void Start()
-    {
-        // This will be called only once when the RunManager is first created.
-        if (GameSession.CurrentRunState == null)
-        {
-            Debug.Log("No active run found. Starting a new debug run.");
-            if (runConfig == null || debugStartingShip == null)
-            {
-                Debug.LogError("RunConfig or DebugStartingShip is not assigned in the RunManager Inspector!");
-                return;
-            }
-            GameSession.StartNewRun(runConfig, debugStartingShip);
-        }
-
-        // Now that the GameSession is guaranteed to be initialized, initialize the UI.
-        if (_playerPanelController != null)
-        {
-            _playerPanelController.Initialize(new PirateRoguelike.Core.GameSessionWrapper());
         }
     }
 
@@ -231,25 +118,19 @@ public class RunManager : MonoBehaviour
             switch (encounterType)
             {
                 case PirateRoguelike.Data.EncounterType.Battle:
-                    // Before loading, hide the map to prevent it from overlapping the next scene
-                    if (_mapView != null) _mapView.Hide();
                     SceneManager.LoadScene("Battle");
                     break;
                 case PirateRoguelike.Data.EncounterType.Shop:
-                    if (_mapView != null) _mapView.Hide();
                     SceneManager.LoadScene("Shop");
                     break;
                 case PirateRoguelike.Data.EncounterType.Treasure:
                     Debug.Log("Treasure encounter triggered. Implementation pending.");
-                    // Future: Grant rewards directly or show a simple reward UI
                     break;
                 case PirateRoguelike.Data.EncounterType.Boss:
-                     if (_mapView != null) _mapView.Hide();
-                    SceneManager.LoadScene("Battle"); // Assuming boss fights use the same scene
+                    SceneManager.LoadScene("Battle");
                     break;
                 case PirateRoguelike.Data.EncounterType.Elite:
-                     if (_mapView != null) _mapView.Hide();
-                    SceneManager.LoadScene("Battle"); // Elite fights also use the Battle scene
+                    SceneManager.LoadScene("Battle");
                     break;
                 default:
                     Debug.LogWarning($"Unhandled encounter type: {encounterType}");
@@ -272,11 +153,9 @@ public class RunManager : MonoBehaviour
 
     private void OnRunSceneLoaded()
     {
-        // Check for battle rewards first thing
         if (GameSession.CurrentRunState != null && GameSession.CurrentRunState.battleRewards != null && GameSession.CurrentRunState.battleRewards.Count > 0)
         {
             Debug.Log($"RunManager: Detected {GameSession.CurrentRunState.battleRewards.Count} battle rewards.");
-            // RewardUI logic remains for now
         }
 
         if (MapManager.Instance != null)
@@ -304,17 +183,10 @@ public class RunManager : MonoBehaviour
             Debug.LogError("GameSession.Economy is null!");
         }
 
-        // Call Show() on the MapView to trigger auto-scrolling
-        if (_mapView != null)
+        // Initialize and show UI now that all data is ready
+        if (UIManager.Instance != null)
         {
-            _mapView.Show();
-        }
-        else
-        {
-            Debug.LogError("MapView instance is null in OnRunSceneLoaded!");
+            UIManager.Instance.InitializeRunUI();
         }
     }
 }
-
-
-

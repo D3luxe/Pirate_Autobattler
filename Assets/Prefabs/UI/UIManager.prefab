@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8324493647197269750
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8739521589902316801}
+  - component: {fileID: 5182420109319677556}
+  m_Layer: 0
+  m_Name: UIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8739521589902316801
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8324493647197269750}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 26.67501, y: -22.4808, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5182420109319677556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8324493647197269750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ab92fb1503fd6942bd1e46b1dbb0b95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIManager
+  playerPanelPrefab: {fileID: 6940418046087843524, guid: bcf83ad999425f54da9e52316e3c4b89, type: 3}
+  mapViewPrefab: {fileID: 6386911918127072378, guid: ad18e79558b8f9d409586eb0ab994690, type: 3}
+  tooltipManagerPrefab: {fileID: 6294734344320484715, guid: c8173fb64b71637418ce567650adbe5c, type: 3}
+  globalUIOverlayPrefab: {fileID: 8004934526173211991, guid: 6f2494b50d401fc4a83cb8fb9e1a5040, type: 3}
+  _shipDisplayElementUXML: {fileID: 9197481963319205126, guid: d18484afd89158449b7a691bb72f974a, type: 3}
+  _slotElementUXML: {fileID: 9197481963319205126, guid: 2d7f6a79a692f804f9771cebdd1fbc1a, type: 3}
