@@ -64,6 +64,7 @@
     -   **UI:** Manages UI using UI Toolkit (`MainMenuController`, `PlayerPanelController`, `MapView`, `BattleUIController`).
 
     -   **UI Systems:** Manages various UI elements and their interactions using UI Toolkit.
+        -   **`PlayerPanelController`**: Orchestrates the player's main UI. It is responsible for creating the `PlayerPanelView` (the view) and the `PlayerPanelDataViewModel` (the view model), and injecting the `IGameSession` dependency into the view model. This ensures the UI is decoupled from the static `GameSession` state.
         -   **`TooltipController`**: A singleton `MonoBehaviour` responsible for managing the lifecycle, content population, positioning, and visibility of the item tooltip. It dynamically instantiates tooltip elements from UXML assets and attaches them to the main UI `rootVisualElement` (Player Panel's `UIDocument`'s root) to ensure correct z-ordering.
             -   **Visibility Management**: Employs a `IsTooltipVisible` flag to track its state, preventing redundant show/hide calls.
             -   **Smooth Transitions**: Utilizes coroutines (`_currentTooltipCoroutine`) to manage smooth fade-in/fade-out animations, ensuring only one animation is active at a time.
@@ -132,10 +133,10 @@
         *   Loads the "Run" scene, which contains the main game environment.
 
     4.  **`RunManager.Start()`**: (Executes after all `Awake()` methods in the scene have completed, and after the "Run" scene is loaded)
-        *   Calls `PlayerPanelController.Initialize()`.
+        *   Calls `PlayerPanelController.Initialize()` and passes the `IGameSession` dependency.
         *   `PlayerPanelController.Initialize()` instantiates `PlayerPanelDataViewModel` (the view model for the player panel) and `PlayerPanelView` (the view component).
         *   Crucially, `PlayerPanelDataViewModel.Initialize()` is called, which subscribes to `GameSession.OnPlayerShipInitialized`, `GameSession.OnInventoryInitialized`, and `GameSession.OnEconomyInitialized` events (for initial data binding) as well as `GameSession.PlayerShip.OnEquipmentChanged` and `GameSession.Inventory.OnInventoryChanged` (for ongoing updates).
-        *   `PlayerPanelView.BindInitialData()` is called to perform the initial data binding from the view model to the UI.
+        *   `PlayerPanelView.BindInitialData()` is called to perform the initial data binding from the view model to the UI. The `Bind` methods within custom UI components (like `ShipDisplayElement`) are responsible for performing an immediate update to display the initial state, preventing timing issues where initial data is missed.
 
     **Event-Driven Data Flow and UI Updates:**
     *   When `GameSession` invokes its initialization events (`OnPlayerShipInitialized`, `OnInventoryInitialized`, `OnEconomyInitialized`), the `PlayerPanelDataViewModel` reacts by updating its properties. This, in turn, notifies the `PlayerPanelView` to update the UI elements that display player ship, inventory, and economy data.
@@ -198,6 +199,7 @@
 | :--- | :--- | :--- | :--- |
 | **High** | **M** | `GameSession`'s static global state hinders testability and complicates save/load. | Refactor `GameSession` into a non-static class/MonoBehaviour for improved testability and explicit data flow. |
 | **Medium** | **S** | Direct UI updates (e.g., `CombatController`, `PlayerPanelController` subscribing to `ShipState`) tightly couple game logic and UI. *Partially mitigated by the new event-driven item manipulation system.* | Introduce a data-binding/view-model layer to decouple UI from game logic. |
+| **Medium** | **S** | Custom UI components that don't refresh on binding can miss initial state. | Ensure custom UI components (like `ShipDisplayElement`) perform a full refresh in their `Bind()` method to prevent timing issues where initial data is missed. |
 | **Low** | **S** | Unused `items.json` and `EventBus` events create codebase clutter and confusion. | Remove unused `items.json` and `EventBus` events to clean up the project. |
 
 -   **Roadmap:**

@@ -134,11 +134,7 @@ namespace PirateRoguelike.UI
         public ObservableList<ISlotViewData> EquipmentSlots => _equipmentSlots;
         public ObservableList<ISlotViewData> InventorySlots => _inventorySlots;
 
-        public PlayerPanelDataViewModel()
-        {
-            _equipmentSlots = new ObservableList<ISlotViewData>();
-            _inventorySlots = new ObservableList<ISlotViewData>();
-        }
+        
 
         public void Initialize()
         {
@@ -319,10 +315,10 @@ namespace PirateRoguelike.UI
             _mapView = mapView;
         }
 
-        public void Initialize()
+        public void Initialize(IGameSession gameSession)
         {
             var root = GetComponent<UIDocument>().rootVisualElement;
-            _viewModel = new PlayerPanelDataViewModel(new PirateRoguelike.Core.GameSessionWrapper()); // Instantiate ViewModel here
+            _viewModel = new PlayerPanelDataViewModel(gameSession); // Instantiate ViewModel here
             _panelView = new PlayerPanelView(root, _theme, this.gameObject);
 
             // Get reference to the MapToggle button

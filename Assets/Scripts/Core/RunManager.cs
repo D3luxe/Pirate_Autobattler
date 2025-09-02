@@ -198,7 +198,7 @@ public class RunManager : MonoBehaviour
         // Now that the GameSession is guaranteed to be initialized, initialize the UI.
         if (_playerPanelController != null)
         {
-            _playerPanelController.Initialize();
+            _playerPanelController.Initialize(new PirateRoguelike.Core.GameSessionWrapper());
         }
     }
 

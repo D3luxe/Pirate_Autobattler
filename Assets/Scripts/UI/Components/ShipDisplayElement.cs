@@ -68,6 +68,8 @@ namespace PirateRoguelike.UI.Components
             {
                 _viewModel.PropertyChanged += OnViewModelPropertyChanged;
             }
+
+            UpdateUI(); // Immediately update UI with the new view model state
         }
 
         private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
