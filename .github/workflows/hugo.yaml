@@ -63,10 +63,6 @@ jobs:
           echo "Go: $(go version)"
           echo "Hugo: $(hugo version)"
           echo "Node.js: $(node --version)"
-      - name: Install Node.js dependencies
-        working-directory: ./docs/hugo-docs
-        run: |
-          [[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true
       - name: Verify file structure
         working-directory: ./docs/hugo-docs
         run: |

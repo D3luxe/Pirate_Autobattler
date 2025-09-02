@@ -2,11 +2,12 @@ baseURL = '/'
 languageCode = 'en-us'
 title = 'Pirate Autobattler Documentation'
 [module]
-  replacements = "github.com/twbs/bootstrap -> ."
-
   [[module.imports]]
     path = "github.com/google/docsy"
-    disable = false
+  [[module.imports]]
+    path = "github.com/twbs/bootstrap"
+
+  # The mounts for Docsy itself remain
   [[module.imports.mounts]]
     source = "assets"
     target = "assets"
