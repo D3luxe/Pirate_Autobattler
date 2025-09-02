@@ -80,6 +80,7 @@ jobs:
       - name: Build the site
         run: |
           hugo \
+            --source ./docs/hugo-docs \
             --gc \
             --minify \
             --baseURL "${{ steps.pages.outputs.base_url }}/" \
@@ -93,7 +94,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./public
+          path: ./docs/hugo-docs/public
   deploy:
     environment:
       name: github-pages
