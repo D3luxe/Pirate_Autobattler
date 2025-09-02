@@ -1,7 +1,22 @@
 baseURL = '/'
 languageCode = 'en-us'
 title = 'Pirate Autobattler Documentation'
-theme = 'docsy'
+[module]
+  [[module.imports]]
+    path = "github.com/google/docsy"
+    disable = false
+  [[module.imports.mounts]]
+    source = "assets"
+    target = "assets"
+  [[module.imports.mounts]]
+    source = "archetypes"
+    target = "archetypes"
+  [[module.imports.mounts]]
+    source = "layouts"
+    target = "layouts"
+  [[module.imports.mounts]]
+    source = "static"
+    target = "static"
 
 # Docsy-specific configurations
 # For more options, see https://www.docsy.dev/docs/getting-started/#configure-hugo

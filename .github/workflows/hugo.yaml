@@ -64,8 +64,12 @@ jobs:
           echo "Hugo: $(hugo version)"
           echo "Node.js: $(node --version)"
       - name: Install Node.js dependencies
+        working-directory: ./docs/hugo-docs
         run: |
           [[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true
+      - name: Initialize Hugo Modules
+        working-directory: ./docs/hugo-docs
+        run: hugo mod get -u
       - name: Configure Git
         run: |
           git config core.quotepath false
@@ -78,9 +82,9 @@ jobs:
           restore-keys:
             hugo-
       - name: Build the site
+        working-directory: ./docs/hugo-docs
         run: |
           hugo \
-            --source ./docs/hugo-docs \
             --gc \
             --minify \
             --baseURL "${{ steps.pages.outputs.base_url }}/" \
@@ -94,7 +98,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./docs/hugo-docs/public
+          path: ./docs/hugo-docs/public # IMPORTANT: Update this path
   deploy:
     environment:
       name: github-pages
