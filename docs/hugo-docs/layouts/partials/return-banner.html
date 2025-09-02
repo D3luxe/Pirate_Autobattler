@@ -7,9 +7,8 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const currentSection = "{{ .Page.Section }}"; // Get current page section from Hugo
     const urlParams = new URLSearchParams(window.location.search);
-    const fromPage = urlParams.get('from');
+    const fromPage = urlParams.get('from'); // This relies on a 'from' query parameter
 
     const returnBanner = document.getElementById('return-banner');
     const returnLink = document.getElementById('return-link');
@@ -18,7 +17,8 @@
       // Explicitly hide the banner by default with !important
       returnBanner.style.setProperty('display', 'none', 'important');
 
-      if (fromPage && currentSection === "analysis") {
+      // Show banner if 'from' param exists (regardless of section)
+      if (fromPage) { // Condition changed: removed 'currentSection === "analysis"'
         returnLink.href = fromPage;
         // Explicitly show the banner with !important
         returnBanner.style.setProperty('display', 'flex', 'important');

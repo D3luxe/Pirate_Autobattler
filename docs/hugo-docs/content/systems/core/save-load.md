@@ -8,7 +8,7 @@ status: "approved"
 
 ## 1. System Architecture
 
-The save/load system is designed around a central `RunState` object that acts as a snapshot of the entire game session. A single save slot is used, stored in a JSON file.
+The save/load system is designed around a central RunState object that acts as a snapshot of the entire game session. A single save slot is used, stored in a JSON file. For a broader understanding of how data is managed in the game, refer to the [Data Systems Overview]({{< myrelref "../data/data-systems-overview.md" >}}).
 
 ### 1.1. Core Components
 
@@ -36,7 +36,7 @@ To facilitate serialization with `JsonUtility`, the live game objects are conver
 
 ### 2.1. Saving Process
 
-1.  The process is typically triggered at the end of a battle via `GameSession.EndBattle()`.
+1.  The process is typically triggered at the end of a battle via `GameSession.EndBattle(). For details on how battles are managed, see the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}).`.
 2.  `GameSession.UpdateCurrentRunStateForSaving()` is called. This method is the core of the save process.
 3.  It populates the `GameSession.CurrentRunState` object with fresh data from the live game state:
     *   The live `PlayerShip` (`ShipState`) is converted to a `SerializableShipState` by calling its `.ToSerializable()` method.
@@ -52,7 +52,7 @@ To facilitate serialization with `JsonUtility`, the live game objects are conver
     *   It creates a new `PlayerShip` (`ShipState`) and a new `Inventory`.
     *   **For Inventory:** When re-populating inventory slots, it iterates through the saved `CurrentRunState.inventoryItems`. For each non-null entry, it verifies the item's existence in `GameDataRegistry` and creates a new `ItemInstance` in the correct slot. Empty slots in the saved data (due to omission during saving) will remain `null` in the `Inventory` as it is pre-initialized with empty slots.
     *   **For Equipped Items:** When loading equipped items via `PlayerShip = new ShipState(CurrentRunState.playerShipState)`, the `ShipState` constructor iterates through `SerializableShipState.equippedItems`. It explicitly handles `null` entries by setting the corresponding `Equipped` slot to `null`, ensuring that empty equipped slots are correctly preserved.
-    *   If an item's definition does not exist in `GameDataRegistry` (e.g., it was removed in a game update), a warning is logged, and the slot is treated as empty (either by omission for inventory or by explicit `null` assignment for equipped items).
+    *   If an item's definition does not exist in `GameDataRegistry` (e.g., it was removed in a game update), a warning is logged, and the slot is treated as empty (either by omission for inventory or by explicit `null` assignment for equipped items). For more information on how game data is loaded and managed, refer to the [Data Systems Overview]({{< myrelref "../data/data-systems-overview.md" >}}).
 
 ## 3. Serialized Data Hierarchy
 
@@ -100,7 +100,7 @@ The current save system does **not** persist any changes made to the mutable pro
     4.  The player saves and quits.
     5.  Upon reloading, the `SerializableItemInstance` is used to create a new `ItemInstance`. The `RuntimeDamageAction` is recreated from the base `DamageActionSO`, and its `CurrentDamageAmount` is reset to the default value of `10`. **The +5 buff is lost.**
 
-**This is a critical flaw that prevents the full potential of the dynamic item system from being utilized across game sessions.** Addressing this will likely require extending the `SerializableItemInstance` to store a list of modifications or creating a more robust serialization strategy for the entire `RuntimeItem` hierarchy.
+**This is a critical flaw that prevents the full potential of the dynamic item system from being utilized across game sessions.** Addressing this will likely require extending the `SerializableItemInstance` to store a list of modifications or creating a more robust serialization strategy for the entire [RuntimeItem hierarchy]({{< myrelref "runtime-data-systems.md" >}}).
 
 ## 5. Proposed Solution
 

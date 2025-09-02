@@ -7,7 +7,7 @@ types: ["system-overview"]
 
 ## 1. Universal Tooltip System
 
-This section details the implementation of the dynamic tooltip description system. It leverages the runtime item system (detailed in `runtime-data-systems.md`) to display real-time, updated values in UI elements.
+This section details the implementation of the dynamic tooltip description system. It leverages the [runtime item system]({{< myrelref "../core/runtime-data-systems.md" >}}) to display real-time, updated values in UI elements.
 
 ### 1.1. Core Components
 
@@ -65,7 +65,7 @@ This section details the implementation of the dynamic tooltip description syste
 
 ## 2. Universal Item Manipulation System
 
-This system centralizes the logic for moving, equipping, and swapping items, decoupling the UI from direct game state manipulation. It interacts with the runtime item system (detailed in `runtime-data-systems.md`).
+This system centralizes the logic for moving, equipping, and swapping items, decoupling the UI from direct game state manipulation. It interacts with the [runtime item system]({{< myrelref "../core/runtime-data-systems.md" >}}).
 
 ### 2.1. Core Components
 
@@ -132,7 +132,7 @@ The enemy panel now fully utilizes the new runtime item system and tooltip setup
 
 ### 3.2. Integration
 
-*   The `EnemyPanelController` is instantiated and initialized within the `CombatController`, receiving the enemy's `ShipState`.
+*   The `EnemyPanelController` is instantiated and initialized within the [CombatController]({{< myrelref "../combat/combat-system-overview.md" >}}), receiving the enemy's `ShipState`.
 *   It creates a `SlotElement` for each equipped item and binds it to a `SlotDataViewModel`.
 *   The `TooltipUtility` registers `PointerEnterEvent` and `PointerLeaveEvent` callbacks on these slots.
 *   These callbacks trigger the `TooltipController.Show()` and `Hide()` methods, passing the `RuntimeItem` from the slot's view model. This ensures tooltips function correctly for enemy items and reflect any dynamic changes.
@@ -140,15 +140,15 @@ The enemy panel now fully utilizes the new runtime item system and tooltip setup
 ## 4. Key Files Involved
 
 ### UI - Controllers & ViewModels
-*   `Assets/Scripts/UI/PlayerPanel/PlayerPanelController.cs` (Contains `PlayerPanelDataViewModel` and `SlotDataViewModel`)
-*   `Assets/Scripts/UI/EnemyPanel/EnemyPanelController.cs`
+*   `Assets/Scripts/UI/PlayerPanel/PlayerPanelController.cs` (Contains `PlayerPanelDataViewModel` and `SlotDataViewModel`) - For more details on the underlying data structures, refer to the [Runtime Data Systems Overview]({{< myrelref "../core/runtime-data-systems.md" >}}).
+*   `Assets/Scripts/UI/EnemyPanel/EnemyPanelController.cs` - This controller manages the enemy's UI panel. For more details on combat systems, refer to the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}). For a comprehensive understanding of core game systems, refer to the [Core Systems Overview]({{< myrelref "../core/_index.md" >}}).
 *   `Assets/Scripts/UI/PlayerPanel/PlayerPanelData.cs` (Contains `ISlotViewData`, `IPlayerPanelData` interfaces etc.)
-*   `Assets/Scripts/UI/TooltipController.cs`
+*   `Assets/Scripts/UI/TooltipController.cs` - This controller manages the tooltip system. For more details on combat systems, refer to the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}).
 
 ### UI - Components & Manipulators
 *   `Assets/Scripts/UI/Components/SlotElement.cs` (The slot container)
 *   `Assets/Scripts/UI/Components/ItemElement.cs` (The draggable item)
 *   `Assets/Scripts/UI/PlayerPanel/SlotManipulator.cs`
 *   `Assets/Scripts/UI/EffectDisplay.cs`
-*   `Assets/Scripts/UI/TooltipUtility.cs`
-*   `Assets/Scripts/Core/UIInteractionService.cs`
+*   `Assets/Scripts/UI/TooltipUtility.cs` - This utility provides helper methods for tooltip management. For a comprehensive understanding of core game systems, refer to the [Core Systems Overview]({{< myrelref "../core/_index.md" >}}).
+*   `Assets/Scripts/Core/UIInteractionService.cs` - This service is crucial for managing global UI state and ensuring that UI actions are only performed when appropriate. For a comprehensive understanding of core game systems, refer to the [Core Systems Overview]({{< myrelref "../core/_index.md" >}}).

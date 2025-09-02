@@ -4,7 +4,7 @@ weight: 10
 system: ["core", "ui"]
 types: ["task", "plan", "refactoring", "dependency-injection"]
 tags: ["GameSession", "PlayerPanelDataViewModel", "IGameSession", "GameSessionWrapper", "PlayerPanelController"]
-stage: ["Blocked"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
+stage: ["Completed"] # e.g., "Planned", "InProgress", "Completed", "Blocked"
 ---
 
 ## Plan: GameSession Injection (Medium Effort Approach - Corrected)

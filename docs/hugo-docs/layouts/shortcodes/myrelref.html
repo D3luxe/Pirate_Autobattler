@@ -1,0 +1,7 @@
+{{ $target := .Get 0 }}
+{{ $url := relref . $target }}
+{{ $currentPermalink := .Page.Permalink }}
+{{ if $currentPermalink }}
+  {{ $url = printf "%s?from=%s" $url $currentPermalink }}
+{{ end }}
+{{ $url }}

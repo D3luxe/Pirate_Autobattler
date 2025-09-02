@@ -9,7 +9,7 @@ status: "approved"
 
 ## Core Philosophy
 
-The map generator operates on a **Sparse-Path-First** philosophy. This means the primary goal is to first create a structurally sound and valid skeleton of paths for the player, and only then to apply node types and other gameplay elements. This approach ensures that every generated map is guaranteed to be completable, as the core path network is validated before any gameplay rules are applied.
+The map generator operates on a **Sparse-Path-First** philosophy. This means the primary goal is to first create a structurally sound and valid skeleton of paths for the player, and only then to apply node types and other gameplay elements. This approach ensures that every generated map is guaranteed to be completable, as the core path network is validated before any gameplay rules are applied. For details on how game data is structured and loaded, refer to the [Data Systems Overview]({{< myrelref "../data/data-systems-overview.md" >}}).
 
 This is a departure from a "dense grid" approach, where a full grid of nodes is created and then culled. Here, we build up from a valid foundation.
 

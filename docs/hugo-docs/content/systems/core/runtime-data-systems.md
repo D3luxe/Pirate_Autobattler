@@ -8,7 +8,7 @@ status: "approved"
 
 ## 1. Problem Statement
 
-Previously, game items, abilities, and actions were primarily defined by `ScriptableObject` assets. While excellent for defining static, immutable data templates, this approach proved rigid when dealing with dynamic gameplay scenarios such as:
+Previously, game items, abilities, and actions were primarily defined by ScriptableObject assets. While excellent for defining static, immutable data templates, this approach proved rigid when dealing with dynamic gameplay scenarios such as: For a comprehensive understanding of how static game data is structured, refer to the [Data Systems Overview]({{< myrelref "../data/data-systems-overview.md" >}}).
 
 *   Applying temporary buffs or debuffs to item stats (e.g., an item's damage increasing during combat).
 *   Modifying item properties permanently within a game run (e.g., an event granting a permanent damage bonus to an item).
@@ -20,7 +20,7 @@ To overcome these limitations, a new layer of runtime C# classes has been introd
 
 ### 2.1. Core Components
 
-*   **`ItemInstance` (`Assets/Scripts/Combat/ItemInstance.cs`):**
+*   **`ItemInstance` (`Assets/Scripts/Combat/ItemInstance.cs`):** - This is the primary class representing a unique instance of an item in the game. For more details on how items interact within combat, refer to the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}).
     *   The primary class representing a unique instance of an item in the game (e.g., in an inventory or equipped on a ship).
     *   Holds a reference to its `ItemSO` blueprint for base data.
     *   Contains mutable fields for instance-specific state like `CooldownRemaining` and `StunDuration`.
@@ -36,7 +36,7 @@ To overcome these limitations, a new layer of runtime C# classes has been introd
     *   Holds a reference to its `AbilitySO` blueprint.
     *   Manages a collection of `RuntimeAction` instances.
 
-*   **`RuntimeAction` (`Assets/Scripts/Runtime/RuntimeAction.cs`):**
+*   **`RuntimeAction` (`Assets/Scripts/Runtime/RuntimeAction.cs`):** - This abstract base class defines the behavior of all unique action instances. For more details on how actions are processed in combat, refer to the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}).
     *   An abstract base class for all unique action instances.
     *   Holds a reference to its `ActionSO` blueprint.
     *   Defines the `BuildDescription(IRuntimeContext context)` method for dynamic tooltip text generation.
@@ -66,7 +66,7 @@ To overcome these limitations, a new layer of runtime C# classes has been introd
 *   `Assets/Scripts/Runtime/RuntimeItem.cs` (Handles abilities/actions)
 *   `Assets/Scripts/Runtime/RuntimeAbility.cs`
 *   `Assets/Scripts/Runtime/RuntimeAction.cs`
-*   `Assets/Scripts/Combat/IRuntimeContext.cs`
+*   `Assets/Scripts/Combat/IRuntimeContext.cs` - This interface provides context for runtime operations. For a comprehensive understanding of core game systems, refer to the [Core Systems Overview]({{< myrelref "_index.md" >}}). For more details on combat systems, refer to the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}).
 *   `Assets/Scripts/Runtime/RuntimeDamageAction.cs` (Example concrete action)
 *   `Assets/Scripts/Runtime/RuntimeHealAction.cs` (Example concrete action)
 *   `Assets/Scripts/Runtime/RuntimeApplyEffectAction.cs` (Example concrete action)
