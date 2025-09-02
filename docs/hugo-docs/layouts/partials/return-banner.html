@@ -1,0 +1,28 @@
+<div id="return-banner" class="alert alert-info d-flex align-items-center" role="alert">
+  <i class="fas fa-info-circle me-2"></i>
+  <div>
+    You navigated from a related document. <a href="#" id="return-link" class="alert-link">Return to original document</a>.
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const currentSection = "{{ .Page.Section }}"; // Get current page section from Hugo
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromPage = urlParams.get('from');
+
+    const returnBanner = document.getElementById('return-banner');
+    const returnLink = document.getElementById('return-link');
+
+    if (returnBanner && returnLink) {
+      // Explicitly hide the banner by default with !important
+      returnBanner.style.setProperty('display', 'none', 'important');
+
+      if (fromPage && currentSection === "analysis") {
+        returnLink.href = fromPage;
+        // Explicitly show the banner with !important
+        returnBanner.style.setProperty('display', 'flex', 'important');
+      }
+    }
+  });
+</script>

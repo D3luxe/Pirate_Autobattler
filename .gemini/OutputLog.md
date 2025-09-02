@@ -1,11 +1,5 @@
-Converted MapNodeData not found for node ID node_2_3 at row 2, col 3.
-UnityEngine.Debug:LogError (object)
-MapManager:GetMapNodeData (string) (at Assets/Scripts/Map/MapManager.cs:243)
-BattleManager:SetupBattle () (at Assets/Scripts/Combat/BattleManager.cs:39)
-BattleManager:Start () (at Assets/Scripts/Combat/BattleManager.cs:33)
-
-Encounter data not found for node: node_2_3.
-UnityEngine.Debug:LogError (object)
-BattleManager:SetupBattle () (at Assets/Scripts/Combat/BattleManager.cs:43)
-BattleManager:Start () (at Assets/Scripts/Combat/BattleManager.cs:33)
-
+DEBUG: return-banner.html - currentSection: analysis
+map-generation-analysis/?from=%2fsystems%2fmap%2fmap-generation-design%2f:897 DEBUG: Banner should be visible now.
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully

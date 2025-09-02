@@ -1,0 +1,92 @@
+baseURL = '/'
+languageCode = 'en-us'
+title = 'Pirate Autobattler Documentation'
+theme = 'docsy'
+
+# Docsy-specific configurations
+# For more options, see https://www.docsy.dev/docs/getting-started/#configure-hugo
+
+# Required for Docsy
+enableGitInfo = true
+disableKinds = ["taxonomyTerm"]
+
+[taxonomies]
+  system = "game_systems"
+  feature = "features"
+  discipline = "disciplines"
+  type = "types"
+  stage = "stages"
+  status = "statuses"
+
+[cascade]
+  [cascade.build]
+    render = "always"
+    list = "always"
+    publishResources = true
+
+[params]
+  # Docsy theme options
+  version_menu = "Docs"
+  # You can add more Docsy params here as needed, e.g., for sidebar, colors, etc.
+
+  # Enable search
+  offlineSearch = true
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+  page = ["HTML"]
+  section = ["HTML", "RSS"]
+
+[outputs.systems]
+  path = "systems"
+  kind = "section"
+  formats = ["HTML"]
+
+[mediaTypes]
+  [mediaTypes."application/json"]
+    suffixes = ["json"]
+
+[outputFormats]
+  [outputFormats.SearchIndex]
+    mediaType = "application/json"
+    baseName = "index"
+    isPlainText = true
+    notAlternative = true
+
+# Configure search with Docsy
+[fuse_search]
+  # Docsy uses Fuse.js for client-side search
+  # For more options, see https://www.docsy.dev/docs/adding-content/search/#configure-fusejs
+  # You can customize search parameters here
+
+[params.sections]
+  # Docsy theme options for sections
+  # For more options, see https://www.docsy.dev/docs/adding-content/content-organization/#section-pages
+  # You can customize section parameters here
+  kind = "section" # Explicitly set kind for sections
+
+[params.ui]
+  # Enable or disable the sidebar on the homepage
+  sidebar_about_description = ""
+  sidebar_footer = ""
+  sidebar_menu_foldable = true
+  sidebar_menu_compact = false
+  sidebar_menu_collapsible = true
+  sidebar_menu_depth = 4 # How many levels of content to show in the sidebar
+  sidebar_menu_show_all = true # Show all content in the sidebar, even if not explicitly linked
+
+[params.ui.navbar]
+  # Docsy navbar options
+  # For more options, see https://www.docsy.dev/docs/adding-content/navigation/#navbar
+  # You can customize navbar parameters here
+
+[menu]
+  
+  [[menu.main]]
+    name = "Tasks"
+    url = "/tasks/"
+    weight = 20
+  [[menu.main]]
+    name = "Systems"
+    url = "/systems/"
+    weight = 30

@@ -1,0 +1,76 @@
+{{ $originalPage := .Page }}
+{{ $currentSystems := $originalPage.Params.system }}
+{{ $currentTypes := $originalPage.Params.types }}
+
+{{ if and $currentSystems $currentTypes }}
+  {{ $allAnalysisPages := where .Site.RegularPages "Section" "analysis" }}
+  {{ $relatedAnalysis := newScratch }}
+
+  {{ range $analysisPage := $allAnalysisPages }}
+    {{ $analysisSystems := $analysisPage.Params.system }}
+    {{ $analysisTypes := $analysisPage.Params.types }}
+
+    {{ $systemMatch := false }}
+    {{ if reflect.IsSlice $currentSystems }}
+      {{ range $cs := $currentSystems }}
+        {{ if reflect.IsSlice $analysisSystems }}
+          {{ range $as := $analysisSystems }}
+            {{ if eq $cs $as }}
+              {{ $systemMatch = true }}
+            {{ end }}
+          {{ end }}
+        {{ else if eq $cs $analysisSystems }}
+          {{ $systemMatch = true }}
+        {{ end }}
+      {{ end }}
+    {{ else if reflect.IsSlice $analysisSystems }}
+      {{ range $as := $analysisSystems }}
+        {{ if eq $currentSystems $as }}
+          {{ $systemMatch = true }}
+        {{ end }}
+      {{ end }}
+    {{ else if eq $currentSystems $analysisSystems }}
+      {{ $systemMatch = true }}
+    {{ end }}
+
+    {{ $typeMatch := false }}
+    {{ if reflect.IsSlice $currentTypes }}
+      {{ range $ct := $currentTypes }}
+        {{ if reflect.IsSlice $analysisTypes }}
+          {{ range $at := $analysisTypes }}
+            {{ if eq $ct $at }}
+              {{ $typeMatch = true }}
+            {{ end }}
+          {{ end }}
+        {{ else if eq $ct $analysisTypes }}
+          {{ $typeMatch = true }}
+        {{ end }}
+      {{ end }}
+    {{ else if reflect.IsSlice $analysisTypes }}
+      {{ range $at := $analysisTypes }}
+        {{ if eq $currentTypes $at }}
+          {{ $typeMatch = true }}
+        {{ end }}
+      {{ end }}
+    {{ else if eq $currentTypes $analysisTypes }}
+      {{ $typeMatch = true }}
+    {{ end }}
+
+    {{ if and $systemMatch $typeMatch (ne $analysisPage.Path $originalPage.Path) }}
+      {{ $relatedAnalysis.Add $analysisPage.Permalink $analysisPage }}
+    {{ end }}
+  {{ end }}
+
+  {{ $finalRelatedAnalysis := $relatedAnalysis.Values }}
+
+  {{ if gt (len $finalRelatedAnalysis) 0 }}
+    <div class="td-sidebar-section td-sidebar-section--related-analysis">
+      <h5 class="td-sidebar-section-title">Related Analysis</h5>
+      <ul>
+        {{ range $finalRelatedAnalysis }}
+          <li><a href="{{ .RelPermalink }}?from={{ $originalPage.RelPermalink }}">{{ .Title }}</a></li>
+        {{ end }}
+      </ul>
+    </div>
+  {{ end }}
+{{ end }}

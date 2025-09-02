@@ -51,6 +51,7 @@
     -   **Core:** Manages game lifecycle, session state, and core services.
         -   **`GameSession`**: Static class, central repository for current run's state (`RunState`).
         -   **`RunManager`**: Persistent singleton, manages main game flow, scene transitions, and UI.
+        -   **`MapManager`**: Persistent singleton, manages map generation and provides map node data. Its state is reset at the start of each new run.
         -   **`GameInitializer`**: Runs in `Boot` scene, initializes `GameSession` and `RunManager`.
         -   **`TickService`**: `MonoBehaviour` providing a fixed 100ms update tick for combat.
         -   **`GameDataRegistry`**: Static class, loads all `ScriptableObject` data from `Resources` at startup.
@@ -115,6 +116,7 @@
 
     1.  **`GameInitializer.Start()`**:
         *   Initializes `AbilityManager` by subscribing it to `EventBus` events.
+        *   Calls `MapManager.Instance.ResetMap()` to clear any previous map state.
         *   Initializes `GameSession` (either starting a new run or loading a saved one). This step sets up core game data (`CurrentRunState`, `EconomyService`, `Inventory`, `PlayerShip`) and dispatches `GameSession.OnEconomyInitialized`, `GameSession.OnPlayerShipInitialized`, and `GameSession.OnInventoryInitialized` events.
         *   Instantiates the `RunManager` prefab, which becomes a persistent singleton.
 

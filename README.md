@@ -33,6 +33,16 @@ The project is set up but requires initial content and scenes to be generated. F
     *   `/Saving`: The `SaveManager` and `RunState` definition for persistence.
 *   **/Assets/Editor**: Contains all editor-specific scripts, including the `ContentTools` script used for setup.
 
+## Documentation Structure
+
+The project's documentation is organized into the `docs` directory, with subdirectories for different types of documents:
+
+*   **`/docs/analysis`**: Contains detailed analyses, root cause investigations, and summaries of specific systems or problems. Files are prefixed with `analysis-`.
+*   **`/docs/tasks`**: Contains plans and specific task-related documentation for features, refactors, or bug fixes. Files are prefixed with `task-`.
+*   **`/docs/systems`**: Contains overviews, design documents, and explanations of core game functionality and systems. Files are prefixed with `system-`.
+
+This structure aims to provide a clear and consistent way to locate relevant information within the project.
+
 ## How to Add New Content
 
 This project is designed to be data-driven. To add new content, you should primarily be creating new assets, not writing new code.
