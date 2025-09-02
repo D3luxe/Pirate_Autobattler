@@ -102,3 +102,4 @@ InitTestScene*.unity*
 */hugo-docs/public
 */hugo-docs/resources
 .hugo_build.lock
+*/hugo-docs/node_modules
