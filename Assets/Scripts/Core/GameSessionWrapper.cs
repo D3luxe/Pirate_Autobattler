@@ -15,6 +15,9 @@ namespace PirateRoguelike.Core
         public int Lives => GameSession.Economy.Lives;
         public int CurrentDepth => GameSession.CurrentRunState.currentColumnIndex; // Assuming CurrentDepth maps to currentColumnIndex
 
+        // NEW: Implement Economy property
+        public EconomyService Economy => GameSession.Economy;
+
         public event Action OnPlayerShipInitialized
         {
             add => GameSession.OnPlayerShipInitialized += value;

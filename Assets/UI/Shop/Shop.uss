@@ -12,16 +12,23 @@
     margin-bottom: 10px;
 }
 
-.gold-label,
-.message-label {
-    color: yellow;
+.gold-label {
     font-size: 24px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+}
+
+.message-label {
+    font-size: 24px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
 }
 
 .shop-content {
     flex-direction: row;
     width: 80%;
     flex-grow: 1;
+    margin-top: 16%;
 }
 
 .shop-section {
@@ -38,15 +45,31 @@
     margin-bottom: 10px;
 }
 
-.item-container,
+.item-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    justify-content: center;
+    margin-top: 5%;
+    margin-bottom: 25%;
+}
+
 .ship-container {
     flex-direction: row;
     flex-wrap: wrap;
     flex-grow: 1;
     justify-content: center;
+    margin-top: 5%;
+    margin-bottom: 25%;
 }
 
-.reroll-section,
+.reroll-section {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
 .ship-buy-section {
     flex-direction: row;
     justify-content: center;
@@ -54,16 +77,32 @@
     margin-top: 10px;
 }
 
-.reroll-button,
-.buy-ship-button,
-.leave-shop-button {
-    background-color: #336699;
+.reroll-button {
+    background-color: rgb(51, 102, 153);
     color: white;
     padding: 5px 10px;
     border-radius: 5px;
 }
 
-.reroll-cost-label,
+.buy-ship-button {
+    background-color: rgb(51, 102, 153);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.leave-shop-button {
+    background-color: rgb(51, 102, 153);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.reroll-cost-label {
+    color: white;
+    margin-left: 10px;
+}
+
 .ship-price-label {
     color: white;
     margin-left: 10px;

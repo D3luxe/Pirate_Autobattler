@@ -1,32 +1,29 @@
-<UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <ui:VisualElement name="ShopRoot" class="shop-root">
-        <ui:VisualElement name="Header" class="shop-header">
-            <ui:Label name="GoldLabel" text="Gold: 0" class="gold-label" />
-            <ui:Label name="MessageLabel" text="" class="message-label" />
+<UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Shop/Shop.uss?fileID=7433441132597879392&amp;guid=bcd3762f73b1b1e4aa03d941456a8fc8&amp;type=3#Shop" />
+    <ui:VisualElement name="ShopRoot" enabled="true" class="shop-root" style="max-width: 1080px; align-self: center; flex-shrink: 1; flex-grow: 0; display: flex; width: 76%; height: 70%;">
+        <ui:VisualElement name="Header" class="shop-header" style="width: auto; margin-top: 8%;">
+            <ui:Label name="MerchantName" text="Ol&apos; Barnacle Bill&apos;s Emporium" class="gold-label" />
         </ui:VisualElement>
-
         <ui:VisualElement name="ShopContent" class="shop-content">
-            <ui:VisualElement name="ItemShopSection" class="shop-section">
-                <ui:Label text="Items" class="section-title" />
-                <ui:VisualElement name="ShopItemContainer" class="item-container" />
-                <ui:VisualElement name="RerollSection" class="reroll-section">
-                    <ui:Button name="RerollButton" class="reroll-button" text="Reroll" />
-                    <ui:Label name="RerollCostLabel" text="(0g)" class="reroll-cost-label" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-
             <ui:VisualElement name="ShipShopSection" class="shop-section">
                 <ui:Label text="Ships" class="section-title" />
                 <ui:VisualElement name="ShopShipContainer" class="ship-container" />
                 <ui:VisualElement name="ShipBuySection" class="ship-buy-section">
-                    <ui:Label name="ShipPriceLabel" text="" class="ship-price-label" />
-                    <ui:Button name="BuyShipButton" class="buy-ship-button" text="Buy Ship" />
+                    <ui:Label name="ShipPriceLabel" class="ship-price-label" />
+                    <ui:Button name="BuyShipButton" text="Buy Ship" class="buy-ship-button" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="ItemShopSection" class="shop-section">
+                <ui:Label text="Items" class="section-title" />
+                <ui:VisualElement name="ShopItemContainer" class="item-container" />
+                <ui:VisualElement name="RerollSection" class="reroll-section">
+                    <ui:Button name="RerollButton" text="Reroll" class="reroll-button" />
+                    <ui:Label name="RerollCostLabel" text="(0g)" class="reroll-cost-label" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-
         <ui:VisualElement name="Footer" class="shop-footer">
-            <ui:Button name="LeaveShopButton" class="leave-shop-button" text="Leave Shop" />
+            <ui:Button name="LeaveShopButton" text="Leave Shop" class="leave-shop-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 </UXML>

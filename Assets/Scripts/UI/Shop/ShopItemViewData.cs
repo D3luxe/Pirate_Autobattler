@@ -97,10 +97,43 @@ namespace PirateRoguelike.UI
             }
         }
 
+        // NEW: Rarity property
+        private string _rarity;
+        public string Rarity
+        {
+            get => _rarity;
+            set
+            {
+                if (_rarity != value)
+                {
+                    _rarity = value;
+                    OnPropertyChanged(nameof(Rarity));
+                }
+            }
+        }
+
         private ItemSO _itemSO; // Reference to the original ItemSO for purchase logic
         public ItemSO ItemSO => _itemSO;
 
-        public ShopItemViewData(ItemSO itemSO, Color rarityColor, bool isPurchasable)
+        // NEW: ShopSlotId to identify the item's position in the shop
+        public int ShopSlotId { get; private set; }
+
+        // NEW: CurrentItemInstance to satisfy ISlotViewData
+        private ItemInstance _currentItemInstance;
+        public ItemInstance CurrentItemInstance
+        {
+            get => _currentItemInstance;
+            private set
+            {
+                if (_currentItemInstance != value)
+                {
+                    _currentItemInstance = value;
+                    OnPropertyChanged(nameof(CurrentItemInstance));
+                }
+            }
+        }
+
+        public ShopItemViewData(ItemSO itemSO, Color rarityColor, bool isPurchasable, int shopSlotId) // Modified constructor
         {
             _itemSO = itemSO;
             Icon = itemSO.icon;
@@ -109,6 +142,9 @@ namespace PirateRoguelike.UI
             ItemCost = itemSO.Cost.ToString() + " Gold";
             RarityColor = rarityColor;
             IsPurchasable = isPurchasable;
+            ShopSlotId = shopSlotId; // Set the new property
+            CurrentItemInstance = new ItemInstance(itemSO); // Initialize CurrentItemInstance
+            Rarity = itemSO.rarity.ToString(); // Populate Rarity
         }
     }
 }

@@ -1,3 +1,2 @@
-*   **CombatController (`PirateRoguelike.Combat.CombatController`):**
-    *   File Path: Assets/Scripts/Combat/CombatController.cs
-    *   The central manager for a single battle. It handles battle initialization, processes each combat tick, applies effects, and determines battle end conditions.
+Assets\Scripts\UI\Shop\ShopItemElement.cs(55,32): error CS7036: There is no argument given that corresponds to the required formal parameter 'sourceSlotData' of 'SlotManipulator.SlotManipulator(VisualElement, ISlotViewData)'
+

@@ -86,7 +86,7 @@ namespace PirateRoguelike.UI.Components
                     _itemElement = new ItemElement();
                     this.Add(_itemElement);
                     // Create and add the SlotManipulator to the ItemElement
-                    Manipulator = new SlotManipulator(_itemElement); // Assign to SlotElement's Manipulator property
+                    Manipulator = new SlotManipulator(_itemElement, _viewModel); // Assign to SlotElement's Manipulator property
                     _itemElement.AddManipulator(Manipulator);
                 }
                 _itemElement.SlotViewData = _viewModel; // Assign slotData to ItemElement

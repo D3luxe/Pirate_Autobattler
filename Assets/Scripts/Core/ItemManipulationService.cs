@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using PirateRoguelike.Data;
 using PirateRoguelike.Core; // Assuming GameSession is in Core
+using System.Linq; // For LINQ operations like FirstOrDefault, Any
 
 namespace PirateRoguelike.Services
 {
@@ -34,15 +35,102 @@ namespace PirateRoguelike.Services
             // Check rules before executing the swap
             if (!PirateRoguelike.UI.UIInteractionService.CanManipulateItem(fromSlot.ContainerType) || !PirateRoguelike.UI.UIInteractionService.CanManipulateItem(toSlot.ContainerType))
             {
-                return; 
+                return;
             }
             ExecuteSwap(fromSlot, toSlot);
         }
 
         public void RequestPurchase(SlotId shopSlot, SlotId playerSlot)
         {
-            // TODO: Implement Shop Logic
-            UnityEngine.Debug.Log($"Purchase requested for item in shop slot {shopSlot.Index}.");
+            // Ensure it's a shop item being purchased
+            if (shopSlot.ContainerType != SlotContainerType.Shop)
+            {
+                Debug.LogWarning($"RequestPurchase called with non-shop slot type: {shopSlot.ContainerType}");
+                return;
+            }
+
+            // Get the ItemSO from the shop (assuming ShopManager exposes it)
+            // This requires ShopManager to expose its current shop items by index or ID
+            // For now, let's assume we can get the ItemSO directly from the shopSlot.Index
+            // This is a temporary coupling, ideally ShopManager would provide the item.
+            // Let's assume ShopManager.Instance.GetShopItem(shopSlot.Index) exists.
+            ItemSO itemToPurchase = null;
+            if (PirateRoguelike.Encounters.ShopManager.Instance != null)
+            {
+                itemToPurchase = PirateRoguelike.Encounters.ShopManager.Instance.GetShopItem(shopSlot.Index);
+            }
+
+            if (itemToPurchase == null)
+            {
+                Debug.LogError($"Could not find item in shop at index {shopSlot.Index} for purchase.");
+                PirateRoguelike.Encounters.ShopManager.Instance?.DisplayMessage("Item not available!");
+                return;
+            }
+
+            // Check if player has enough gold
+            if (!_gameSession.Economy.TrySpendGold(itemToPurchase.Cost))
+            {
+                Debug.LogWarning($"Not enough gold to purchase {itemToPurchase.displayName}. Cost: {itemToPurchase.Cost}, Gold: {_gameSession.Economy.Gold}");
+                PirateRoguelike.Encounters.ShopManager.Instance?.DisplayMessage("Not enough gold!");
+                return;
+            }
+
+            // Determine target slot for the item
+            SlotId targetFinalSlot = playerSlot;
+
+            // If playerSlot is -1 (find first available) or target slot is occupied (for drag-to-occupied)
+            if (playerSlot.Index == -1 || (playerSlot.ContainerType == SlotContainerType.Inventory && _gameSession.Inventory.IsSlotOccupied(playerSlot.Index)) || (playerSlot.ContainerType == SlotContainerType.Equipment && _gameSession.PlayerShip.IsEquipmentSlotOccupied(playerSlot.Index)))
+            {
+                // Try to find first available inventory slot
+                int availableInventorySlot = _gameSession.Inventory.GetFirstEmptySlot();
+                if (availableInventorySlot != -1)
+                {
+                    targetFinalSlot = new SlotId(availableInventorySlot, SlotContainerType.Inventory);
+                }
+                else
+                {
+                    // If no inventory slot, try to find first available equipment slot
+                    int availableEquipmentSlot = _gameSession.PlayerShip.GetFirstEmptyEquipmentSlot();
+                    if (availableEquipmentSlot != -1)
+                    {
+                        targetFinalSlot = new SlotId(availableEquipmentSlot, SlotContainerType.Equipment);
+                    }
+                    else
+                    {
+                        // No available slots, refund gold and display message
+                        _gameSession.Economy.AddGold(itemToPurchase.Cost);
+                        Debug.LogWarning($"No available slots for {itemToPurchase.displayName}. Gold refunded.");
+                        PirateRoguelike.Encounters.ShopManager.Instance?.DisplayMessage("Inventory full!");
+                        return;
+                    }
+                }
+            }
+
+            // Add item to the determined target slot
+            bool purchaseSuccessful = false;
+            if (targetFinalSlot.ContainerType == SlotContainerType.Inventory)
+            {
+                purchaseSuccessful = _gameSession.Inventory.AddItemAt(new ItemInstance(itemToPurchase), targetFinalSlot.Index);
+            }
+            else if (targetFinalSlot.ContainerType == SlotContainerType.Equipment)
+            {
+                purchaseSuccessful = _gameSession.PlayerShip.SetEquipment(targetFinalSlot.Index, new ItemInstance(itemToPurchase));
+            }
+
+            if (purchaseSuccessful)
+            {
+                // Remove item from shop (ShopManager needs to handle this)
+                PirateRoguelike.Encounters.ShopManager.Instance?.RemoveShopItem(shopSlot.Index);
+                Debug.Log($"Successfully purchased {itemToPurchase.displayName} for {itemToPurchase.Cost} gold and placed in {targetFinalSlot.ContainerType} slot {targetFinalSlot.Index}.");
+                PirateRoguelike.Encounters.ShopManager.Instance?.DisplayMessage($"Purchased {itemToPurchase.displayName}!");
+            }
+            else
+            {
+                // Should not happen if slot finding logic is correct, but as a fallback
+                _gameSession.Economy.AddGold(itemToPurchase.Cost);
+                Debug.LogError($"Failed to add {itemToPurchase.displayName} to slot {targetFinalSlot.Index}. Gold refunded.");
+                PirateRoguelike.Encounters.ShopManager.Instance?.DisplayMessage("Purchase failed!");
+            }
         }
 
         private void ExecuteSwap(SlotId slotA, SlotId slotB)
