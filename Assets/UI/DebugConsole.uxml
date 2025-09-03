@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-namespaces="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/DebugConsole.uss?fileID=7433441132597879392&amp;guid=c8d23012c2da8cc459e1364d7a7d0928&amp;type=3#DebugConsole" />
+    <ui:VisualElement class="debug-console-root">
+        <ui:ScrollView name="output-scroll-view" class="output-scroll-view" style="min-height: 500px;" />
+        <ui:TextField name="input-field" hide-placeholder-on-focus="true" readonly="false" placeholder-text="e.g. &apos;help&apos;" class="input-field" style="height: 50px;" />
+    </ui:VisualElement>
+</ui:UXML>

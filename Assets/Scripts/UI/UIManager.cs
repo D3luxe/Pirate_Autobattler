@@ -14,6 +14,7 @@ namespace PirateRoguelike.UI
     [SerializeField] private GameObject mapViewPrefab;
     [SerializeField] private GameObject tooltipManagerPrefab;
     [SerializeField] private GameObject globalUIOverlayPrefab;
+    [SerializeField] private GameObject debugConsolePrefab; // Added for Debug Console
 
     [Header("UXML Assets")]
     [SerializeField] private VisualTreeAsset _shipDisplayElementUXML;
@@ -26,6 +27,8 @@ namespace PirateRoguelike.UI
     private MapView _mapView;
     private TooltipController _tooltipController;
     private UIDocument _globalUIOverlayDocument;
+
+    public VisualElement GlobalUIRoot => _globalUIOverlayDocument?.rootVisualElement;
 
     void Awake()
     {
@@ -106,6 +109,25 @@ namespace PirateRoguelike.UI
         else
         {
             Debug.LogError("TooltipController or Global UI Overlay Document is null. Cannot initialize tooltip.");
+        }
+
+        // Instantiate Debug Console
+        if (debugConsolePrefab != null)
+        {
+            GameObject debugConsoleInstance = Instantiate(debugConsolePrefab, transform);
+            DebugConsoleController debugConsoleController = debugConsoleInstance.GetComponent<DebugConsoleController>();
+            if (debugConsoleController != null && GlobalUIRoot != null)
+            {
+                debugConsoleController.Initialize(GlobalUIRoot);
+            }
+            else
+            {
+                Debug.LogError("DebugConsoleController or GlobalUIRoot is null. Cannot initialize debug console.");
+            }
+        }
+        else
+        {
+            Debug.LogError("DebugConsole Prefab is not assigned in UIManager!");
         }
     }
 

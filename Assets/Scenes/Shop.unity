@@ -285,7 +285,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6c9745fe50e5324d9c29df57cdb3325, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopManager
-  shopUI: {fileID: 1578915873}
 --- !u!4 &284468835
 Transform:
   m_ObjectHideFlags: 0
@@ -333,7 +332,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
   m_PanelSettings: {fileID: 11400000, guid: 70d3fb67e52315244904fe831dd66591, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: e1d14ccf04065054bb972b0f5076f36f, type: 3}
   m_SortingOrder: 0
   m_Position: 0
   m_WorldSpaceSizeMode: 1
@@ -366,15 +365,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1578915870}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6fac8eee0f2a3b54da3748596cebe008, type: 3}
+  m_Script: {fileID: 11500000, guid: 81da269ce3f858f498ba2094581fa938, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopUI
-  uiDocument: {fileID: 1578915871}
-  shopUss: {fileID: 7433441132597879392, guid: bcd3762f73b1b1e4aa03d941456a8fc8, type: 3}
-  shopItemViewUxml: {fileID: 9197481963319205126, guid: 5ee5aba02207f6f479e4d7831ce81acd, type: 3}
-  shopItemViewUss: {fileID: 7433441132597879392, guid: 592cb7d68c72b244f9bc16c3df3ecdbe, type: 3}
-  shipViewUxml: {fileID: 9197481963319205126, guid: be229c36c3747aa4495c0fd0dcc5f705, type: 3}
-  shipViewUss: {fileID: 7433441132597879392, guid: 65fe0c25f0c773d4bb675aae77fcb200, type: 3}
+  _shopManager: {fileID: 284468834}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

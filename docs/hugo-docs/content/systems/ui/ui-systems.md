@@ -88,6 +88,7 @@ This system centralizes the logic for moving, equipping, and swapping items, dec
     >   File Path: Assets/Scripts/UI/PlayerPanel/SlotManipulator.cs
     *   A `PointerManipulator` attached to each `ItemElement`. It detects drag-and-drop gestures.
     *   Initiates requests by calling methods on `ItemManipulationService` (e.g., `SwapItems`). It does not modify game state directly.
+    *   **Conflict Prevention:** This manipulator now checks `UIStateService.IsConsoleOpen` and will not initiate drag operations if the debug console is active, preventing input conflicts.
 
 *   **`Inventory` (`PirateRoguelike.Services.Inventory`):**
     >   File Path: Assets/Scripts/Core/Inventory.cs
@@ -170,4 +171,9 @@ The enemy panel now fully utilizes the new runtime item system and tooltip setup
 *   `Assets/Scripts/UI/EffectDisplay.cs`
 *   `Assets/Scripts/UI/TooltipUtility.cs` - This utility provides helper methods for tooltip management. For a comprehensive understanding of core game systems, refer to the [Core Systems Overview]({{< myrelref "../core/_index.md" >}}).
 *   `Assets/Scripts/Core/UIInteractionService.cs` - This service is crucial for managing global UI state and ensuring that UI actions are only performed when appropriate. For a comprehensive understanding of core game systems, refer to the [Core Systems Overview]({{< myrelref "../core/_index.md" >}}).
+
+## 5. UI Toolkit Event Handling Notes
+
+*   **`TrickleDown.TrickleDown`:** When registering callbacks for `KeyDownEvent` (and other events where early intervention is critical), using `TrickleDown.TrickleDown` ensures that your callback is executed during the TrickleDown phase of event propagation. This allows you to process or `PreventDefault()` the event before other elements or the default behavior of the target element (e.g., `TextField`) can consume or modify it. This is crucial for achieving precise control over UI element behavior, especially for input fields.
+
 

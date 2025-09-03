@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using PirateRoguelike.Data;
@@ -11,6 +12,7 @@ namespace PirateRoguelike.Core
     public class RunManager : MonoBehaviour
 {
     public static RunManager Instance { get; private set; }
+    public static event Action OnToggleConsole;
 
     [Header("Configuration")]
     [SerializeField] private RunConfigSO runConfig;
@@ -18,7 +20,10 @@ namespace PirateRoguelike.Core
     [SerializeField] private GameObject rewardUIPrefab;
     [SerializeField] private GameObject mapManagerPrefab;
 
+    [Header("Input")]
+    public InputActionAsset inputActionAsset;
     private InputAction _saveHotkeyAction;
+    private InputAction _toggleConsoleAction;
 
     void Awake()
     {
@@ -29,8 +34,21 @@ namespace PirateRoguelike.Core
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        _saveHotkeyAction = new InputAction("SaveGame", type: InputActionType.Button, binding: "<Keyboard>/s");
-        _saveHotkeyAction.performed += OnSaveHotkeyPerformed;
+
+        if (inputActionAsset != null)
+        {
+            var debugMap = inputActionAsset.FindActionMap("Debug");
+            if (debugMap != null)
+            {
+                _saveHotkeyAction = debugMap.FindAction("SaveGame");
+                _saveHotkeyAction.performed += OnSaveHotkeyPerformed;
+
+                _toggleConsoleAction = debugMap.FindAction("ToggleConsole");
+                _toggleConsoleAction.performed += HandleToggleConsole;
+
+                //debugMap.Enable(); // Enable the whole map
+            }
+        }
 
         SceneManager.sceneLoaded += OnSceneLoaded;
         GameSession.OnPlayerNodeChanged += HandlePlayerNodeChanged;
@@ -191,6 +209,11 @@ namespace PirateRoguelike.Core
         {
             UIManager.Instance.InitializeRunUI();
         }
+    }
+
+    private void HandleToggleConsole(InputAction.CallbackContext context)
+    {
+        OnToggleConsole?.Invoke();
     }
 }
 }

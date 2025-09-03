@@ -34,12 +34,16 @@ The game's functionality is distributed among several key systems:
     *   **Interaction:** Provides data to all other systems and dispatches events when core game state changes.
 
 *   **`PirateRoguelike.Core.RunManager` (`Assets/Scripts/Core/RunManager.cs`):**
-    *   **Responsibility:** A persistent singleton that manages the overall game flow within a "run." It instantiates core game managers (like `Pirate.MapGen.MapManager`), handles scene transitions (e.g., to Battle, Shop), and reacts to player progress on the map.
+    *   **Responsibility:** A persistent singleton that manages the overall game flow within a "run." It instantiates core game managers (like `Pirate.MapGen.MapManager`), handles scene transitions (e.g., to Battle, Shop), and reacts to player progress on the map. **It also centralizes the management of debug and save hotkey input actions.**
     *   **Interaction:** Orchestrates the initialization of `Pirate.MapGen.MapManager` and `PirateRoguelike.UI.UIManager`. Reacts to `PirateRoguelike.Core.GameSession` events (e.g., `OnPlayerNodeChanged`).
 
 *   **`PirateRoguelike.UI.UIManager` (`Assets/Scripts/UI/UIManager.cs`):**
     *   **Responsibility:** A persistent singleton dedicated to instantiating and managing all global UI elements (player panel, map view, tooltips). It acts as the central point for UI initialization and display.
     *   **Interaction:** Receives explicit initialization calls from `PirateRoguelike.Core.GameInitializer` and `PirateRoguelike.Core.RunManager`. Provides references to UI controllers (e.g., `PirateRoguelike.UI.PlayerPanelController`) to other systems.
+
+*   **`PirateRoguelike.Services.UIStateService` (`Assets/Scripts/Services/UIStateService.cs`):**
+    *   **Responsibility:** A static class providing global UI state flags, such as `IsConsoleOpen`, to coordinate behavior across different UI components.
+    *   **Interaction:** Used by UI components (e.g., `DebugConsoleController`, `SlotManipulator`) to query or set global UI states, preventing conflicts and ensuring proper interaction flow.
 
 *   **`Pirate.MapGen.MapManager` (`Assets/Scripts/Map/MapManager.cs`):**
     *   **Responsibility:** Generates and manages the procedural map data for each run. Provides map structure (nodes, edges) and handles map-related events.

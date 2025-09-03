@@ -49,6 +49,8 @@ namespace PirateRoguelike.UI
 
         private void OnPointerDown(PointerDownEvent evt)
         {
+            if (UIStateService.IsConsoleOpen) { return; }
+
             if (!UIInteractionService.CanManipulateItem(_fromContainer))
             {
                 return;

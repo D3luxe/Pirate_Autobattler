@@ -43,7 +43,7 @@ To facilitate serialization with `JsonUtility`, the live game objects are conver
 
 ### 2.1. Saving Process
 
-1.  The process is typically triggered at the end of a battle via `GameSession.EndBattle(). For details on how battles are managed, see the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}).`.
+1.  The process is typically triggered at the end of a battle via `GameSession.EndBattle()`. For details on how battles are managed, see the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}). It can also be triggered by the debug save hotkey, which is managed by the `RunManager` using the `InputSystem_Actions` asset.
 2.  `GameSession.UpdateCurrentRunStateForSaving()` is called. This method is the core of the save process.
 3.  It populates the `GameSession.CurrentRunState` object with fresh data from the live game state:
     *   The live `PlayerShip` (`ShipState`) is converted to a `SerializableShipState` by calling its `.ToSerializable()` method.
