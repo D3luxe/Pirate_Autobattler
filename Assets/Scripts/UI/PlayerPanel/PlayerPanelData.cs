@@ -1,30 +1,24 @@
-
 using System.Collections.Generic;
 using UnityEngine;
-using PirateRoguelike.Runtime; // Added for RuntimeItem
 using System.ComponentModel;
-using PirateRoguelike.Shared; // Added for ObservableList
-using PirateRoguelike.Data; // NEW
+using PirateRoguelike.Shared;
+using PirateRoguelike.Data;
+using PirateRoguelike.Services;
 
 namespace PirateRoguelike.UI
 {
     // Represents the visual state of a single slot
-    public interface ISlotViewData : PirateRoguelike.Shared.INotifyPropertyChanged
-    {
-        int SlotId { get; }
-        Sprite Icon { get; }
-        string Rarity { get; }
-        bool IsEmpty { get; }
-        bool IsDisabled { get; }
-        float CooldownPercent { get; }
-        bool IsPotentialMergeTarget { get; }
-        RuntimeItem ItemData { get; }
-        string ItemInstanceId { get; }
-        ItemInstance CurrentItemInstance { get; } // NEW
-    }
+    public interface ISlotViewData : System.ComponentModel.INotifyPropertyChanged
+{
+    ItemInstance CurrentItemInstance { get; }
+    Sprite Icon { get; }
+    int SlotId { get; }
+    bool IsEmpty { get; }
+    SlotContainerType ContainerType { get; }
+}
 
     // Represents the visual state of the ship panel
-    public interface IShipViewData : PirateRoguelike.Shared.INotifyPropertyChanged
+    public interface IShipViewData : System.ComponentModel.INotifyPropertyChanged
     {
         string ShipName { get; }
         Sprite ShipSprite { get; }
@@ -33,7 +27,7 @@ namespace PirateRoguelike.UI
     }
 
     // Represents the visual state of the HUD counters
-    public interface IHudViewData : PirateRoguelike.Shared.INotifyPropertyChanged
+    public interface IHudViewData : System.ComponentModel.INotifyPropertyChanged
     {
         int Gold { get; }
         int Lives { get; }

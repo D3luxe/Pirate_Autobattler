@@ -142,6 +142,17 @@ namespace PirateRoguelike.Core
                     SceneManager.LoadScene("Battle");
                     break;
                 case PirateRoguelike.Data.EncounterType.Shop:
+                    // Retrieve the EncounterSO for the current node
+                    PirateRoguelike.Data.EncounterSO shopEncounter = GameDataRegistry.GetEncounter(currentNode.id);
+                    if (shopEncounter != null)
+                    {
+                        GameSession.CurrentRunState.NextShopItemCount = shopEncounter.shopItemCount;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Could not find shop encounter SO for node ID: {currentNode.id}. Using default shop item count.");
+                        GameSession.CurrentRunState.NextShopItemCount = 3; // Fallback to default
+                    }
                     SceneManager.LoadScene("Shop");
                     break;
                 case PirateRoguelike.Data.EncounterType.Treasure:

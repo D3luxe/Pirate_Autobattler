@@ -11,9 +11,9 @@ namespace PirateRoguelike.UI.Utilities
         {
             element.RegisterCallback<PointerEnterEvent>(evt =>
             {
-                if (!slotData.IsEmpty && slotData.ItemData != null)
+                                                                if (!slotData.IsEmpty && slotData.CurrentItemInstance != null)
                 {
-                    TooltipController.Instance.Show(slotData.ItemData, element, panelRoot);
+                    TooltipController.Instance.Show(slotData.CurrentItemInstance.RuntimeItem, element, panelRoot);
                 }
                 else
                 {

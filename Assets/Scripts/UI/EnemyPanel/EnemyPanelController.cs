@@ -61,7 +61,7 @@ namespace PirateRoguelike.UI
         private void UpdateEnemyEquipmentSlots()
         {
             _enemyEquipmentSlots.Clear();
-            foreach (var slotVm in _enemyShipState.Equipped.Select((item, index) => new SlotDataViewModel(item, index)).Cast<ISlotViewData>()) 
+            foreach (var slotVm in _enemyShipState.Equipped.Select((item, index) => new SlotDataViewModel(item, index, global::PirateRoguelike.Services.SlotContainerType.Equipment)).Cast<ISlotViewData>()) 
             {
                 _enemyEquipmentSlots.Add(slotVm);
             }

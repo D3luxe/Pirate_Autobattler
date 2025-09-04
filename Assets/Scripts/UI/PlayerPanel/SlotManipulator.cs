@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System;
-using System.Linq; // Added for ToList()
-using PirateRoguelike.Services; // Added for SlotId and SlotContainerType
-using PirateRoguelike.UI.Components; // Added for SlotElement
-using PirateRoguelike.Data; // For ItemInstance
+using System.Linq;
+using PirateRoguelike.Services;
+using PirateRoguelike.UI.Components;
+using PirateRoguelike.Data;
 
 namespace PirateRoguelike.UI
 {
@@ -12,16 +12,19 @@ namespace PirateRoguelike.UI
     {
         private VisualElement _ghostIcon;
         private Vector2 _startPosition;
-        public bool IsDragging { get; private set; } // Make IsDragging public for ShopItemElement
-        private ISlotViewData _sourceSlotData; // Changed from ItemElement to ISlotViewData
-        private PirateRoguelike.Services.SlotContainerType _fromContainer;
+        public bool IsDragging { get; private set; }
+        private ISlotViewData _sourceSlotData;
+        private global::PirateRoguelike.Services.SlotContainerType _fromContainer;
         private VisualElement _lastHoveredSlot;
+        private float _dragThreshold = 5f;
+        private Vector2 _pointerDownPosition;
+        private bool _isPointerDown = false;
+        private PointerDownEvent _initialPointerDownEvent;
 
-        // Change constructor to accept VisualElement
         public SlotManipulator(VisualElement targetElement, ISlotViewData sourceSlotData)
         {
-            target = targetElement; // Assign target here
-            _sourceSlotData = sourceSlotData; // Initialize _sourceSlotData directly
+            target = targetElement;
+            _sourceSlotData = sourceSlotData;
             IsDragging = false;
             Debug.Log($"SlotManipulator: Constructor called for {targetElement.name} ({targetElement.GetType().Name}).");
         }
@@ -32,10 +35,6 @@ namespace PirateRoguelike.UI
             target.RegisterCallback<PointerMoveEvent>(OnPointerMove);
             target.RegisterCallback<PointerUpEvent>(OnPointerUp);
             target.RegisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
-
-            // Determine the container type of the target slot when the manipulator is registered
-            _fromContainer = GetSlotContainerType(target.parent);
-            
         }
 
         protected override void UnregisterCallbacksFromTarget()
@@ -49,6 +48,8 @@ namespace PirateRoguelike.UI
 
         private void OnPointerDown(PointerDownEvent evt)
         {
+            _fromContainer = _sourceSlotData.ContainerType;
+
             if (UIStateService.IsConsoleOpen) { return; }
 
             if (!UIInteractionService.CanManipulateItem(_fromContainer))
@@ -56,104 +57,120 @@ namespace PirateRoguelike.UI
                 return;
             }
 
-            // Use _sourceSlotData for SlotId and IsEmpty
             Debug.Log($"SlotManipulator: OnPointerDown called for Slot ID: {_sourceSlotData?.SlotId}");
-            if (IsDragging) return;
 
             if (_sourceSlotData == null || _sourceSlotData.IsEmpty)
             {
                 return;
             }
 
-            // Hide the tooltip when a drag operation begins
             TooltipController.Instance.Hide();
 
-            _startPosition = evt.position;
+            _pointerDownPosition = evt.position;
+            _isPointerDown = true;
             target.CapturePointer(evt.pointerId);
-            IsDragging = true;
-
-            target.style.visibility = Visibility.Hidden; // Hide the original element
-
-            PlayerPanelEvents.OnSlotBeginDrag?.Invoke(_sourceSlotData.SlotId, evt);
-
-            _ghostIcon = new Image();
-            float ghostWidth = target.resolvedStyle.width * 0.8f;
-            float ghostHeight = target.resolvedStyle.height * 0.8f;
-            _ghostIcon.style.width = ghostWidth;
-            _ghostIcon.style.height = ghostHeight;
-            // Access Icon from ISlotViewData
-            ((Image)_ghostIcon).sprite = _sourceSlotData.Icon;
-            _ghostIcon.style.position = Position.Absolute;
-            _ghostIcon.pickingMode = PickingMode.Ignore;
-            _ghostIcon.style.opacity = 0.8f;
-            target.panel.visualTree.Add(_ghostIcon);
-
-            _ghostIcon.style.left = evt.position.x - (ghostWidth / 2);
-            _ghostIcon.style.top = evt.position.y - (ghostHeight / 2);
+            _initialPointerDownEvent = evt;
         }
 
         private void OnPointerMove(PointerMoveEvent evt)
         {
-            if (!IsDragging || !target.HasPointerCapture(evt.pointerId)) return;
+            if (!_isPointerDown) return; // Only proceed if mouse button is down
 
-            UpdateGhostPosition(evt.position);
+            float distance = Vector2.Distance(_pointerDownPosition, evt.position); // Declare distance once here
 
-            (VisualElement newHoveredSlotElement, ISlotViewData newHoveredSlotData, PirateRoguelike.Services.SlotContainerType newHoveredContainerType) = FindHoveredSlot(evt.position);
-
-            if (newHoveredSlotElement != _lastHoveredSlot)
+            if (!IsDragging) // If dragging has not yet started
             {
-                _lastHoveredSlot?.RemoveFromClassList("slot--hover");
-                newHoveredSlotElement?.AddToClassList("slot--hover");
-                _lastHoveredSlot = newHoveredSlotElement;
+                if (distance > _dragThreshold)
+                {
+                    IsDragging = true;
+                    target.style.visibility = Visibility.Hidden;
+
+                    PlayerPanelEvents.OnSlotBeginDrag?.Invoke(_sourceSlotData.SlotId, _initialPointerDownEvent);
+
+                    _ghostIcon = new Image();
+                    float ghostWidth = target.resolvedStyle.width * 0.8f;
+                    float ghostHeight = target.resolvedStyle.height * 0.8f;
+                    _ghostIcon.style.width = ghostWidth;
+                    _ghostIcon.style.height = ghostHeight;
+                    ((Image)_ghostIcon).sprite = _sourceSlotData.Icon;
+                    _ghostIcon.style.position = Position.Absolute;
+                    _ghostIcon.pickingMode = PickingMode.Ignore;
+                    _ghostIcon.style.opacity = 0.8f;
+                    target.panel.visualTree.Add(_ghostIcon);
+
+                    _ghostIcon.style.left = evt.position.x - (ghostWidth / 2);
+                    _ghostIcon.style.top = evt.position.y - (ghostHeight / 2);
+
+                    UpdateGhostPosition(evt.position); // Initial position update for the ghost icon
+                }
+            }
+
+            if (IsDragging) // If dragging is active (either just initiated or ongoing)
+            {
+                UpdateGhostPosition(evt.position);
+
+                (VisualElement newHoveredSlotElement, ISlotViewData newHoveredSlotData, global::PirateRoguelike.Services.SlotContainerType newHoveredContainerType) = FindHoveredSlot(evt.position);
+
+                if (newHoveredSlotElement != _lastHoveredSlot)
+                {
+                    _lastHoveredSlot?.RemoveFromClassList("slot--hover");
+                    newHoveredSlotElement?.AddToClassList("slot--hover");
+                    _lastHoveredSlot = newHoveredSlotElement;
+                }
             }
         }
 
         private void OnPointerUp(PointerUpEvent evt)
         {
-            if (!IsDragging || !target.HasPointerCapture(evt.pointerId)) return;
+            _isPointerDown = false;
+
+            if (!target.HasPointerCapture(evt.pointerId)) return;
 
             _lastHoveredSlot?.RemoveFromClassList("slot--hover");
 
-            (VisualElement dropTargetElement, ISlotViewData dropSlotData, PirateRoguelike.Services.SlotContainerType toContainer) = FindHoveredSlot(evt.position);
+            (VisualElement dropTargetElement, ISlotViewData dropSlotData, global::PirateRoguelike.Services.SlotContainerType toContainer) = FindHoveredSlot(evt.position);
 
             Debug.Log($"OnPointerUp: Drop Target Element: {dropTargetElement?.name ?? "NULL"} (Type: {dropTargetElement?.GetType().Name ?? "NULL"})");
             Debug.Log($"OnPointerUp: Drop Slot Data: {dropSlotData?.SlotId.ToString() ?? "NULL"} (IsEmpty: {dropSlotData?.IsEmpty.ToString() ?? "NULL"})");
             Debug.Log($"OnPointerUp: To Container: {toContainer}");
 
-            target.style.visibility = Visibility.Visible; // Make original element visible again
+            target.style.visibility = Visibility.Visible;
 
-            SlotId fromSlotId = new SlotId(_sourceSlotData.SlotId, _fromContainer);
+            global::PirateRoguelike.Services.SlotId fromSlotId = new global::PirateRoguelike.Services.SlotId(_sourceSlotData.SlotId, _fromContainer);
 
-            if (_fromContainer == SlotContainerType.Shop)
+            if (!IsDragging && _fromContainer == global::PirateRoguelike.Services.SlotContainerType.Shop)
             {
-                // Dragging from Shop
-                if (dropTargetElement != null && dropSlotData != null)
-                {
-                    // Dropped onto a valid slot (inventory or equipment)
-                    SlotId toSlotId = new SlotId(dropSlotData.SlotId, toContainer);
+                ItemManipulationService.Instance.RequestPurchase(fromSlotId, new global::PirateRoguelike.Services.SlotId(-1, global::PirateRoguelike.Services.SlotContainerType.Inventory));
+                CleanUp();
+                target.ReleasePointer(evt.pointerId);
+                return;
+            }
 
-                    // If target slot is occupied, treat as click-to-buy (find first available)
+            if (_fromContainer == global::PirateRoguelike.Services.SlotContainerType.Shop)
+            {
+                if (dropTargetElement != null && dropSlotData != null && (toContainer == global::PirateRoguelike.Services.SlotContainerType.Inventory || toContainer == global::PirateRoguelike.Services.SlotContainerType.Equipment))
+                {
+                    global::PirateRoguelike.Services.SlotId toSlotId = new global::PirateRoguelike.Services.SlotId(dropSlotData.SlotId, toContainer);
+
                     if (!dropSlotData.IsEmpty)
                     {
-                        ItemManipulationService.Instance.RequestPurchase(fromSlotId, new SlotId(-1, SlotContainerType.Inventory)); // -1 indicates find first available
+                        ItemManipulationService.Instance.RequestPurchase(fromSlotId, new global::PirateRoguelike.Services.SlotId(-1, global::PirateRoguelike.Services.SlotContainerType.Inventory));
                     }
-                    else // Target slot is empty, place directly
+                    else
                     {
                         ItemManipulationService.Instance.RequestPurchase(fromSlotId, toSlotId);
                     }
                 }
                 else
                 {
-                    // Dropped outside a valid slot, treat as click-to-buy (find first available)
-                    ItemManipulationService.Instance.RequestPurchase(fromSlotId, new SlotId(-1, SlotContainerType.Inventory)); // -1 indicates find first available
+                    // Dropped outside valid inventory/equipment, cancel purchase
                 }
             }
-            else if (_fromContainer == SlotContainerType.Inventory || _fromContainer == SlotContainerType.Equipment)
+            else if (_fromContainer == global::PirateRoguelike.Services.SlotContainerType.Inventory || _fromContainer == global::PirateRoguelike.Services.SlotContainerType.Equipment)
             {
-                // Existing swap logic for inventory/equipment
                 if (dropTargetElement != null && dropSlotData != null)
                 {
-                    SlotId toSlotId = new SlotId(dropSlotData.SlotId, toContainer);
+                    global::PirateRoguelike.Services.SlotId toSlotId = new global::PirateRoguelike.Services.SlotId(dropSlotData.SlotId, toContainer);
                     ItemManipulationService.Instance.RequestSwap(fromSlotId, toSlotId);
                 }
             }
@@ -174,8 +191,7 @@ namespace PirateRoguelike.UI
             _ghostIcon.style.top = pointerPosition.y - (_ghostIcon.resolvedStyle.height / 2);
         }
 
-        // Modified to return ISlotViewData and SlotContainerType
-        private (VisualElement, ISlotViewData, PirateRoguelike.Services.SlotContainerType) FindHoveredSlot(Vector2 pointerPosition)
+        private (VisualElement, ISlotViewData, global::PirateRoguelike.Services.SlotContainerType) FindHoveredSlot(Vector2 pointerPosition)
         {
             PickingMode originalPickingMode = target.pickingMode;
             target.pickingMode = PickingMode.Ignore;
@@ -200,39 +216,16 @@ namespace PirateRoguelike.UI
                 SlotElement slotElement = current as SlotElement;
                 if (slotElement != null && slotElement.userData is ISlotViewData slotData)
                 {
-                    return (current, slotData, GetSlotContainerType(current));
+                    return (current, slotData, slotData.ContainerType);
                 }
             }
             return (null, null, default);
         }
 
-        // New helper method to determine the slot's container type
-        private PirateRoguelike.Services.SlotContainerType GetSlotContainerType(VisualElement slotElement)
-        {
-            VisualElement current = slotElement;
-            while (current != null)
-            {
-                if (current.ClassListContains("equipment-bar"))
-                {
-                    return PirateRoguelike.Services.SlotContainerType.Equipment;
-                }
-                if (current.name == "inventory-container") // Inventory container has a name, not a class
-                {
-                    return PirateRoguelike.Services.SlotContainerType.Inventory;
-                }
-                // NEW: Check for shop item container
-                if (current.name == "ShopItemContainer") // Assuming ShopItemContainer is the parent of shop items
-                {
-                    return PirateRoguelike.Services.SlotContainerType.Shop;
-                }
-                current = current.parent;
-            }
-            return PirateRoguelike.Services.SlotContainerType.Inventory; // Default to Inventory if not found
-        }
-
         private void CleanUp()
         {
             IsDragging = false;
+            _isPointerDown = false;
             _ghostIcon?.RemoveFromHierarchy();
             _ghostIcon = null;
             _lastHoveredSlot?.RemoveFromClassList("slot--hover");

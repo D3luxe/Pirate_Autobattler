@@ -43,4 +43,8 @@ Once a valid skeleton is produced, this phase "decorates" the sparse graph with 
 
 ### Phase C: Validation & Repair
 
+## Related Documents
+
+*   [Data Systems Overview]({{< myrelref "../data/data-systems-overview.md" >}})
+
 After typing, a final validation pass is performed to check for gameplay rule violations (e.g., two `Elite` nodes in a row). A repair system makes minor attempts to fix these issues by re-typing individual nodes. Because the skeleton is guaranteed to be structurally sound, this phase no longer needs to worry about critical pathing issues like the map being incompletable.

@@ -178,7 +178,7 @@ namespace PirateRoguelike.UI
             _equipmentSlots.Clear();
             for (int i = 0; i < currentEquipped.Length; i++)
             {
-                _equipmentSlots.Add(new SlotDataViewModel(currentEquipped[i], i));
+                _equipmentSlots.Add(new SlotDataViewModel(currentEquipped[i], i, global::PirateRoguelike.Services.SlotContainerType.Equipment));
             }
         }
 
@@ -188,7 +188,7 @@ namespace PirateRoguelike.UI
             _inventorySlots.Clear();
             for (int i = 0; i < currentInventory.Count; i++)
             {
-                ((IList<ISlotViewData>)_inventorySlots).Add(new SlotDataViewModel(currentInventory[i].Item, i)); // MODIFIED LINE
+                ((IList<ISlotViewData>)_inventorySlots).Add(new SlotDataViewModel(currentInventory[i].Item, i, global::PirateRoguelike.Services.SlotContainerType.Inventory)); // MODIFIED LINE
             }
         }
 
@@ -196,21 +196,21 @@ namespace PirateRoguelike.UI
         private void HandleItemMoved(ItemInstance item, SlotId from, SlotId to)
         {
             // Clear the old slot
-            if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
+            if (from.ContainerType == global::PirateRoguelike.Services.SlotContainerType.Inventory)
             {
                 (_inventorySlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
             }
-            else if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
+            else if (from.ContainerType == global::PirateRoguelike.Services.SlotContainerType.Equipment)
             {
                 (_equipmentSlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
             }
 
             // Populate the new slot
-            if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
+            if (to.ContainerType == global::PirateRoguelike.Services.SlotContainerType.Inventory)
             {
                 (_inventorySlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
             }
-            else if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
+            else if (to.ContainerType == global::PirateRoguelike.Services.SlotContainerType.Equipment)
             {
                 (_equipmentSlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
             }
@@ -218,11 +218,11 @@ namespace PirateRoguelike.UI
 
         private void HandleItemAdded(ItemInstance item, SlotId to)
         {
-            if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
+            if (to.ContainerType == global::PirateRoguelike.Services.SlotContainerType.Inventory)
             {
                 (_inventorySlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
             }
-            else if (to.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
+            else if (to.ContainerType == global::PirateRoguelike.Services.SlotContainerType.Equipment)
             {
                 (_equipmentSlots[to.Index] as SlotDataViewModel).CurrentItemInstance = item;
             }
@@ -230,11 +230,11 @@ namespace PirateRoguelike.UI
 
         private void HandleItemRemoved(ItemInstance item, SlotId from)
         {
-            if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Inventory)
+            if (from.ContainerType == global::PirateRoguelike.Services.SlotContainerType.Inventory)
             {
                 (_inventorySlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
             }
-            else if (from.ContainerType == PirateRoguelike.Services.SlotContainerType.Equipment)
+            else if (from.ContainerType == global::PirateRoguelike.Services.SlotContainerType.Equipment)
             {
                 (_equipmentSlots[from.Index] as SlotDataViewModel).CurrentItemInstance = null;
             }
@@ -252,11 +252,13 @@ namespace PirateRoguelike.UI
 
         private ItemInstance _item;
         private readonly int _index;
+        public global::PirateRoguelike.Services.SlotContainerType ContainerType { get; private set; } // NEW
 
-        public SlotDataViewModel(ItemInstance item, int index)
+        public SlotDataViewModel(ItemInstance item, int index, global::PirateRoguelike.Services.SlotContainerType containerType) // MODIFIED CONSTRUCTOR
         {
             _item = item;
             _index = index;
+            ContainerType = containerType; // NEW
         }
 
         public int SlotId => _index;

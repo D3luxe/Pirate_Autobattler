@@ -1,8 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
-        <ui:VisualElement name="rarity-overlay" class="rarity-overlay" />
-        <ui:Image name="item-icon" class="item-icon" scale-mode="scale-to-fit" />
-        <ui:Label name="item-name-label" class="item-name-label" text="Item Name" />
-        <ui:Label name="item-description-label" class="item-description-label" text="Item Description" />
-        <ui:Label name="item-cost-label" class="item-cost-label" text="100 Gold" />
-        <ui:Button name="buy-button" class="buy-button" text="Buy" />
-</ui:UXML>

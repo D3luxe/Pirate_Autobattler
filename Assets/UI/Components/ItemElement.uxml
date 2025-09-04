@@ -1,5 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-uie="UnityEditor.UIElements">
+    <Style src="project://database/Assets/UI/Components/ItemElement.uss?fileID=7433441132597879392&amp;guid=f5a4d3b3a3a3a3a4a3a3a3a3a3a3a3a4&amp;type=3#ItemElement" />
     <ui:Image name="item-icon" class="item-icon" />
     <ui:VisualElement name="rarity-frame" class="rarity-frame" />
     <ui:VisualElement name="cooldown-overlay" class="cooldown-overlay" />
+    <ui:Label name="price-label" class="price-label" />
 </ui:UXML>

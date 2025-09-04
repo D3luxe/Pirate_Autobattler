@@ -1,8 +1,0 @@
-<UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <ui:VisualElement name="ShopItemRoot" class="shop-item-root">
-        <ui:VisualElement name="ItemIcon" class="item-icon" />
-        <ui:Label name="ItemName" class="item-name" text="Item Name" />
-        <ui:Label name="ItemPrice" class="item-price" text="0g" />
-        <ui:Button name="BuyItemButton" class="buy-item-button" text="Buy" />
-    </ui:VisualElement>
-</UXML>

@@ -20,10 +20,10 @@
                     <ui:Button name="RerollButton" text="Reroll" class="reroll-button" />
                     <ui:Label name="RerollCostLabel" text="(0g)" class="reroll-cost-label" />
                 </ui:VisualElement>
+                <ui:Label text="Can&apos;t afford!" name="MessageLabel" class="messageLabel" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="Footer" class="shop-footer">
-            <ui:Button name="LeaveShopButton" text="Leave Shop" class="leave-shop-button" />
-        </ui:VisualElement>
+        <ui:VisualElement name="Footer" class="shop-footer" />
+        <ui:Button name="LeaveShopButton" text="Leave Shop" class="leave-shop-button" style="top: 20%;" />
     </ui:VisualElement>
 </UXML>

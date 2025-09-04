@@ -1,0 +1,29 @@
+/* Styles for the SlotElement component */
+.slot {
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    background-image: url("project://database/Assets/Art/UI/ItemSlot_Empty.png?fileID=2800000&guid=c082f9c0526dfe74ab3dedad7c838055&type=3#ItemSlot_Empty");
+    background-color: rgba(51, 51, 51, 0);
+}
+
+.slot--hover {
+    border-color: white;
+    border-width: 2px;
+}
+
+.slot--merge {
+    --glow-color: yellow;
+    box-shadow: 0 0 10px 5px var(--glow-color);
+}
+
+.slot:focus {
+    border-width: 2px;
+    border-color: rgb(77, 144, 254);
+    box-shadow: 0 0 5px 2px rgb(77, 144, 254);
+}

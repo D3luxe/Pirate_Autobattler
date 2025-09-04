@@ -166,7 +166,7 @@ namespace PirateRoguelike.UI
 
                                 // Update the ItemElement's SlotViewData
                                 itemToMove.SlotViewData = newSlotData;
-                                itemToMove.Bind(newSlotData.CurrentItemInstance); // Re-bind the ItemElement
+                                itemToMove.Bind(); // Re-bind the ItemElement
 
                                 Debug.Log($"  Moved ItemElement from SlotId: {oldSlotData.SlotId} to {newSlotData.SlotId}");
                             }

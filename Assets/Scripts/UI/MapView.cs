@@ -20,12 +20,12 @@ namespace PirateRoguelike.UI
         [System.Serializable]
         public class EncounterIconMapping
         {
-            public PirateRoguelike.Data.EncounterType type;
+            public global::PirateRoguelike.Data.EncounterType type;
             public Sprite icon;
         }
 
         public List<EncounterIconMapping> encounterIcons;
-        private Dictionary<PirateRoguelike.Data.EncounterType, Sprite> _iconLookup;
+        private Dictionary<global::PirateRoguelike.Data.EncounterType, Sprite> _iconLookup;
 
         [Header("Visual Compaction Settings")]
         public float contentWidth = 1000f;
@@ -248,7 +248,7 @@ namespace PirateRoguelike.UI
                 }
                 // --- End Path Color Debugging ---
 
-                if (System.Enum.TryParse<PirateRoguelike.Data.EncounterType>(n.type, true, out var encounterType) && _iconLookup.TryGetValue(encounterType, out Sprite iconSprite))
+                if (System.Enum.TryParse<global::PirateRoguelike.Data.EncounterType>(n.type, true, out var encounterType) && _iconLookup.TryGetValue(encounterType, out Sprite iconSprite))
                 {
                     ve.style.backgroundImage = new StyleBackground(iconSprite);
                 }
@@ -707,7 +707,7 @@ namespace PirateRoguelike.UI
                 ve.RemoveFromClassList("type-unknown"); // Remove old class
                 ve.AddToClassList($"type-{resolvedNodeType.ToString().ToLower()}"); // Add new class
                 // Update icon if applicable
-                if (System.Enum.TryParse<PirateRoguelike.Data.EncounterType>(resolvedNodeType.ToString(), true, out var encounterType) && _iconLookup.TryGetValue(encounterType, out Sprite iconSprite))
+                if (System.Enum.TryParse<global::PirateRoguelike.Data.EncounterType>(resolvedNodeType.ToString(), true, out var encounterType) && _iconLookup.TryGetValue(encounterType, out Sprite iconSprite))
                 {
                     ve.style.backgroundImage = new StyleBackground(iconSprite);
                 }
@@ -732,11 +732,11 @@ namespace PirateRoguelike.UI
         // Helper method to update MapNodeData with encounter info (extracted from MapManager)
         private void UpdateMapNodeDataEncounterInfo(MapNodeData mapNode, Pirate.MapGen.NodeType resolvedNodeType, RulesSO rules)
         {
-            PirateRoguelike.Data.EncounterSO encounter = null;
+            global::PirateRoguelike.Data.EncounterSO encounter = null;
             switch (resolvedNodeType)
             {
                 case Pirate.MapGen.NodeType.Battle:
-                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == PirateRoguelike.Data.EncounterType.Battle && !e.isElite);
+                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == global::PirateRoguelike.Data.EncounterType.Battle && !e.isElite);
                     break;
                 case Pirate.MapGen.NodeType.Elite:
                     encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == PirateRoguelike.Data.EncounterType.Elite);
@@ -751,13 +751,13 @@ namespace PirateRoguelike.UI
                     encounter = GameDataRegistry.GetEncounter("enc_event");
                     break;
                 case Pirate.MapGen.NodeType.Treasure:
-                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == PirateRoguelike.Data.EncounterType.Treasure);
+                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == global::PirateRoguelike.Data.EncounterType.Treasure);
                     break;
                 case Pirate.MapGen.NodeType.Port: // Added Port case
                     encounter = GameDataRegistry.GetEncounter("enc_port"); // Assuming a specific port encounter
                     break;
                 default:
-                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == PirateRoguelike.Data.EncounterType.Battle && !e.isElite);
+                    encounter = GameDataRegistry.GetAllEncounters().FirstOrDefault(e => e.type == global::PirateRoguelike.Data.EncounterType.Battle && !e.isElite);
                     break;
             }
 

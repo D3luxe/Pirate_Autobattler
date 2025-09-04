@@ -77,12 +77,8 @@ namespace PirateRoguelike.UI
 
         void Start()
         {
-            // Initial UI update when the shop is first opened
-            if (_shopManager != null)
-            {
-                // ShopManager now generates items in its Start/Awake, so just update UI
-                UpdateShopUI();
-            }
+            // The UI is now updated exclusively by the OnShopDataUpdated event
+            // from the ShopManager, which guarantees the data is ready before rendering.
         }
 
         private void OnRerollButtonClicked()
@@ -107,30 +103,41 @@ namespace PirateRoguelike.UI
         // This method will be called by ShopManager when shop data changes
         public void UpdateShopUI()
         {
+            Debug.Log($"ShopController.UpdateShopUI: Called. Received {_shopManager.CurrentShopItems.Count} items from ShopManager.");
             // Update Merchant Name (static for now as per user request)
             // _merchantNameLabel.text = "Ol' Barnacle Bill's Emporium"; // Already set in UXML
+
+            // Add the shop-container class to enable contextual styling
+            _shopItemContainer.AddToClassList("shop-container");
 
             // Clear existing items and populate with current shop items
             _shopItemContainer.Clear();
             for (int i = 0; i < _shopManager.CurrentShopItems.Count; i++)
             {
                 var itemSO = _shopManager.CurrentShopItems[i];
-                var shopItemViewData = new ShopItemViewData(itemSO, GetRarityColor(itemSO.rarity), GameSession.Economy.Gold >= itemSO.Cost, i); // Pass index as ShopSlotId
-                var shopItemElement = new ShopItemElement();
-                shopItemElement.Bind(shopItemViewData);
-                // The click-to-buy and drag-to-buy are now handled within ShopItemElement
-                _shopItemContainer.Add(shopItemElement);
+                var itemInstance = new ItemInstance(itemSO); // View model requires an ItemInstance
+
+                var viewModel = new ShopSlotViewModel(
+                    itemInstance, 
+                    itemSO.Cost, 
+                    GameSession.Economy.Gold >= itemSO.Cost, 
+                    i); // Pass index as SlotId
+                
+                var slotElement = new SlotElement();
+                slotElement.Bind(viewModel);
+                _shopItemContainer.Add(slotElement);
+                PirateRoguelike.UI.Utilities.TooltipUtility.RegisterTooltipCallbacks(slotElement, viewModel, _shopRoot);
             }
 
             // Update ship display
             _shopShipContainer.Clear();
             if (_shopManager.CurrentShopShip != null)
             {
-                var shipViewUI = new ShipViewUI(); // Assuming ShipViewUI is a reusable component
+                var shipDisplayElement = new ShipDisplayElement();
                 var shopShipState = new PirateRoguelike.Core.ShipState(_shopManager.CurrentShopShip); // Use Core.ShipState
                 var enemyShipViewData = new PirateRoguelike.UI.EnemyShipViewData(shopShipState);
-                shipViewUI.Bind(enemyShipViewData);
-                _shopShipContainer.Add(shipViewUI);
+                shipDisplayElement.Bind(enemyShipViewData);
+                _shopShipContainer.Add(shipDisplayElement);
 
                 // Update ship price label and buy button state
                 _shipPriceLabel.text = $"{_shopManager.CurrentShopShip.Cost} Gold";

@@ -21,6 +21,7 @@ namespace PirateRoguelike.Saving
         public SubSeeds subSeeds; // Persist sub-seeds for deterministic replays
         public PityState pityState; // Persist pity state for Unknown node resolution
         public int rerollsThisShop; // Save reroll count for current shop
+        public int NextShopItemCount; // Save the number of items for the next shop encounter
         public List<RunModifier> activeRunModifiers;
         public List<SerializableItemInstance> battleRewards; // Items offered as battle rewards
         public UnknownContext unknownContext; // Context for unknown node resolution

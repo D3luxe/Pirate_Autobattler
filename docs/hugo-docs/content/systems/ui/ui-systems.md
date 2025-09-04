@@ -51,23 +51,18 @@ This section details the implementation of the dynamic tooltip description syste
 
 *   **`TooltipUtility` (`PirateRoguelike.UI.Utilities.TooltipUtility`):**
     >   File Path: Assets/Scripts/UI/TooltipUtility.cs
-    *   A static helper class that provides a simple method (`RegisterTooltipCallbacks`) for registering the necessary `PointerEnterEvent` and `PointerLeaveEvent` on a UI element.
+    *   A static helper class that provides a simple method (`RegisterTooltipCallbacks`) for registering the necessary `PointerEnterEvent` and `PointerLeaveEvent` on a UI element. It takes an `ISlotViewData` and a `panelRoot` as input, and passes the `RuntimeItem` from the `ISlotViewData` to the `TooltipController.Show()` method.
 
 *   **`TooltipPanelStyle.uss`:**
     *   The stylesheet that contains the necessary styles (`.tooltip--visible`, `.tooltip--hidden`, etc.) to control the tooltip's appearance and animations.
 
 ### 1.2. UI Integration
 
-*   **`ShopItemViewUI.cs`:**
-    *   Registers `PointerEnterEvent` and `PointerLeaveEvent` callbacks on the root visual element.
-    *   The `PointerEnterEvent` callback invokes `TooltipController.Show()`, passing the item's data and a reference to itself for positioning.
-    *   The `PointerLeaveEvent` callback invokes `TooltipController.Hide()`.
+This system is used by multiple parts of the UI to ensure consistent behavior.
 
-*   **`PlayerPanelView.cs`:**
-    *   `ISlotViewData` was extended to include `ItemSO ItemData`.
-    *   `SlotDataViewModel` and `MockSlotViewData` were updated to implement `ItemData`.
-    *   In the `PopulateSlots` method, `PointerEnterEvent` and `PointerLeaveEvent` callbacks are registered on the `slotElement`s.
-    *   These callbacks invoke `TooltipController.Show()` and `Hide()`, passing the `RuntimeItem` from the slot's view model.
+*   **`PlayerPanelView.cs`:** The player's inventory and equipment slots are composed of `SlotElement`s, which are populated with `ItemElement`s based on data from the `PlayerPanelDataViewModel`.
+*   **`EnemyPanelController.cs`:** The enemy's equipment display dynamically creates `SlotElement`s and binds them to the enemy's `ShipState` data.
+*   **`ShopController.cs`:** The shop interface is now a primary consumer of this system. It uses `SlotElement`s to display items for sale. It uses a special `ShopSlotViewModel` to provide price data, and contextual CSS to make the price visible only within the shop. Crucially, `ShopController` now explicitly registers tooltip callbacks for each shop item, ensuring tooltips appear on hover.
 
 ## 2. Universal Item Manipulation System
 
@@ -87,7 +82,11 @@ This system centralizes the logic for moving, equipping, and swapping items, dec
 *   **`SlotManipulator` (`PirateRoguelike.UI.SlotManipulator`):**
     >   File Path: Assets/Scripts/UI/PlayerPanel/SlotManipulator.cs
     *   A `PointerManipulator` attached to each `ItemElement`. It detects drag-and-drop gestures.
-    *   Initiates requests by calling methods on `ItemManipulationService` (e.g., `SwapItems`). It does not modify game state directly.
+    *   **Drag Initiation:** Dragging is now initiated only after the mouse moves beyond a small threshold from the initial click position, allowing for distinct click actions.
+    *   Initiates requests by calling methods on `ItemManipulationService` (e.g., `SwapItems`, `RequestPurchase`). It does not modify game state directly.
+    *   **Shop Item Interaction:**
+        *   **Click-to-Buy:** A quick click on a shop item triggers an immediate purchase to an available inventory slot.
+        *   **Drag-and-Drop Purchase:** Dragging a shop item and dropping it over a valid inventory or equipment slot triggers a purchase. Dropping it elsewhere cancels the purchase, and the item visually returns to the shop.
     *   **Conflict Prevention:** This manipulator now checks `UIStateService.IsConsoleOpen` and will not initiate drag operations if the debug console is active, preventing input conflicts.
 
 *   **`Inventory` (`PirateRoguelike.Services.Inventory`):**
@@ -115,6 +114,7 @@ This system centralizes the logic for moving, equipping, and swapping items, dec
     >   File Path: Assets/Scripts/Core/UIInteractionService.cs
     *   A static class that holds the current global UI state (e.g., `IsInCombat`). It provides methods that the UI can query to ask for permission to perform an action.
     *   The `ItemManipulationService` will only perform actions after they have been approved by the `UIInteractionService`.
+    *   This service now allows item manipulation for `SlotContainerType.Shop` when not in combat, enabling shop item purchases.
 
 ### 2.2. How it Works (Example: Item Swap)
 

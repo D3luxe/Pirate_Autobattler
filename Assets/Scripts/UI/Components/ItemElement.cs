@@ -1,63 +1,57 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using System.ComponentModel;
 using PirateRoguelike.Data;
+using System.ComponentModel;
 
 namespace PirateRoguelike.UI.Components
 {
-    public class ItemElement : VisualElement
+    public partial class ItemElement : VisualElement
     {
-        private Image _icon;
-        private VisualElement _rarityFrame;
-        private VisualElement _cooldownOverlay;
-        private ItemInstance _itemInstance;
-        public ISlotViewData SlotViewData { get; set; } // New field
+        public ISlotViewData SlotViewData { get; set; }
 
-        public Image IconElement => _icon; // New public property
+        // UXML elements
+        private VisualElement _itemIcon;
+        private Label _priceLabel;
 
         public ItemElement()
         {
+            Debug.Log("ItemElement: Constructor called.");
             // Load UXML and add to hierarchy
-            var visualTree = Resources.Load<VisualTreeAsset>("UI/Components/ItemElement"); // Assuming ItemElement.uxml is in Resources
+            var visualTree = UIManager.Instance.ItemElementUXML;
             visualTree.CloneTree(this);
 
-            _icon = this.Q<Image>("item-icon");
-            _rarityFrame = this.Q<VisualElement>("rarity-frame");
-            _cooldownOverlay = this.Q<VisualElement>("cooldown-overlay");
+            // Query elements
+            _itemIcon = this.Q<VisualElement>("item-icon");
+            _priceLabel = this.Q<Label>("price-label");
         }
 
-        public void Bind(ItemInstance item)
+        public void Bind()
         {
-            if (_itemInstance != null)
+            if (SlotViewData == null || SlotViewData.CurrentItemInstance == null)
             {
-                // Unsubscribe from old item's property changes if needed
+                // Hide or clear elements if no item
+                _itemIcon.style.backgroundImage = null;
+                _priceLabel.text = string.Empty;
+                this.style.visibility = Visibility.Hidden;
+                return;
             }
 
-            _itemInstance = item;
+            this.style.visibility = Visibility.Visible;
 
-            if (_itemInstance != null)
+            // Set item icon
+            _itemIcon.style.backgroundImage = new StyleBackground(SlotViewData.Icon);
+
+            // Set price label visibility and text based on SlotViewData type
+            if (SlotViewData is ShopSlotViewModel shopSlotViewModel)
             {
-                _icon.sprite = _itemInstance.Def.icon;
-                // Set rarity frame background based on rarity
-                _rarityFrame.style.backgroundImage = new StyleBackground(GetRarityFrameSprite(_itemInstance.Def.rarity));
-                // Set cooldown overlay visibility
-                _cooldownOverlay.style.visibility = Visibility.Hidden; // Placeholder for now
-
-                // Subscribe to item's property changes if needed
+                _priceLabel.text = $"{shopSlotViewModel.Price}g";
+                _priceLabel.style.display = DisplayStyle.Flex;
             }
             else
             {
-                _icon.sprite = null;
-                _rarityFrame.style.backgroundImage = StyleKeyword.None;
-                _cooldownOverlay.style.visibility = Visibility.Hidden;
+                _priceLabel.text = string.Empty;
+                _priceLabel.style.display = DisplayStyle.None;
             }
-        }
-
-        private Sprite GetRarityFrameSprite(Rarity rarity)
-        {
-            // This needs to be implemented based on your project's asset loading
-            // For now, return a placeholder or null
-            return null; 
         }
     }
 }

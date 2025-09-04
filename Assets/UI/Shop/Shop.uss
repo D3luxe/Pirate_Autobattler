@@ -29,6 +29,7 @@
     width: 80%;
     flex-grow: 1;
     margin-top: 16%;
+    margin-bottom: 5%;
 }
 
 .shop-section {
@@ -96,6 +97,7 @@
     color: white;
     padding: 5px 10px;
     border-radius: 5px;
+    position: absolute;
 }
 
 .reroll-cost-label {
@@ -110,4 +112,12 @@
 
 .shop-footer {
     margin-top: 10px;
+}
+
+.messageLabel {
+    position: absolute;
+    align-self: center;
+    font-size: 28px;
+    color: rgb(255, 0, 0);
+    text-shadow: 2px 2px 0 rgb(0, 0, 0);
 }

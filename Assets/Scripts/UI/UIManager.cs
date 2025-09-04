@@ -19,9 +19,12 @@ namespace PirateRoguelike.UI
     [Header("UXML Assets")]
     [SerializeField] private VisualTreeAsset _shipDisplayElementUXML;
     [SerializeField] private VisualTreeAsset _slotElementUXML;
+    [SerializeField] private VisualTreeAsset _itemElementUXML; // Added for ItemElement
 
     public VisualTreeAsset ShipDisplayElementUXML => _shipDisplayElementUXML;
     public VisualTreeAsset SlotElementUXML => _slotElementUXML;
+    public VisualTreeAsset ItemElementUXML => _itemElementUXML; // Added for ItemElement
+
 
     private PlayerPanelController _playerPanelController;
     private MapView _mapView;
@@ -147,7 +150,6 @@ namespace PirateRoguelike.UI
         else
         {
             Debug.LogError("MapView instance is null in OnRunSceneLoaded!");
-        }
+                }
     }
-}
-}
+}}

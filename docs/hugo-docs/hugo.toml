@@ -129,3 +129,7 @@ disableKinds = ["taxonomyTerm"]
 [markup]
   [markup.highlight]
       style = "nord"
+
+[params.plantuml]
+  enable = true
+  theme = "default"

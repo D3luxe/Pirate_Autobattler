@@ -231,8 +231,24 @@ namespace PirateRoguelike.UI
                 case "loadscene":
                     if (parts.Length == 2)
                     {
-                        string sceneName = parts[1];
+                        string sceneName = parts[1].ToLower();
                         Log($"Attempting to load scene: {sceneName}...");
+
+                        // FIX: If loading the shop directly, we must manually set the game state
+                        // that the RunManager would normally set when entering a shop node.
+                        if (sceneName == "shop")
+                        {
+                            if (GameSession.CurrentRunState != null)
+                            {
+                                GameSession.CurrentRunState.NextShopItemCount = 3; // Set a default item count for debug purposes
+                                Log("Set NextShopItemCount to 3 for debug shop load.");
+                            }
+                            else
+                            {
+                                Log("Error: Cannot set shop item count because GameSession is not active.");
+                            }
+                        }
+
                         SceneManager.LoadScene(sceneName);
                     }
                     else

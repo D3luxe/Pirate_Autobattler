@@ -4,3 +4,9 @@ Act as a senior Unity C# gameplay engineer + tech designer; Before changing any 
 Act as a senior Unity C# gameplay engineer + tech designer; Before changing any code, first output brief assumptions + a high-level plan (≤3 bullets). *Wait* for approval before continuing.
 
 Hello Gemini. Following your Trace and Verify procotol (and *NO ASSUMPTIONS*), please analyze 
+
+
+* Debug console added
+* Need to implement/test commands
+* Fix shop errors (in outputlog)
+* Eventually, phase 2 of admin panel

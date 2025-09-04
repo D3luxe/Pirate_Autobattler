@@ -77,8 +77,9 @@ namespace PirateRoguelike.Encounters
             // _shopItemsContainer = root.Q<VisualElement>("shop-items-container");
             // ...
 
-            GenerateShopItems();
+            GenerateShopItems(GameSession.CurrentRunState.NextShopItemCount);
             GenerateShopShip();
+            Debug.Log($"ShopManager.Start: Firing OnShopDataUpdated. Subscribers: {OnShopDataUpdated?.GetInvocationList()?.Length ?? 0}");
             OnShopDataUpdated?.Invoke(); // Initial UI update
         }
 
@@ -100,7 +101,7 @@ namespace PirateRoguelike.Encounters
             }
         }
 
-        private void GenerateShopItems()
+        private void GenerateShopItems(int itemCount)
         {
             _currentShopItems.Clear();
             int currentFloorIndex = GameSession.CurrentRunState != null ? GameSession.CurrentRunState.currentColumnIndex : 0;
@@ -110,7 +111,7 @@ namespace PirateRoguelike.Encounters
             List<ItemSO> availableItems = GameDataRegistry.GetAllItems();
             List<ItemSO> generatedItems = new List<ItemSO>();
 
-            for (int i = 0; i < 3; i++) // Generate 3 unique items
+            for (int i = 0; i < itemCount; i++) // Generate unique items based on itemCount
             {
                 Rarity selectedRarity = GetRandomRarity(rarityProbabilities);
                 ItemSO selectedItem = null;
@@ -193,7 +194,7 @@ namespace PirateRoguelike.Encounters
             if (GameSession.Economy.TrySpendGold(rerollCost))
             {
                 GameSession.Economy.IncrementRerollCount();
-                GenerateShopItems();
+                GenerateShopItems(GameSession.CurrentRunState.NextShopItemCount);
                 Debug.Log($"Rerolled shop for {rerollCost} gold.");
                 OnShopDataUpdated?.Invoke(); // Notify UI
             }
@@ -252,7 +253,6 @@ namespace PirateRoguelike.Encounters
                     _currentShopShip = null;
                 }
             }
-            OnShopDataUpdated?.Invoke(); // Notify UI
         }
 
         public void BuyShip(ShipSO ship)

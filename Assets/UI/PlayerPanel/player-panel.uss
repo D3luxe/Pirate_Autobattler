@@ -82,89 +82,7 @@
     height: 140px;
 }
 
-.slot {
-    width: 60px;
-    height: 60px;
-    margin: 5px;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
-    flex-grow: 0;
-    flex-shrink: 0;
-    background-image: url("project://database/Assets/Art/UI/ItemSlot_Empty.png?fileID=2800000&guid=c082f9c0526dfe74ab3dedad7c838055&type=3#ItemSlot_Empty");
-    background-color: rgba(51, 51, 51, 0);
-}
-
-.slot__rarity-frame {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-width: 3px;
-    border-radius: 8px;
-    background-color: transparent;
-    color: white;
-    scale: 1 1;
-}
-
-.slot__icon {
-    width: 50px;
-    height: 50px;
-    background-color: transparent;
-    color: white;
-    scale: 1 1;
-}
-
-.slot__cooldown-overlay {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    transform-origin: bottom;
-    scale: 1 0;
-    transition: scale 0.1s linear;
-}
-
-.slot--empty .slot__icon {
-    visibility: hidden;
-}
-
-.slot--empty .slot__rarity-frame {
-    visibility: hidden;
-}
-
-.slot--empty .slot__id-label {
-    visibility: hidden;
-}
-
-.slot--disabled .slot__icon {
-    -unity-slice-scale: 0.8;
-}
-
-.slot--hover {
-    border-color: white;
-    border-width: 2px;
-}
-
-.slot--merge {
-    --glow-color: yellow;
-    box-shadow: 0 0 10px 5px var(--glow-color);
-}
-
-.rarity--bronze .slot__rarity-frame {
-    border-color: rgb(205, 127, 50);
-}
-
-.rarity--silver .slot__rarity-frame {
-    border-color: rgb(192, 192, 192);
-}
-
-.rarity--gold .slot__rarity-frame {
-    border-color: rgb(255, 215, 0);
-}
-
-.rarity--diamond .slot__rarity-frame {
-    border-color: rgb(185, 242, 255);
-}
+/* SLOT AND ITEM STYLES MOVED TO DEDICATED COMPONENT STYLESHEETS */
 
 .hud-counters {
     flex-direction: row;
@@ -208,12 +126,6 @@
 }
 
 .control-button:focus {
-    border-width: 2px;
-    border-color: rgb(77, 144, 254);
-    box-shadow: 0 0 5px 2px rgb(77, 144, 254);
-}
-
-.slot:focus {
     border-width: 2px;
     border-color: rgb(77, 144, 254);
     box-shadow: 0 0 5px 2px rgb(77, 144, 254);

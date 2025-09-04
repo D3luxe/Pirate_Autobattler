@@ -90,7 +90,7 @@ namespace PirateRoguelike.UI.Components
                     _itemElement.AddManipulator(Manipulator);
                 }
                 _itemElement.SlotViewData = _viewModel; // Assign slotData to ItemElement
-                _itemElement.Bind(_viewModel.CurrentItemInstance); // Bind ItemElement to ItemInstance
+                _itemElement.Bind(); // Bind ItemElement using its internal SlotViewData
             }
             else
             {

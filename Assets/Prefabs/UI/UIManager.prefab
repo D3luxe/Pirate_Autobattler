@@ -51,3 +51,4 @@ MonoBehaviour:
   debugConsolePrefab: {fileID: 27078478518024827, guid: 69d3ee032750f0b4f95a2c53b73fa97f, type: 3}
   _shipDisplayElementUXML: {fileID: 9197481963319205126, guid: d18484afd89158449b7a691bb72f974a, type: 3}
   _slotElementUXML: {fileID: 9197481963319205126, guid: 2d7f6a79a692f804f9771cebdd1fbc1a, type: 3}
+  _itemElementUXML: {fileID: 9197481963319205126, guid: 053cb6eec7aae344b988864e2ecae06f, type: 3}

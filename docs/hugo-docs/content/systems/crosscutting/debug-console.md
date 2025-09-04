@@ -55,7 +55,7 @@ The `ProcessCommand` method in `DebugConsoleController.cs` parses user input and
 *   `help`: Displays a list of available commands.
 *   `addgold <amount>`: Adds a specified amount of gold to the player's economy.
 *   `addlives <amount>`: Adds a specified amount of lives to the player's economy.
-*   `loadscene <sceneName>`: Loads a specified scene (e.g., `MainMenu`, `Boot`, `Run`, `Battle`, `Summary`).
+*   `loadscene <sceneName>`: Loads a specified scene (e.g., `MainMenu`, `Boot`, `Run`, `Battle`, `Summary`). **Note:** Using `loadscene shop` will automatically set a default item count for the shop to ensure it is populated correctly for testing.
 *   `skipnode`: Advances the player to the next node on the map.
 *   `giveitem <itemId>`: Gives the player a specified item.
 
