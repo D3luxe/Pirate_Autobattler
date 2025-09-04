@@ -30,6 +30,413 @@ Provides static `Get` methods (e.g., `GetItem(string id)`, `GetShip(string id)`,
 ### Dynamic Rarity Calculation
 `GameDataRegistry` also contains logic (`GetRarityProbabilitiesForFloor`) to calculate item rarity probabilities based on `RunConfigSO`'s `rarityMilestones`, interpolating between milestones based on the current floor index.
 
+### Key ScriptableObjects
+
+This section details the primary ScriptableObjects used to define static game data.
+
+*   **`AbilitySO` (`Assets/Scripts/Data/Abilities/AbilitySO.cs`):**
+    *   **Purpose:** Defines a single ability that can be triggered by various combat events.
+    *   **Create Asset Menu:** `Pirate/Abilities/Ability`
+    *   **Key Fields:**
+        *   `id` (string): Unique identifier for the ability.
+        *   `displayName` (string): Display name for the ability.
+        *   `trigger` (`TriggerType`): The event that triggers this ability (e.g., `OnBattleStart`, `OnDamageDealt`).
+        *   `actions` (List of `ActionSO`): A list of actions to be executed when this ability is triggered.
+    *   **Relationships:** Contains a list of `ActionSO`s. Referenced by `ItemSO`.
+
+*   **`ActionSO` (`Assets/Scripts/Data/Actions/ActionSO.cs`):**
+    *   **Purpose:** Abstract base class for all concrete actions that an `AbilitySO` can execute. Concrete implementations define specific behaviors like dealing damage, healing, or applying effects.
+    *   **Key Fields:**
+        *   `description` (string): A text description of the action.
+    *   **Methods:**
+        *   `Execute(CombatContext ctx)`: Abstract method to be implemented by subclasses, containing the action's logic.
+        *   `GetActionType()`: Abstract method to return the specific `ActionType` of the action.
+    *   **Relationships:** Parent class for `ApplyEffectActionSO`, `DamageActionSO`, `HealActionSO`.
+
+*   **`ApplyEffectActionSO` (`Assets/Scripts/Data/Actions/ApplyEffectActionSO.cs`):**
+    *   **Purpose:** A concrete `ActionSO` that applies a specified `EffectSO` to the target of the action.
+    *   **Create Asset Menu:** `Pirate/Actions/Apply Effect Action`
+    *   **Key Fields:**
+        *   `effectToApply` (`EffectSO`): The effect to be applied when this action executes.
+    *   **Relationships:** References an `EffectSO`.
+
+*   **`DamageActionSO` (`Assets/Scripts/Data/Actions/DamageActionSO.cs`):**
+    *   **Purpose:** A concrete `ActionSO` that deals a specified amount of damage to the target of the action.
+    *   **Create Asset Menu:** `Pirate/Actions/Damage Action`
+    *   **Key Fields:**
+        *   `damageAmount` (int): The amount of damage to deal.
+
+*   **`HealActionSO` (`Assets/Scripts/Data/Actions/HealActionSO.cs`):**
+    *   **Purpose:** A concrete `ActionSO` that heals the caster of the action for a specified amount.
+    *   **Create Asset Menu:** `Pirate/Actions/Heal Action`
+    *   **Key Fields:**
+        *   `healAmount` (int): The amount of health to restore.
+
+*   **`EffectSO` (`Assets/Scripts/Data/Effects/EffectSO.cs`):**
+    *   **Purpose:** Defines a persistent combat effect (e.g., buff, debuff, damage over time) that can be applied to a ship.
+    *   **Create Asset Menu:** `Pirate/Effects/Effect`
+    *   **Key Fields:**
+        *   `id` (string): Unique identifier for the effect.
+        *   `displayName` (string): Display name for the effect.
+        *   `duration` (float): How long the effect lasts in seconds.
+        *   `tickInterval` (float): How often the `tickAction` is performed (0 for no tick).
+        *   `tickAction` (`ActionSO`): An optional action to perform on each tick of the effect.
+        *   `isStackable` (bool): Whether multiple instances of this effect can stack.
+        *   `maxStacks` (int): Maximum number of stacks if `isStackable` is true.
+    *   **Relationships:** Contains an `ActionSO` for its tick effect. Referenced by `ApplyEffectActionSO`.
+
+*   **`EncounterSO` (`Assets/Scripts/Data/EncounterSO.cs`):**
+    *   **Purpose:** Defines the parameters for different types of encounters a player can face on the map (e.g., battle, shop, event, port).
+    *   **Create Asset Menu:** `Pirate/Data/Encounter`
+    *   **Key Fields:**
+        *   `id` (string): Unique identifier for the encounter.
+        *   `type` (`EncounterType`): The type of encounter (e.g., `Battle`, `Shop`, `Event`).
+        *   `weight` (float): For weighted random selection of encounters.
+        *   `isElite` (bool): Indicates if this is an elite encounter.
+        *   `eliteRewardDepthBonus` (int): Bonus for reward generation in elite encounters.
+        *   `iconPath` (string): Path to the icon sprite for the encounter.
+        *   `tooltipText` (string): Text displayed when hovering over the encounter on the map.
+        *   `enemies` (List of `EnemySO`): For battle encounters, a list of enemies to fight.
+        *   `shopItemCount` (int): For shop encounters, the number of items available.
+        *   `portHealPercent` (float): For port encounters, percentage of health healed.
+        *   `eventTitle` (string): For event encounters, the title of the event.
+        *   `eventDescription` (string): For event encounters, the description of the event.
+        *   `minFloor`, `maxFloor` (int): Floor range for event encounters.
+        *   `eventChoices` (List of `EventChoice`): For event encounters, a list of choices the player can make.
+    *   **Relationships:** Contains lists of `EnemySO`s and `EventChoice`s.
+
+*   **`EnemySO` (`Assets/Scripts/Data/EnemySO.cs`):**
+    *   **Purpose:** Defines a specific enemy, including its base ship type and initial equipped items.
+    *   **Create Asset Menu:** `Pirate/Data/Enemy`
+    *   **Key Fields:**
+        *   `id` (string): Unique identifier for the enemy.
+        *   `displayName` (string): Display name for the enemy.
+        *   `shipId` (string): The ID of the `ShipSO` this enemy uses as its base.
+        *   `itemLoadout` (List of `ItemSO`): Items the enemy starts with.
+        *   `targetingStrategy` (`TargetingStrategy`): AI strategy for targeting in combat.
+    *   **Relationships:** References a `ShipSO` (by ID) and contains a list of `ItemSO`s.
+
+*   **`ItemSO` (`Assets/Scripts/Data/ItemSO.cs`):**
+    *   **Purpose:** Defines a static item, including its visual representation, stats, abilities, and shop cost.
+    *   **Create Asset Menu:** `Pirate/Data/Item`
+    *   **Key Fields:**
+        *   `id` (string): Unique identifier for the item.
+        *   `displayName` (string): Display name for the item.
+        *   `description` (string): Detailed description of the item.
+        *   `icon` (Sprite): Visual icon for the item.
+        *   `rarity` (`Rarity`): Rarity tier of the item.
+        *   `isActive` (bool): Whether the item has an active ability (e.g., requires cooldown).
+        *   `cooldownSec` (float): Cooldown duration in seconds if `isActive` is true.
+        *   `abilities` (List of `AbilitySO`): Abilities granted by this item.
+        *   `tags` (List of `Tag`): Categorization tags for the item.
+        *   `synergyRules` (List of `SynergyRule`): Rules for item synergies.
+        *   `Cost` (int, property): Calculated shop cost based on rarity.
+    *   **Relationships:** Contains lists of `AbilitySO`s, `Tag`s, and `SynergyRule`s. Referenced by `EnemySO`.
+
+*   **`RunConfigSO` (`Assets/Scripts/Data/RunConfigSO.cs`):**
+    *   **Purpose:** Defines global configuration settings for a game run, such as starting resources and reward generation rules.
+    *   **Create Asset Menu:** `Data/RunConfigSO`
+    *   **Key Fields:**
+        *   `startingLives` (int): Player's starting lives.
+        *   `startingGold` (int): Player's starting gold.
+        *   `inventorySize` (int): Size of the player's inventory.
+        *   `rewardGoldPerWin` (int): Gold awarded after each battle win.
+        *   `rerollBaseCost` (int): Base cost for rerolling shop items.
+        *   `rerollGrowth` (float): Growth factor for reroll cost.
+        *   `rarityMilestones` (List of `RarityMilestone`): Defines rarity probabilities per floor.
+        *   `eliteModifier` (int): Modifier for elite encounter rewards.
+        *   `rules` (`RulesSO`): Map generation rules.
+    *   **Relationships:** Contains a list of `RarityMilestone`s and references `RulesSO`.
+
+*   **`ShipSO` (`Assets/Scripts/Data/ShipSO.cs`):**
+    *   **Purpose:** Defines a static ship type, including its base stats, visual art, and built-in items.
+    *   **Create Asset Menu:** `Data/ShipSO`
+    *   **Key Fields:**
+        *   `id` (string): Unique identifier for the ship.
+        *   `displayName` (string): Display name for the ship.
+        *   `baseMaxHealth` (int): Base maximum health of the ship.
+        *   `baseItemSlots` (int): Number of item slots the ship has.
+        *   `builtInItems` (List of `ItemRef`): Items the ship starts with (references by ID).
+        *   `itemLoadout` (List of `ItemRef`): Additional items for specific loadouts (references by ID).
+        *   `art` (Sprite): Visual sprite for the ship.
+        *   `rarity` (`Rarity`): Rarity tier of the ship.
+        *   `Cost` (int): Cost of the ship (e.g., in shop).
+    *   **Relationships:** Contains lists of `ItemRef`s. Referenced by `EnemySO` (by ID).
+
+### Data Structure Relationships (PlantUML Class Diagram)
+
+This diagram illustrates the relationships between the various ScriptableObjects and related data structures.
+
+```plantuml
+@startuml
+' --- STYLING ---
+skinparam style strictuml
+skinparam shadowing true
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 16
+skinparam backgroundColor #b4b4b42c
+!pragma usecasesquare
+skinparam class {
+    BorderColor #A9A9A9
+    BorderThickness 1.5
+    ArrowColor #555555
+    ArrowThickness 1.5
+}
+skinparam note {
+    BackgroundColor #FFFFE0
+    BorderColor #B4B4B4
+}
+
+' Define stereotype colors
+skinparam class<<SO>> {
+    BackgroundColor #ADD8E6 ' Light Blue
+}
+skinparam class<<AbstractSO>> {
+    BackgroundColor #ADD8E6
+    FontColor #808080
+    FontStyle italic
+}
+skinparam class<<Enum>> {
+    BackgroundColor #D3D3D3 ' Light Gray
+}
+skinparam class<<Struct>> {
+    BackgroundColor #D3D3D3
+}
+skinparam class<<Serializable>> {
+    BackgroundColor #FFFF99 ' Light Yellow
+}
+
+' --- CLASSES ---
+abstract class ActionSO <<AbstractSO>> {
+    + description: string
+    + Execute(ctx: CombatContext)
+    + GetActionType(): ActionType
+}
+
+class AbilitySO <<SO>> {
+    + id: string
+    + displayName: string
+    + trigger: TriggerType
+    + actions: List<ActionSO>
+}
+
+class ApplyEffectActionSO <<SO>> {
+    + effectToApply: EffectSO
+}
+
+class DamageActionSO <<SO>> {
+    + damageAmount: int
+}
+
+class HealActionSO <<SO>> {
+    + healAmount: int
+}
+
+class EffectSO <<SO>> {
+    + id: string
+    + displayName: string
+    + duration: float
+    + tickInterval: float
+    + tickAction: ActionSO
+    + isStackable: bool
+    + maxStacks: int
+}
+
+class EncounterSO <<SO>> {
+    + id: string
+    + type: EncounterType
+    + weight: float
+    + isElite: bool
+    + enemies: List<EnemySO>
+    + eventChoices: List<EventChoice>
+}
+
+class EnemySO <<SO>> {
+    + id: string
+    + displayName: string
+    + shipId: string
+    + itemLoadout: List<ItemSO>
+    + targetingStrategy: TargetingStrategy
+}
+
+class ItemSO <<SO>> {
+    + id: string
+    + displayName: string
+    + description: string
+    + icon: Sprite
+    + rarity: Rarity
+    + isActive: bool
+    + cooldownSec: float
+    + abilities: List<AbilitySO>
+    + tags: List<Tag>
+    + synergyRules: List<SynergyRule>
+    + Cost: int
+}
+
+class RunConfigSO <<SO>> {
+    + startingLives: int
+    + startingGold: int
+    + inventorySize: int
+    + rewardGoldPerWin: int
+    + rerollBaseCost: int
+    + rerollGrowth: float
+    + rarityMilestones: List<RarityMilestone>
+    + eliteModifier: int
+    + rules: RulesSO
+}
+
+class ShipSO <<SO>> {
+    + id: string
+    + displayName: string
+    + baseMaxHealth: int
+    + baseItemSlots: int
+    + builtInItems: List<ItemRef>
+    + itemLoadout: List<ItemRef>
+    + art: Sprite
+    + rarity: Rarity
+    + Cost: int
+}
+
+enum TriggerType <<Enum>> {
+    OnItemReady
+    OnAllyActivate
+    OnBattleStart
+    OnEncounterEnd
+    OnDamageDealt
+    OnDamageReceived
+    OnHeal
+    OnShieldGained
+    OnDebuffApplied
+    OnBuffApplied
+    OnTick
+}
+
+enum ActionType <<Enum>> {
+    Buff
+    Damage
+    Heal
+    Shield
+    Debuff
+    StatChange
+    Meta
+    Burn
+    Poison
+    Stun
+}
+
+enum Rarity <<Enum>> {
+    Bronze
+    Silver
+    Gold
+    Diamond
+}
+
+enum EncounterType <<Enum>> {
+    Battle
+    Elite
+    Shop
+    Port
+    Event
+    Treasure
+    Boss
+    Unknown
+}
+
+enum StatType <<Enum>> {
+    Attack
+    Defense
+}
+
+enum StatModifierType <<Enum>> {
+    Flat
+    Percentage
+}
+
+enum TargetingStrategy <<Enum>> {
+    Player
+    LowestHealth
+    HighestDamage
+}
+
+class RarityMilestone <<Serializable>> {
+    + floor: int
+    + weights: List<RarityWeight>
+}
+
+class RarityWeight <<Serializable>> {
+    + rarity: Rarity
+    + weight: int
+}
+
+class RarityTieredValue <<Serializable>> {
+    + rarity: Rarity
+    + value: float
+}
+
+class ItemRef <<Serializable>> {
+    + id: string
+}
+
+class Tag <<Serializable>> {
+    + id: string
+    + displayName: string
+}
+
+class SynergyRule <<Serializable>> {
+    + description: string
+}
+
+class EventChoice <<Serializable>> {
+    + choiceText: string
+    + goldCost: int
+    + lifeCost: int
+    + itemRewardId: string
+    + shipRewardId: string
+    + nextEncounterId: string
+    + outcomeText: string
+}
+
+' --- RELATIONSHIPS ---
+ActionSO <|-- ApplyEffectActionSO
+ActionSO <|-- DamageActionSO
+ActionSO <|-- HealActionSO
+
+AbilitySO "1" *-- "many" ActionSO : contains >
+ItemSO "1" *-- "many" AbilitySO : grants >
+
+ApplyEffectActionSO "1" --> "1" EffectSO : applies >
+EffectSO "1" --> "1" ActionSO : ticks with >
+
+EncounterSO "1" *-- "many" EnemySO : contains >
+EncounterSO "1" *-- "many" EventChoice : defines >
+
+EnemySO "1" --> "1" ShipSO : uses >
+EnemySO "1" *-- "many" ItemSO : equips >
+
+ItemSO "1" *-- "many" Tag : has >
+ItemSO "1" *-- "many" SynergyRule : defines >
+
+RunConfigSO "1" *-- "many" RarityMilestone : defines >
+RunConfigSO "1" --> "1" RulesSO : uses >
+
+ShipSO "1" *-- "many" ItemRef : has >
+
+RarityMilestone "1" *-- "many" RarityWeight : defines >
+RarityWeight "1" --> "1" Rarity : uses >
+RarityTieredValue "1" --> "1" Rarity : uses >
+
+ItemRef "1" --> "1" ItemSO : references >
+
+AbilitySO "1" --> "1" TriggerType : uses >
+ActionSO "1" --> "1" ActionType : uses >
+ItemSO "1" --> "1" Rarity : uses >
+ShipSO "1" --> "1" Rarity : uses >
+EncounterSO "1" --> "1" EncounterType : uses >
+EnemySO "1" --> "1" TargetingStrategy : uses >
+
+@enduml
+```
+
 ## 2. Runtime Data (Item Instances & Runtime Objects)
 
 ### Problem Addressed

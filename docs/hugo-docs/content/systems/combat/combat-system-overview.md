@@ -50,6 +50,10 @@ The combat system in Pirate Autobattler is a real-time, tick-based simulation or
     >   File Path: Assets/Scripts/Core/EventBus.cs
     A static class for global event dispatching. It facilitates communication between various combat-related systems by broadcasting events like `OnBattleStart`, `OnDamageReceived`, and `OnHeal`.
 
+*   **`AbilityManager` (`PirateRoguelike.Core.AbilityManager`):**
+    >   File Path: Assets/Scripts/Core/AbilityManager.cs
+    A static class responsible for managing and executing abilities based on various combat triggers. It subscribes to `EventBus` events to activate abilities from equipped items and other sources. For a detailed overview, refer to the [Ability Manager Overview]({{< myrelref "ability-manager-overview.md" >}}).
+
 *   **[UI Components]({{< myrelref "../ui/ui-systems.md" >}}) (BattleUIController, EnemyPanelController, ShipStateView):**
     These components manage the visual display of combat information, subscribing to `ShipState.OnHealthChanged` and other events to keep the UI synchronized with the game state.
 
@@ -76,7 +80,7 @@ The `HandleTick` method is the heart of the combat simulation, executed every 10
     *   Expired effects are removed from the `ActiveEffects` list.
     *   Effects are processed in a sorted order based on their action type priority.
 3.  **Reduce Stun**: The stun duration for both the player and enemy ships is reduced.
-4.  **Dispatch General Tick Event**: `EventBus.DispatchTick` is broadcast, allowing other systems (like `AbilityManager` for passive abilities) to react to the general combat tick.
+4.  **Dispatch General Tick Event**: `EventBus.DispatchTick` is broadcast, allowing other systems (like `AbilityManager` to process `OnItemReady` abilities and other time-based effects) to react to the general combat tick.
 5.  **Check Battle End Conditions**: The system checks if either ship's `CurrentHealth` has dropped to zero or below.
 
 ### 3.3. Battle End
@@ -114,40 +118,75 @@ Several events are defined in `EventBus.cs` but are not currently dispatched by 
 *   **UI Integration**: The `CombatController` directly interacts with `BattleUIController` and `EnemyPanelController` for visual updates. `ShipState.OnHealthChanged` is a primary mechanism for UI synchronization, ensuring health bars and other indicators are always up-to-date.
 *   **[Game Session Management]({{< myrelref "../core/save-load.md" >}})**: The `CombatController` calls `GameSession.EndBattle` to transition out of combat and update the overall game state (e.g., awarding rewards, progressing the run).
 *   **[Data Loading]({{< myrelref "../data/data-systems-overview.md" >}})**: `GameDataRegistry` is used by `CombatController` and `ShipState` to retrieve `ShipSO` and `ItemSO` definitions when initializing ships and items.
-*   **Ability System**: The `AbilityManager` (not detailed here, but part of the broader system) subscribes to `EventBus` events (e.g., `OnBattleStart`, `OnTick`, `OnDamageReceived`, `OnHeal`) to trigger item abilities and other combat-related effects.
+*   **[Ability System]({{< myrelref "ability-manager-overview.md" >}})**: The `AbilityManager` subscribes to `EventBus` events (e.g., `OnBattleStart`, `OnTick`, `OnDamageReceived`, `OnHeal`) to trigger item abilities and other combat-related effects. For a detailed overview, refer to the [Ability Manager Overview]({{< myrelref "ability-manager-overview.md" >}}).
 
 ## 7. Performance Considerations
 
 *   **Tick-based Allocations**: The `CombatController.ProcessActiveEffects` method currently creates new lists (`effectsToRemove`, `sortedActiveEffects`) and uses LINQ's `OrderBy` on every tick. While acceptable for a small number of effects, this can lead to increased memory allocations in a hot path, especially with many active effects. Future optimization could involve pooling lists or pre-sorting effects if performance becomes a bottleneck.
 
-## 8. High-Level Combat Flow Diagram
+```plantuml
+@startuml
+' --- STYLING (Activity Beta syntaxing) ---
+skinparam style strictuml
+skinparam shadowing true
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 16
+skinparam backgroundColor #b4b4b42c
+!option handWritten true
+skinparam activity {
+    BorderColor #A9A9A9
+    BorderThickness 1.5
+    ArrowColor #555555
+    ArrowThickness 1.5
+}
+skinparam note {
+    BackgroundColor #FFFFE0
+    BorderColor #B4B4B4
+}
 
-```mermaid
-graph TD
-    A[GameInitializer] --> B(Load Battle Scene);
-    B --> C[CombatController.Init];
-    C --> D[Player ShipState];
-    C --> E[Enemy ShipState];
-    C --> F[TickService.StartTicking];
-    C --> G[BattleUIController.Initialize];
-    C --> H[EnemyPanelController.Initialize];
-    C --> I[EventBus.DispatchBattleStart];
+' --- DIAGRAM LOGIC (Using Partition) ---
+start
 
-    F -- OnTick (100ms) --> J[CombatController.HandleTick];
-    J --> K{Sudden Death Check};
-    J --> L[ProcessActiveEffects (Player & Enemy)];
-    J --> M[Reduce Stun (Player & Enemy)];
-    J --> N[EventBus.DispatchTick];
-    J --> O{Check Battle End Conditions};
+partition "Combat Initialization" #E3F2FD {
+  :GameInitializer;
+  :Load Battle Scene;
+  :CombatController.Init(PlayerShip, EnemyData, TickService, UI Controllers);
+  :Create Enemy ShipState;
+  :CombatController subscribes to TickService.OnTick;
+  :Initialize UI Components (BattleUIController, EnemyPanelController, ShipStateViews);
+  :EventBus.DispatchBattleStart;
+  :UIInteractionService.IsInCombat = true;
+}
 
-    L -- Applies/Removes --> P[ShipState.ActiveEffects];
-    P -- Triggers --> Q[RuntimeAction.Execute];
+partition "Combat Tick Loop (CombatController.HandleTick)" #E8F5E9 {
+  repeat
+    :TickService.OnTick (every 100ms);
+    :Sudden Death Check;
+    :Process Active Effects (Player & Enemy);
+    :Reduce Stun (Player & Enemy);
+    :EventBus.DispatchTick;
+    :AbilityManager processes OnItemReady abilities;
+    :Check Battle End Conditions;
+  repeat while (Battle not ended)
 
-    O -- Battle Ends --> R[TickService.Stop];
-    O -- Battle Ends --> S[GameSession.EndBattle];
+  :Battle Ends;
+}
 
-    D -- OnHealthChanged --> G;
-    E -- OnHealthChanged --> G;
-    D -- TakeDamage/Heal --> T[EventBus.DispatchDamageReceived/Heal];
-    E -- TakeDamage/Heal --> T;
-    T --> U[AbilityManager];
+partition "Battle End" #FFF3E0 {
+  :TickService.Stop;
+  :Determine Winner;
+  :GameSession.EndBattle(Outcome);
+}
+
+partition "Event-Driven Interactions" #F3E5F5 {
+  :ShipState.OnHealthChanged --> BattleUIController;
+  :ShipState.OnHealthChanged --> EnemyPanelController;
+  :ShipState.OnHealthChanged --> PlayerPanelController;
+  :ShipState.TakeDamage/Heal --> EventBus.DispatchDamageReceived/Heal;
+  :EventBus.DispatchDamageReceived/Heal --> AbilityManager;
+  :EventBus.DispatchBattleStart --> AbilityManager;
+}
+
+stop
+@enduml
+
