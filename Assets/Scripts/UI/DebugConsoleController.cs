@@ -188,6 +188,7 @@ namespace PirateRoguelike.UI
                     Log("  loadscene <sceneName> - Loads a specified scene (e.g., MainMenu, Boot, Run, Battle, Summary).");
                     Log("  skipnode - Advances the player to the next node on the map.");
                     Log("  giveitem <itemId> - Gives the player a specified item.");
+                    Log("  startencounter <encounterId> - Starts a specific battle encounter.");
                     break;
 
                 case "addgold":
@@ -330,6 +331,35 @@ namespace PirateRoguelike.UI
                     else
                     {
                         Log("Usage: giveitem <itemId>");
+                    }
+                    break;
+
+                case "startencounter":
+                    if (parts.Length == 2)
+                    {
+                        string encounterId = parts[1];
+                        EncounterSO encounter = GameDataRegistry.GetEncounter(encounterId);
+                        if (encounter != null)
+                        {
+                            if (GameSession.CurrentRunState != null)
+                            {
+                                GameSession.CurrentRunState.currentEncounterId = encounterId;
+                                Log($"Starting encounter: {encounterId}");
+                                SceneManager.LoadScene("Battle");
+                            }
+                            else
+                            {
+                                Log("Error: GameSession is not active. Please start a run first.");
+                            }
+                        }
+                        else
+                        {
+                            Log($"Error: Encounter with ID '{encounterId}' not found in GameDataRegistry.");
+                        }
+                    }
+                    else
+                    {
+                        Log("Usage: startencounter <encounterId>");
                     }
                     break;
 
