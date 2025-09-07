@@ -110,6 +110,9 @@ The `EventBus` plays a crucial role in decoupling combat systems.
 | `OnHealthChanged` (C# event) | `ShipState:102, 223, 238` | `CombatController:38, 39`, `ShipView:17`, `PlayerPanelController:87` | Direct C# event on `ShipState` for immediate UI updates. |
 
 **Note on Unused Events:**
+Several events are defined in `EventBus.cs` but are not currently dispatched by the `CombatController` or other core combat logic: `OnEncounterEnd`, `OnAllyActivate`, `OnShieldGained`, `OnDebuffApplied`, `OnBuffApplied`. These may represent future features or incomplete implementations.
+
+**Note on Unused Events:**
 Several events are defined in `EventBus.cs` but are not currently dispatched by the `CombatController` or other core combat logic: `OnEncounterEnd`, `OnItemReady`, `OnAllyActivate`, `OnShieldGained`, `OnDebuffApplied`, `OnBuffApplied`. These may represent future features or incomplete implementations.
 
 ## 5. Important Data Structures

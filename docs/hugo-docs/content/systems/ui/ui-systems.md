@@ -21,25 +21,12 @@ This section details the implementation of the dynamic tooltip description syste
 
 *   **`TooltipController` (`PirateRoguelike.UI.TooltipController`):**
     >   File Path: Assets/Scripts/UI/TooltipController.cs
-    *   A persistent singleton (`MonoBehaviour`) that orchestrates all tooltip activity.
-    *   Instantiates the tooltip from `TooltipPanel.uxml` and adds it to a global UI `rootVisualElement` to ensure correct z-ordering across all UI elements.
-    *   Exposes a public `Show(RuntimeItem item, VisualElement targetElement)` method to display and position the tooltip.
-    *   Exposes a public `Hide()` method to conceal the tooltip.
+    *   A persistent singleton (`MonoBehaviour`) that orchestrates all tooltip activity. It is instantiated and initialized by the `UIManager`.
+    *   Exposes public `Show(RuntimeItem item, VisualElement targetElement, VisualElement panelRoot)` and `Hide()` methods to control tooltip visibility and positioning.
     *   Dynamically populates the tooltip's UXML fields with data from the provided `RuntimeItem`.
-    *   Manages the fade-in/out animation by toggling USS classes.
-    *   Positions the tooltip adjacent to the `targetElement`.
-    *   Ensures proper initialization order by being initialized in `RunManager.Awake()`.
-        *   A persistent singleton (`MonoBehaviour`) that orchestrates all tooltip activity.
-    *   Instantiates the tooltip from `TooltipPanel.uxml` and adds it to a global UI `rootVisualElement` to ensure correct z-ordering across all UI elements.
-    *   Exposes a public `Show(RuntimeItem item, VisualElement targetElement)` method to display and position the tooltip.
-    *   Exposes a public `Hide()` method to conceal the tooltip.
-    *   Dynamically populates the tooltip's UXML fields with data from the provided `RuntimeItem`.
-    *   Manages the fade-in/out animation by toggling USS classes.
-    *   Positions the tooltip adjacent to the `targetElement`.
-    *   Ensures proper initialization order by being initialized by the `UIManager`.
-    *   **Instance Management:** The `TooltipController` maintains a `Dictionary<VisualElement, VisualElement>`. It stores a unique tooltip UI element instance for each `panelRoot` it interacts with.
-    *   **On-Demand Instantiation:** When a tooltip needs to be shown on a panel for the first time, the `TooltipController` instantiates a new tooltip from a `VisualTreeAsset` and adds it to that panel's visual tree. This new instance is then cached in the dictionary.
-    *   **Stylesheet Injection:** Crucially, when creating a new tooltip instance for a panel, the `TooltipController` also ensures that its required stylesheet (`TooltipPanelStyle.uss`) is added to the panel's `styleSheets` list. This guarantees the tooltip will always render correctly, regardless of the panel's default styles.
+    *   Manages fade-in/out animations by toggling USS classes.
+    *   **Instance Management:** To ensure tooltips work across different UI panels (e.g., main UI, shop, rewards), the controller maintains a dictionary of tooltip instances, creating one on-demand for each new panel root it encounters.
+    *   **Stylesheet Injection:** When creating a new tooltip instance, it also injects the required `TooltipPanelStyle.uss` into the panel's stylesheets, guaranteeing correct rendering.
 
 *   **`EffectDisplay` (`PirateRoguelike.UI.EffectDisplay`):**
     >   File Path: Assets/Scripts/UI/EffectDisplay.cs

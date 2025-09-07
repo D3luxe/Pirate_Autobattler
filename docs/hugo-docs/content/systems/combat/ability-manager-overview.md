@@ -30,6 +30,9 @@ The `AbilityManager` is designed as a static class, making it globally accessibl
         *   These static methods are subscribed to `EventBus` events.
         *   `HandleBattleStart(CombatContext ctx)`: Clears previously registered abilities, then iterates through the equipped items of both the `Caster` (player) and `Target` (enemy) `ShipState`s in the provided `CombatContext`. It calls `RegisterAbilities` for all abilities found on these items. Finally, it executes any abilities with the `OnBattleStart` trigger.
         *   `HandleTick(ShipState playerShip, ShipState enemyShip, float deltaTime)`: This is a crucial handler for time-based abilities. It iterates through the equipped items of both the player and enemy ships. For each active item, it manages its `CooldownRemaining`. If an item's cooldown reaches zero, it executes all abilities with the `OnItemReady` trigger associated with that item, and then resets the item's cooldown.
+
+            **Note:** This process is driven by the global `OnTick` event. The AbilityManager does not use a separate `OnItemReady` event, but rather checks for the `TriggerType.OnItemReady` on an item's abilities once its cooldown, which it tracks internally, expires.
+
         *   `HandleDamageDealt(ShipState caster, ShipState target, float amount)`: Creates a `CombatContext` and calls `CheckAndExecuteAbilities` for `TriggerType.OnDamageDealt`.
         *   `HandleDamageReceived(ShipState target, float amount)`: Creates a `CombatContext` and calls `CheckAndExecuteAbilities` for `TriggerType.OnDamageReceived`.
         *   `HandleHeal(ShipState target, float amount)`: Creates a `CombatContext` and calls `CheckAndExecuteAbilities` for `TriggerType.OnHeal`.

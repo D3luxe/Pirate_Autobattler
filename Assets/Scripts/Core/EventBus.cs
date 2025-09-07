@@ -12,7 +12,6 @@ namespace PirateRoguelike.Core
     public static event Action OnEncounterEnd;
 
     // Item-specific triggers (example, more will be added)
-    public static event Action<ItemInstance, CombatContext> OnItemReady;
     public static event Action<ItemInstance, CombatContext> OnAllyActivate;
 
     // Combat-related events
@@ -28,7 +27,6 @@ namespace PirateRoguelike.Core
     public static void DispatchBattleStart(CombatContext ctx) => OnBattleStart?.Invoke(ctx);
     public static void DispatchSuddenDeathStarted() => OnSuddenDeathStarted?.Invoke();
     public static void DispatchEncounterEnd() => OnEncounterEnd?.Invoke();
-    public static void DispatchItemReady(ItemInstance item, CombatContext ctx) => OnItemReady?.Invoke(item, ctx);
     public static void DispatchAllyActivate(ItemInstance item, CombatContext ctx) => OnAllyActivate?.Invoke(item, ctx);
     public static void DispatchDamageDealt(ShipState caster, ShipState target, float amount) => OnDamageDealt?.Invoke(caster, target, amount);
     public static void DispatchDamageReceived(ShipState target, float amount) => OnDamageReceived?.Invoke(target, amount);
@@ -53,7 +51,6 @@ namespace PirateRoguelike.Core
                 // This event is currently unused and has no specific dispatch logic here.
                 // DispatchEncounterEnd(); // If it were used, this would be the call.
                 break;
-            case TriggerType.OnItemReady:
             case TriggerType.OnAllyActivate:
                 if (args.Length > 1 && args[0] is ItemInstance itemAllyParam && args[1] is CombatContext ctxAllyParam)
                 {

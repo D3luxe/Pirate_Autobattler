@@ -11,6 +11,9 @@ namespace PirateRoguelike.Core
     private static bool _isInitialized = false;
     // A dictionary mapping a trigger type to all abilities that use that trigger.
     private static readonly Dictionary<TriggerType, List<AbilitySO>> _activeAbilities = new Dictionary<TriggerType, List<AbilitySO>>();
+    // OPTIMIZATION: Lists to hold only items with active abilities, to avoid polling all items every tick.
+    private static readonly List<ItemInstance> _playerActiveItems = new List<ItemInstance>();
+    private static readonly List<ItemInstance> _enemyActiveItems = new List<ItemInstance>();
 
     public static void Initialize()
     {
@@ -27,6 +30,8 @@ namespace PirateRoguelike.Core
 
         UnsubscribeFromEvents();
         _activeAbilities.Clear();
+        _playerActiveItems.Clear();
+        _enemyActiveItems.Clear();
         _isInitialized = false;
         Debug.Log("AbilityManager shut down.");
     }
@@ -71,65 +76,59 @@ namespace PirateRoguelike.Core
 
     private static void HandleTick(ShipState playerShip, ShipState enemyShip, float deltaTime)
     {
-        // Process active items for the player ship
-        foreach (var item in playerShip.Equipped)
+        // OPTIMIZATION: Process active items for the player ship from the pre-filtered list
+        foreach (var item in _playerActiveItems)
         {
-            if (item != null && item.Def.isActive)
+            if (item.CooldownRemaining <= 0)
             {
-                if (item.CooldownRemaining <= 0)
+                // Item is ready to activate
+                Debug.Log($"Item {item.Def.displayName} (Player) is ready to activate.");
+                foreach (var ability in item.Def.abilities)
                 {
-                    // Item is ready to activate
-                    Debug.Log($"Item {item.Def.displayName} (Player) is ready to activate.");
-                    foreach (var ability in item.Def.abilities)
+                    // Only execute abilities with OnItemReady trigger for now
+                    if (ability.Trigger == TriggerType.OnItemReady)
                     {
-                        // Only execute abilities with OnItemReady trigger for now
-                        if (ability.Trigger == TriggerType.OnItemReady)
+                        Debug.Log($"Executing OnItemReady ability: {ability.displayName} (Player)");
+                        var ctx = new CombatContext { Caster = playerShip, Target = enemyShip };
+                        foreach (var action in ability.Actions)
                         {
-                            Debug.Log($"Executing OnItemReady ability: {ability.displayName} (Player)");
-                            var ctx = new CombatContext { Caster = playerShip, Target = enemyShip };
-                            foreach (var action in ability.Actions)
-                            {
-                                action.Execute(ctx);
-                            }
+                            action.Execute(ctx);
                         }
                     }
-                    item.CooldownRemaining = item.Def.cooldownSec; // Reset cooldown
                 }
-                else
-                {
-                    item.CooldownRemaining -= deltaTime; // Reduce cooldown
-                }
+                item.CooldownRemaining = item.Def.cooldownSec; // Reset cooldown
+            }
+            else
+            {
+                item.CooldownRemaining -= deltaTime; // Reduce cooldown
             }
         }
 
-        // Process active items for the enemy ship
-        foreach (var item in enemyShip.Equipped)
+        // OPTIMIZATION: Process active items for the enemy ship from the pre-filtered list
+        foreach (var item in _enemyActiveItems)
         {
-            if (item != null && item.Def.isActive)
+            if (item.CooldownRemaining <= 0)
             {
-                if (item.CooldownRemaining <= 0)
+                // Item is ready to activate
+                Debug.Log($"Item {item.Def.displayName} (Enemy) is ready to activate.");
+                foreach (var ability in item.Def.abilities)
                 {
-                    // Item is ready to activate
-                    Debug.Log($"Item {item.Def.displayName} (Enemy) is ready to activate.");
-                    foreach (var ability in item.Def.abilities)
+                    // Only execute abilities with OnItemReady trigger for now
+                    if (ability.Trigger == TriggerType.OnItemReady)
                     {
-                        // Only execute abilities with OnItemReady trigger for now
-                        if (ability.Trigger == TriggerType.OnItemReady)
+                        Debug.Log($"Executing OnItemReady ability: {ability.displayName} (Enemy)");
+                        var ctx = new CombatContext { Caster = enemyShip, Target = playerShip };
+                        foreach (var action in ability.Actions)
                         {
-                            Debug.Log($"Executing OnItemReady ability: {ability.displayName} (Enemy)");
-                            var ctx = new CombatContext { Caster = enemyShip, Target = playerShip };
-                            foreach (var action in ability.Actions)
-                            {
-                                action.Execute(ctx);
-                            }
+                            action.Execute(ctx);
                         }
                     }
-                    item.CooldownRemaining = item.Def.cooldownSec; // Reset cooldown
                 }
-                else
-                {
-                    item.CooldownRemaining -= deltaTime; // Reduce cooldown
-                }
+                item.CooldownRemaining = item.Def.cooldownSec; // Reset cooldown
+            }
+            else
+            {
+                item.CooldownRemaining -= deltaTime; // Reduce cooldown
             }
         }
     }
@@ -137,28 +136,31 @@ namespace PirateRoguelike.Core
     private static void HandleBattleStart(CombatContext ctx)
     {
         _activeAbilities.Clear();
-        Debug.Log("AbilityManager: Registering abilities for new battle.");
+        _playerActiveItems.Clear();
+        _enemyActiveItems.Clear();
+        Debug.Log("AbilityManager: Cleared state and registering abilities for new battle.");
 
-        // Register abilities from player's items
-        if (ctx.Caster != null)
+        // Register abilities and populate active item lists
+        if (ctx.Caster != null) // Player
         {
             foreach (var item in ctx.Caster.Equipped)
             {
-                if (item != null && item.Def != null && item.Def.abilities != null) 
-                {
-                    RegisterAbilities(item.Def.abilities);
+                if (item != null)
+                { 
+                    if(item.Def != null && item.Def.abilities != null) RegisterAbilities(item.Def.abilities);
+                    if(item.Def != null && item.Def.isActive) _playerActiveItems.Add(item);
                 }
             }
         }
 
-        // Register abilities from enemy's items
-        if (ctx.Target != null)
+        if (ctx.Target != null) // Enemy
         {
             foreach (var item in ctx.Target.Equipped)
             {
-                if (item != null && item.Def != null && item.Def.abilities != null) 
+                if (item != null)
                 {
-                    RegisterAbilities(item.Def.abilities);
+                    if(item.Def != null && item.Def.abilities != null) RegisterAbilities(item.Def.abilities);
+                    if(item.Def != null && item.Def.isActive) _enemyActiveItems.Add(item);
                 }
             }
         }
