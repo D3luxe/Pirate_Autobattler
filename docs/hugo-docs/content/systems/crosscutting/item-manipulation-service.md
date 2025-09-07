@@ -16,7 +16,7 @@ The service is designed as a singleton to provide a single, authoritative point 
 *   **Singleton Pattern:** Implemented as a static singleton (`ItemManipulationService.Instance`) to ensure a single instance manages all item manipulations globally.
 *   **Dependencies:** It is initialized with an `IGameSession` instance, through which it accesses core game components like `Economy`, `Inventory`, and `PlayerShip`.
 *   **Interaction with `UIInteractionService`:** Before executing any item manipulation, the service consults `UIInteractionService.CanManipulateItem` to verify that the action is permissible given the current UI state (e.g., not in combat, debug console not open). This prevents unintended or disallowed actions.
-*   **Decoupling:** The service operates by modifying the underlying game state (e.g., adding/removing items from inventory). It does not directly manipulate UI elements; instead, changes to the game state trigger UI updates through an event-driven architecture (e.g., `ItemManipulationEvents`).
+*   **Decoupling:** The service operates by modifying the underlying game state (e.g., adding/removing items from inventory). It does not directly manipulate UI elements; instead, changes to the game state trigger UI updates through an event-driven architecture (e.g., `ItemManipulationEvents`). It also dispatches `OnRewardItemClaimed` when a reward item is successfully claimed.
 
 ## Implementation Details
 
@@ -35,6 +35,12 @@ The service is designed as a singleton to provide a single, authoritative point 
         *   Determines the `targetFinalSlot` for the purchased item. It prioritizes finding the first available empty slot in the player's inventory, then in their equipment. If no suitable slot is found, the gold is refunded, and an "Inventory full!" message is displayed.
         *   Adds the newly purchased `ItemInstance` to the `targetFinalSlot` within either `_gameSession.Inventory` or `_gameSession.PlayerShip`.
         *   Upon successful purchase, the item is removed from the shop's available items via `ShopManager.Instance.RemoveShopItem(shopSlot.Index)`.
+    *   **`RequestClaimReward(SlotId sourceSlot, SlotId destinationSlot, ItemSO itemToClaimFromSource)`:**
+        *   Receives `SlotId` objects representing the source (must be `SlotContainerType.Reward`), destination slots, and the `ItemSO` to claim.
+        *   Uses the provided `itemToClaimFromSource` directly, ensuring the correct item is processed regardless of its original index in the reward list.
+        *   Determines the `targetFinalSlot` for the claimed item, prioritizing empty inventory then equipment slots.
+        *   Adds the `ItemInstance` to the `targetFinalSlot` within `_gameSession.Inventory` or `_gameSession.PlayerShip`.
+        *   Upon successful claim, calls `RewardService.RemoveClaimedItem(itemToClaimFromSource)` to update the reward state by removing the specific `ItemSO` instance.
     *   **`ExecuteSwap(SlotId slotA, SlotId slotB)` (Private Method):**
         *   Manages the low-level logic for swapping `ItemInstance` objects between any two specified slots. This involves retrieving items from their current locations, removing them, and then placing them into their new target slots.
 *   **`SlotId` (`PirateRoguelike.Services.SlotId`):**

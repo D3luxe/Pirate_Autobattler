@@ -177,7 +177,7 @@ namespace PirateRoguelike.UI
 
             string[] parts = command.ToLower().Split(' ');
             string cmd = parts[0];
-
+            int goldAmount; // Declare here
             switch (cmd)
             {
                 case "help":
@@ -189,19 +189,28 @@ namespace PirateRoguelike.UI
                     Log("  skipnode - Advances the player to the next node on the map.");
                     Log("  giveitem <itemId> - Gives the player a specified item.");
                     Log("  startencounter <encounterId> - Starts a specific battle encounter.");
+                    Log("  generatereward [goldAmount=10] [showItems=true] <isElite=false> <floorIndex=5> - Generates a reward window for testing.");
                     break;
 
                 case "addgold":
-                    if (parts.Length == 2 && int.TryParse(parts[1], out int goldAmount))
+                    if (parts.Length == 2)
                     {
-                        if (GameSession.Economy != null)
+                        
+                        if (int.TryParse(parts[1], out goldAmount)) // Check if parsing succeeds
                         {
-                            GameSession.Economy.AddGold(goldAmount);
-                            Log($"Added {goldAmount} gold. Current gold: {GameSession.Economy.Gold}");
+                            if (GameSession.Economy != null)
+                            {
+                                GameSession.Economy.AddGold(goldAmount);
+                                Log($"Added {goldAmount} gold. Current gold: {GameSession.Economy.Gold}");
+                            }
+                            else
+                            {
+                                Log("Error: GameSession.Economy is not initialized.");
+                            }
                         }
                         else
                         {
-                            Log("Error: GameSession.Economy is not initialized.");
+                            Log("Usage: addgold <amount> (Amount must be a valid integer)");
                         }
                     }
                     else
@@ -361,6 +370,82 @@ namespace PirateRoguelike.UI
                     {
                         Log("Usage: startencounter <encounterId>");
                     }
+                    break;
+
+                case "generatereward":
+                    goldAmount = 10; // Default gold
+                    bool showItems = true; // Default to showing items
+                    bool isElite = false; // Default to non-elite
+                    int floorIndex = 5; // Default floor index
+                    int? itemCount = 3; // Default item count if showing items
+
+                    if (parts.Length > 1)
+                    {
+                        // Parse goldAmount
+                        int parsedGoldAmount;
+                        if (!int.TryParse(parts[1], out parsedGoldAmount))
+                        {
+                            Log("Usage: generatereward [goldAmount] [showItems] [isElite] [floorIndex]");
+                            return;
+                        }
+                        goldAmount = parsedGoldAmount;
+                    }
+
+                    if (parts.Length > 2)
+                    {
+                        // Parse showItems
+                        bool parsedShowItems;
+                        if (!bool.TryParse(parts[2], out parsedShowItems))
+                        {
+                            Log("Usage: generatereward [goldAmount] [showItems] [isElite] [floorIndex]");
+                            return;
+                        }
+                        showItems = parsedShowItems;
+                        if (!showItems) itemCount = 0; // If not showing items, set count to 0
+                    }
+
+                    if (parts.Length > 3)
+                    {
+                        // Parse isElite
+                        bool parsedIsElite;
+                        if (!bool.TryParse(parts[3], out parsedIsElite))
+                        {
+                            Log("Usage: generatereward [goldAmount] [showItems] [isElite] [floorIndex]");
+                            return;
+                        }
+                        isElite = parsedIsElite;
+                    }
+
+                    if (parts.Length > 4)
+                    {
+                        // Parse floorIndex
+                        int parsedFloorIndex;
+                        if (!int.TryParse(parts[4], out parsedFloorIndex))
+                        {
+                            Log("Usage: generatereward [goldAmount] [showItems] [isElite] [floorIndex]");
+                            return;
+                        }
+                        floorIndex = parsedFloorIndex;
+                    }
+
+                    // If showItems is true and itemCount was not explicitly set to 0 by parsing, ensure it's 3
+                    if (showItems && itemCount == null) itemCount = 3;
+
+                    RewardService.GenerateDebugReward(floorIndex, isElite, goldAmount, itemCount);
+
+                    // Explicitly show the reward UI
+                    if (UIManager.Instance != null && UIManager.Instance.RewardUIController != null)
+                    {
+                        UIManager.Instance.RewardUIController.ShowRewards(
+                            RewardService.GetCurrentRewardItems().Select(item => new ItemInstance(item).ToSerializable()).ToList(),
+                            RewardService.GetCurrentRewardGold()
+                        );
+                    }
+                    else
+                    {
+                        Log("Error: UIManager or RewardUIController is not initialized. Cannot show debug rewards.");
+                    }
+                    Log($"Generated reward: Gold: {goldAmount}, Items: {(showItems ? (itemCount?.ToString() ?? "default") : "none")}, Elite: {isElite}, Floor: {floorIndex}.");
                     break;
 
                 default:

@@ -170,14 +170,16 @@ namespace PirateRoguelike.Combat
                 playerWon = false;
             }
 
-            if (GameSession.CurrentRunState != null)
-            {
-                GameSession.EndBattle(playerWon, GameDataRegistry.GetRunConfig(), Enemy);
-            }
-            else
-            {
-                Debug.LogWarning("GameSession not active. Battle ended, but no run state to update.");
-            }
+                            UIInteractionService.IsInCombat = false; // Set to false when battle ends
+
+                if (GameSession.CurrentRunState != null)
+                {
+                    GameSession.EndBattle(playerWon, GameDataRegistry.GetRunConfig(), Enemy);
+                }
+                else
+                {
+                    Debug.LogWarning("GameSession not active. Battle ended, but no run state to update.");
+                }
         }
     }
 }

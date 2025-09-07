@@ -89,6 +89,13 @@ RunState
         ├── rarity
         ├── cooldownRemaining
         └── stunDuration
+|
+└── battleRewards (List<SerializableItemInstance>)
+    └── [SerializableItemInstance]
+        ├── itemId
+        ├── rarity
+        ├── cooldownRemaining
+        └── stunDuration
 ```
 
 ## 4. Known Issues & Critical Gaps

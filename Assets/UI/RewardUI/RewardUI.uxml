@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-namespaces="UnityEditor.UIElements">
+    <ui:VisualElement name="reward-root" class="reward-root">
+        <ui:VisualElement name="reward-panel" class="reward-panel">
+            <ui:Label text="Rewards" name="reward-title" class="reward-title" />
+            <ui:VisualElement name="reward-items-container" class="reward-items-container">
+                <!-- Item slots will be dynamically added here -->
+            </ui:VisualElement>
+            <ui:Button name="gold-button" class="gold-button">
+                <ui:Label text="0 Gold" name="gold-button-label" class="gold-button-label" />
+            </ui:Button>
+            <ui:Button text="Skip (+0 Gold)" name="skip-button" class="skip-button" />
+            <ui:Button text="Leave" name="leave-button" class="leave-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

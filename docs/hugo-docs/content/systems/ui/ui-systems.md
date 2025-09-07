@@ -63,6 +63,7 @@ This system is used by multiple parts of the UI to ensure consistent behavior.
 *   **`PlayerPanelView.cs`:** The player's inventory and equipment slots are composed of `SlotElement`s, which are populated with `ItemElement`s based on data from the `PlayerPanelDataViewModel`.
 *   **`EnemyPanelController.cs`:** The enemy's equipment display dynamically creates `SlotElement`s and binds them to the enemy's `ShipState` data.
 *   **`ShopController.cs`:** The shop interface is now a primary consumer of this system. It uses `SlotElement`s to display items for sale. It uses a special `ShopSlotViewModel` to provide price data, and contextual CSS to make the price visible only within the shop. Crucially, `ShopController` now explicitly registers tooltip callbacks for each shop item, ensuring tooltips appear on hover.
+*   **`RewardUIController.cs`:** The reward interface utilizes this system for displaying reward items. It uses `SlotElement`s to display items and `RewardItemSlotViewData` to provide item data. It is explicitly called by `RunManager` (for battle rewards) or `DebugConsoleController` (for debug rewards) to display rewards. It integrates with the `UIManager`'s global root for proper layering and event handling, and registers tooltip callbacks for reward items.
 
 ## 2. Universal Item Manipulation System
 
@@ -83,7 +84,7 @@ This system centralizes the logic for moving, equipping, and swapping items, dec
     >   File Path: Assets/Scripts/UI/PlayerPanel/SlotManipulator.cs
     *   A `PointerManipulator` attached to each `ItemElement`. It detects drag-and-drop gestures.
     *   **Drag Initiation:** Dragging is now initiated only after the mouse moves beyond a small threshold from the initial click position, allowing for distinct click actions.
-    *   Initiates requests by calling methods on `ItemManipulationService` (e.g., `SwapItems`, `RequestPurchase`). It does not modify game state directly.
+    *   Initiates requests by calling methods on `ItemManipulationService` (e.g., `SwapItems`, `RequestPurchase`, `RequestClaimReward`). It passes the specific `ItemSO` to be claimed, ensuring correct item manipulation. It does not modify game state directly.
     *   **Shop Item Interaction:**
         *   **Click-to-Buy:** A quick click on a shop item triggers an immediate purchase to an available inventory slot.
         *   **Drag-and-Drop Purchase:** Dragging a shop item and dropping it over a valid inventory or equipment slot triggers a purchase. Dropping it elsewhere cancels the purchase, and the item visually returns to the shop.

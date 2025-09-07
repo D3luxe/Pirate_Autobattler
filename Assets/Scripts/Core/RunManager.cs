@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using PirateRoguelike.Data;
@@ -6,6 +8,7 @@ using UnityEngine.InputSystem;
 using PirateRoguelike.Saving;
 using Pirate.MapGen;
 using PirateRoguelike.UI;
+using PirateRoguelike.Services; // Added
 
 namespace PirateRoguelike.Core
 {
@@ -17,7 +20,6 @@ namespace PirateRoguelike.Core
     [Header("Configuration")]
     [SerializeField] private RunConfigSO runConfig;
     [SerializeField] private ShipSO debugStartingShip; // For testing
-    [SerializeField] private GameObject rewardUIPrefab;
     [SerializeField] private GameObject mapManagerPrefab;
 
     [Header("Input")]
@@ -63,15 +65,6 @@ namespace PirateRoguelike.Core
         else
         {
             Debug.LogError("MapManager Prefab is not assigned in RunManager!");
-        }
-
-        if (rewardUIPrefab != null)
-        {
-            Instantiate(rewardUIPrefab, transform);
-        }
-        else
-        {
-            Debug.LogError("RewardUI Prefab is not assigned in RunManager!");
         }
     }
 
@@ -188,6 +181,16 @@ namespace PirateRoguelike.Core
         if (GameSession.CurrentRunState != null && GameSession.CurrentRunState.battleRewards != null && GameSession.CurrentRunState.battleRewards.Count > 0)
         {
             Debug.Log($"RunManager: Detected {GameSession.CurrentRunState.battleRewards.Count} battle rewards.");
+            // Show Reward UI via UIManager
+            if (UIManager.Instance != null && UIManager.Instance.RewardUIController != null)
+            {
+                UIManager.Instance.RewardUIController.ShowRewards(GameSession.CurrentRunState.battleRewards, RewardService.GetCurrentRewardGold());
+                GameSession.CurrentRunState.battleRewards = null; // Clear rewards after showing
+            }
+            else
+            {
+                Debug.LogError("UIManager or RewardUIController is null. Cannot show battle rewards.");
+            }
         }
 
         if (MapManager.Instance != null)

@@ -57,8 +57,6 @@ namespace PirateRoguelike.UI
                 return;
             }
 
-            Debug.Log($"SlotManipulator: OnPointerDown called for Slot ID: {_sourceSlotData?.SlotId}");
-
             if (_sourceSlotData == null || _sourceSlotData.IsEmpty)
             {
                 return;
@@ -172,6 +170,24 @@ namespace PirateRoguelike.UI
                 {
                     global::PirateRoguelike.Services.SlotId toSlotId = new global::PirateRoguelike.Services.SlotId(dropSlotData.SlotId, toContainer);
                     ItemManipulationService.Instance.RequestSwap(fromSlotId, toSlotId);
+                }
+            }
+            else if (_fromContainer == global::PirateRoguelike.Services.SlotContainerType.Reward)
+            {
+                if (dropTargetElement != null && dropSlotData != null && (toContainer == global::PirateRoguelike.Services.SlotContainerType.Inventory || toContainer == global::PirateRoguelike.Services.SlotContainerType.Equipment))
+                {
+                    global::PirateRoguelike.Services.SlotId toSlotId = new global::PirateRoguelike.Services.SlotId(dropSlotData.SlotId, toContainer);
+                    ItemManipulationService.Instance.RequestClaimReward(fromSlotId, toSlotId, _sourceSlotData.CurrentItemInstance.Def);
+                }
+                else if (!IsDragging) // Click to claim
+                {
+                    // If not dragging, it's a click. Try to claim to first available inventory/equipment slot.
+                    ItemManipulationService.Instance.RequestClaimReward(fromSlotId, new global::PirateRoguelike.Services.SlotId(-1, global::PirateRoguelike.Services.SlotContainerType.Inventory), _sourceSlotData.CurrentItemInstance.Def);
+                }
+                else
+                {
+                    // Dropped outside valid inventory/equipment, or not a click
+                    Debug.LogWarning("Reward item dropped outside valid target or not a click.");
                 }
             }
 

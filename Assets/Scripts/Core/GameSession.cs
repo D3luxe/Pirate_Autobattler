@@ -188,7 +188,8 @@ namespace PirateRoguelike.Core
                 }
             }
 
-            List<ItemSO> itemRewards = RewardService.GenerateBattleRewards(currentDepth, config, mapLength, isEliteEncounter);
+            RewardService.GenerateBattleReward(currentDepth, isEliteEncounter);
+            List<ItemSO> itemRewards = RewardService.GetCurrentRewardItems();
             List<SerializableItemInstance> serializableItemRewards = new List<SerializableItemInstance>();
             foreach (var itemSO in itemRewards)
             {

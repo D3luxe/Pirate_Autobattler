@@ -16,9 +16,9 @@ namespace PirateRoguelike.Core
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     public static void Initialize()
     {
-        _items = Resources.LoadAll<ItemSO>("GameData/Items").ToDictionary(x => x.id, x => x);
-        _ships = Resources.LoadAll<ShipSO>("GameData/Ships").ToDictionary(x => x.id, x => x);
-        _encounters = Resources.LoadAll<EncounterSO>("GameData/Encounters").ToDictionary(x => x.id, x => x);
+        _items = Resources.LoadAll<ItemSO>("GameData/Items").Where(x => !string.IsNullOrEmpty(x.id)).ToDictionary(x => x.id, x => x);
+        _ships = Resources.LoadAll<ShipSO>("GameData/Ships").Where(x => !string.IsNullOrEmpty(x.id)).ToDictionary(x => x.id, x => x);
+        _encounters = Resources.LoadAll<EncounterSO>("GameData/Encounters").Where(x => !string.IsNullOrEmpty(x.id)).ToDictionary(x => x.id, x => x);
         _runConfig = Resources.Load<RunConfigSO>("GameData/RunConfiguration"); // Load the RunConfigSO
         Debug.Log($"GameDataRegistry initialized. Loaded {_items.Count} items, {_ships.Count} ships, {_encounters.Count} encounters.");
 

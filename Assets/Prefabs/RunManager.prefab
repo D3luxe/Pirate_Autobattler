@@ -46,6 +46,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RunManager
   runConfig: {fileID: 11400000, guid: 20c85d27094dac045b8bde7a8c53baba, type: 2}
   debugStartingShip: {fileID: 11400000, guid: 14f3e203ca43f504091a5df9e105e479, type: 2}
-  rewardUIPrefab: {fileID: 4782130974891231969, guid: 63fb0a46f00834d4b8bdea2eb7118b0d, type: 3}
+  rewardUIPrefab: {fileID: 4615069877605295715, guid: c1b66b7f39bea2c4e94d3d232ce5485b, type: 3}
   mapManagerPrefab: {fileID: 5280767250319595147, guid: 28e27271814713a4281cb30dc2ae41cd, type: 3}
   inputActionAsset: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

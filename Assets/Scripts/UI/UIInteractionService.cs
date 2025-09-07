@@ -10,7 +10,7 @@ namespace PirateRoguelike.UI
         {
             if (IsInCombat) return false;
 
-            return containerType == SlotContainerType.Inventory || containerType == SlotContainerType.Equipment || containerType == SlotContainerType.Shop;
+            return containerType == SlotContainerType.Inventory || containerType == SlotContainerType.Equipment || containerType == SlotContainerType.Shop || containerType == SlotContainerType.Reward;
         }
     }
 }

@@ -49,6 +49,7 @@ MonoBehaviour:
   tooltipManagerPrefab: {fileID: 6294734344320484715, guid: c8173fb64b71637418ce567650adbe5c, type: 3}
   globalUIOverlayPrefab: {fileID: 8004934526173211991, guid: 6f2494b50d401fc4a83cb8fb9e1a5040, type: 3}
   debugConsolePrefab: {fileID: 27078478518024827, guid: 69d3ee032750f0b4f95a2c53b73fa97f, type: 3}
+  rewardUIPrefab: {fileID: 4615069877605295715, guid: c1b66b7f39bea2c4e94d3d232ce5485b, type: 3}
   _shipDisplayElementUXML: {fileID: 9197481963319205126, guid: d18484afd89158449b7a691bb72f974a, type: 3}
   _slotElementUXML: {fileID: 9197481963319205126, guid: 2d7f6a79a692f804f9771cebdd1fbc1a, type: 3}
   _itemElementUXML: {fileID: 9197481963319205126, guid: 053cb6eec7aae344b988864e2ecae06f, type: 3}

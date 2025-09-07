@@ -53,6 +53,7 @@ The design of the event architecture prioritizes a clear separation of concerns:
 | `OnItemAdded` | `Inventory`, `ShipState` | `PlayerPanelController`, `InventoryUI` | An item has been added to a slot. |
 | `OnItemRemoved` | `Inventory`, `ShipState` | `PlayerPanelController`, `InventoryUI` | An item has been removed from a slot. |
 | `OnItemMoved` | `Inventory`, `ShipState` | `PlayerPanelController`, `EnemyPanelController`, `InventoryUI` | An item has moved between slots. |
+| `OnRewardItemClaimed` | `ItemManipulationService` | `RewardUIController` | A reward item has been successfully claimed. |
 
 ### 3. Direct C# Instance Events
 

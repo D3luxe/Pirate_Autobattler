@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 459213758aa157e4891580347c5a3277, type: 3}
   m_Name: enc_treasure
   m_EditorClassIdentifier: Assembly-CSharp::PirateRoguelike.Data.EncounterSO
-  id: 
+  id: enc_treasure
   type: 5
   weight: 1
   isElite: 0

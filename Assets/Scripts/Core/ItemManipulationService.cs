@@ -3,6 +3,7 @@ using UnityEngine;
 using PirateRoguelike.Data;
 using PirateRoguelike.Core; // Assuming GameSession is in Core
 using System.Linq; // For LINQ operations like FirstOrDefault, Any
+using PirateRoguelike.Events; // Added
 
 namespace PirateRoguelike.Services
 {
@@ -133,6 +134,74 @@ namespace PirateRoguelike.Services
             }
         }
 
+        public void RequestClaimReward(SlotId sourceSlot, SlotId destinationSlot, ItemSO itemToClaimFromSource)
+        {
+            if (sourceSlot.ContainerType != SlotContainerType.Reward)
+            {
+                Debug.LogWarning($"RequestClaimReward called with non-reward slot type: {sourceSlot.ContainerType}");
+                return;
+            }
+
+            // Get the item from the RewardService (now passed directly)
+            ItemSO itemToClaim = itemToClaimFromSource;
+
+            if (itemToClaim == null)
+            {
+                Debug.LogError($"Item to claim is null.");
+                return;
+            }
+
+            // Determine target slot for the item
+            SlotId targetFinalSlot = destinationSlot;
+
+            // If destinationSlot is -1 (find first available) or target slot is occupied (for drag-to-occupied)
+            if (destinationSlot.Index == -1 || (destinationSlot.ContainerType == SlotContainerType.Inventory && _gameSession.Inventory.IsSlotOccupied(destinationSlot.Index)) || (destinationSlot.ContainerType == SlotContainerType.Equipment && _gameSession.PlayerShip.IsEquipmentSlotOccupied(destinationSlot.Index)))
+            {
+                // Try to find first available inventory slot
+                int availableInventorySlot = _gameSession.Inventory.GetFirstEmptySlot();
+                if (availableInventorySlot != -1)
+                {
+                    targetFinalSlot = new SlotId(availableInventorySlot, SlotContainerType.Inventory);
+                }
+                else
+                {
+                    // If no inventory slot, try to find first available equipment slot
+                    int availableEquipmentSlot = _gameSession.PlayerShip.GetFirstEmptyEquipmentSlot();
+                    if (availableEquipmentSlot != -1)
+                    {
+                        targetFinalSlot = new SlotId(availableEquipmentSlot, SlotContainerType.Equipment);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"No available slots for {itemToClaim.displayName}.");
+                        return;
+                    }
+                }
+            }
+
+            // Add item to the determined target slot
+            bool claimSuccessful = false;
+            if (targetFinalSlot.ContainerType == SlotContainerType.Inventory)
+            {
+                claimSuccessful = _gameSession.Inventory.AddItemAt(new ItemInstance(itemToClaim), targetFinalSlot.Index);
+            }
+            else if (targetFinalSlot.ContainerType == SlotContainerType.Equipment)
+            {
+                claimSuccessful = _gameSession.PlayerShip.SetEquipment(targetFinalSlot.Index, new ItemInstance(itemToClaim));
+            }
+
+            if (claimSuccessful)
+            {
+                Debug.Log($"Successfully claimed {itemToClaim.displayName} and placed in {targetFinalSlot.ContainerType} slot {targetFinalSlot.Index}.");
+                RewardService.RemoveClaimedItem(itemToClaim); // Notify RewardService that item has been claimed
+                ItemManipulationEvents.DispatchRewardItemClaimed(sourceSlot.Index); // Invoke the event
+            }
+            else
+            {
+                Debug.LogError($"Failed to add {itemToClaim.displayName} to slot {targetFinalSlot.Index}.");
+            }
+        }
+
         private void ExecuteSwap(SlotId slotA, SlotId slotB)
         {
             ItemInstance itemA = null;
@@ -209,6 +278,7 @@ namespace PirateRoguelike.Services
         Inventory,
         Equipment,
         Shop,
-        Crafting
+        Crafting,
+        Reward
     }
 }

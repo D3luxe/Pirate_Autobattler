@@ -9,6 +9,7 @@ using PirateRoguelike.UI; // Added for ShopItemViewData and ShopItemElement
 using PirateRoguelike.Core;
 using Pirate.MapGen;
 using System; // For Action
+using PirateRoguelike.Services;
 
 namespace PirateRoguelike.Encounters
 {
@@ -101,90 +102,15 @@ namespace PirateRoguelike.Encounters
             }
         }
 
+
         private void GenerateShopItems(int itemCount)
         {
-            _currentShopItems.Clear();
             int currentFloorIndex = GameSession.CurrentRunState != null ? GameSession.CurrentRunState.currentColumnIndex : 0;
-            int mapLength = MapManager.Instance != null ? MapManager.Instance.mapLength : 1; // Default to 1 to avoid division by zero if MapManager not found
-            List<RarityWeight> rarityProbabilities = GameDataRegistry.GetRarityProbabilitiesForFloor(currentFloorIndex, mapLength, false);
-
-            List<ItemSO> availableItems = GameDataRegistry.GetAllItems();
-            List<ItemSO> generatedItems = new List<ItemSO>();
-
-            for (int i = 0; i < itemCount; i++) // Generate unique items based on itemCount
-            {
-                Rarity selectedRarity = GetRandomRarity(rarityProbabilities);
-                ItemSO selectedItem = null;
-                int attempts = 0;
-                const int maxAttempts = 50; // Prevent infinite loops
-
-                while (selectedItem == null && attempts < maxAttempts)
-                {
-                    List<ItemSO> itemsOfSelectedRarity = availableItems.Where(item => item.rarity == selectedRarity).ToList();
-                    if (itemsOfSelectedRarity.Any())
-                    {
-                        ItemSO candidateItem = itemsOfSelectedRarity[UnityEngine.Random.Range(0, itemsOfSelectedRarity.Count)];
-
-                        // Check for duplicates in current shop offerings
-                        if (!generatedItems.Any(gi => gi.id == candidateItem.id))
-                        {
-                            // Check for highest rarity owned rule
-                            ItemInstance ownedItem = GameSession.Inventory.Slots.FirstOrDefault(invSlot => invSlot.Item != null && invSlot.Item.Def.id == candidateItem.id)?.Item;
-                            if (ownedItem != null && ownedItem.Def.rarity > candidateItem.rarity)
-                            {
-                                // Player owns a higher rarity version, try to get that one or next rarity
-                                ItemSO higherRarityVersion = GameDataRegistry.GetItem(candidateItem.id, ownedItem.Def.rarity);
-                                if (higherRarityVersion != null)
-                                {
-                                    selectedItem = higherRarityVersion;
-                                }
-                                else {
-                                    // Fallback if specific higher rarity version not found
-                                    selectedItem = candidateItem;
-                                }
-                            }
-                            else
-                            {
-                                selectedItem = candidateItem;
-                            }
-                        }
-                    }
-                    attempts++;
-                }
-
-                if (selectedItem != null)
-                {
-                    generatedItems.Add(selectedItem);
-                }
-                else
-                {
-                    Debug.LogWarning($"Could not generate a unique item of rarity {selectedRarity} after {maxAttempts} attempts. Adding a fallback item.");
-                    // Fallback: add any available item if generation fails
-                    if (availableItems.Any())
-                    {
-                        generatedItems.Add(availableItems[UnityEngine.Random.Range(0, availableItems.Count)]);
-                    }
-                }
-            }
-            _currentShopItems = generatedItems;
+            _currentShopItems = ItemGenerationService.GenerateRandomItems(itemCount, currentFloorIndex, false);
             OnShopDataUpdated?.Invoke(); // Notify UI
         }
 
-        private Rarity GetRandomRarity(List<RarityWeight> probabilities)
-        {
-            int totalWeight = probabilities.Sum(p => p.weight);
-            int randomNumber = UnityEngine.Random.Range(0, totalWeight);
-
-            foreach (var prob in probabilities)
-            {
-                if (randomNumber < prob.weight)
-                {
-                    return prob.rarity;
-                }
-                randomNumber -= prob.weight;
-            }
-            return Rarity.Bronze; // Fallback
-        }
+        
 
         // Removed UpdateShopUI() - UI is now handled by ShopController
 

@@ -15,6 +15,7 @@ namespace PirateRoguelike.UI
     [SerializeField] private GameObject tooltipManagerPrefab;
     [SerializeField] private GameObject globalUIOverlayPrefab;
     [SerializeField] private GameObject debugConsolePrefab; // Added for Debug Console
+    [SerializeField] private GameObject rewardUIPrefab; // Added for Reward UI
 
     [Header("UXML Assets")]
     [SerializeField] private VisualTreeAsset _shipDisplayElementUXML;
@@ -30,8 +31,11 @@ namespace PirateRoguelike.UI
     private MapView _mapView;
     private TooltipController _tooltipController;
     private UIDocument _globalUIOverlayDocument;
+    private DebugConsoleController _debugConsoleController; // Added for Debug Console
+    private RewardUIController _rewardUIController; // Added for Reward UI
 
     public VisualElement GlobalUIRoot => _globalUIOverlayDocument?.rootVisualElement;
+    public RewardUIController RewardUIController => _rewardUIController; // Expose RewardUIController
 
     void Awake()
     {
@@ -118,10 +122,10 @@ namespace PirateRoguelike.UI
         if (debugConsolePrefab != null)
         {
             GameObject debugConsoleInstance = Instantiate(debugConsolePrefab, transform);
-            DebugConsoleController debugConsoleController = debugConsoleInstance.GetComponent<DebugConsoleController>();
-            if (debugConsoleController != null && GlobalUIRoot != null)
+            _debugConsoleController = debugConsoleInstance.GetComponent<DebugConsoleController>();
+            if (_debugConsoleController != null && GlobalUIRoot != null)
             {
-                debugConsoleController.Initialize(GlobalUIRoot);
+                _debugConsoleController.Initialize(GlobalUIRoot);
             }
             else
             {
@@ -131,6 +135,25 @@ namespace PirateRoguelike.UI
         else
         {
             Debug.LogError("DebugConsole Prefab is not assigned in UIManager!");
+        }
+
+        // Instantiate Reward UI
+        if (rewardUIPrefab != null)
+        {
+            GameObject rewardUIInstance = Instantiate(rewardUIPrefab, transform);
+            _rewardUIController = rewardUIInstance.GetComponent<RewardUIController>();
+            if (_rewardUIController != null && GlobalUIRoot != null)
+            {
+                GlobalUIRoot.Add(_rewardUIController.GetComponent<UIDocument>().rootVisualElement);
+            }
+            else
+            {
+                Debug.LogError("RewardUIController or GlobalUIRoot is null. Cannot initialize reward UI.");
+            }
+        }
+        else
+        {
+            Debug.LogError("RewardUI Prefab is not assigned in UIManager!");
         }
     }
 

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 459213758aa157e4891580347c5a3277, type: 3}
   m_Name: event_test
   m_EditorClassIdentifier: Assembly-CSharp::PirateRoguelike.Data.EncounterSO
-  id: 
-  type: 0
+  id: enc_event_test
+  type: 4
   weight: 1
   isElite: 0
   eliteRewardDepthBonus: 0

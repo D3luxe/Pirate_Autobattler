@@ -68,6 +68,13 @@ The combat system in Pirate Autobattler is a real-time, tick-based simulation or
 5.  The `EventBus.DispatchBattleStart` event is invoked to signal the start of the battle to other systems (e.g., `AbilityManager`).
 6.  `UIInteractionService.IsInCombat` is set to `true` to indicate the game is in a combat state.
 
+### 3.3. Battle End
+
+1.  If either ship's health is depleted, the `TickService` is stopped.
+2.  The winner is determined (in case of a tie, the player wins).
+3.  `GameSession.EndBattle` is called, passing the battle outcome to update the overall game state (e.g., awarding rewards, progressing the run).
+4.  `UIInteractionService.IsInCombat` is set to `false` to indicate the game is no longer in a combat state, allowing UI interactions.
+
 ### 3.2. Tick Loop (`CombatController.HandleTick`)
 
 The `HandleTick` method is the heart of the combat simulation, executed every 100ms by the `TickService`.

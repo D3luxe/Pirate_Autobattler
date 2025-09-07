@@ -12,6 +12,8 @@ namespace PirateRoguelike.Events
         public static event Action<ItemInstance, SlotId> OnItemAdded;
         public static event Action<ItemInstance, SlotId> OnItemRemoved;
 
+        public static event Action<int> OnRewardItemClaimed; // New event
+
         public static void DispatchItemMoved(ItemInstance item, SlotId from, SlotId to)
         {
             OnItemMoved?.Invoke(item, from, to);
@@ -35,6 +37,11 @@ namespace PirateRoguelike.Events
         public static void DispatchItemRemoved(ItemInstance item, SlotId from)
         {
             OnItemRemoved?.Invoke(item, from);
+        }
+
+        public static void DispatchRewardItemClaimed(int index)
+        {
+            OnRewardItemClaimed?.Invoke(index);
         }
     }
 }

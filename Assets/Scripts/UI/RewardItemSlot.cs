@@ -23,7 +23,7 @@ namespace PirateRoguelike.UI
         // Ensure the button's onClick listener is correctly set up
         // This might need to be done in the editor or dynamically
         selectButton.onClick.RemoveAllListeners();
-        selectButton.onClick.AddListener(() => _controller.OnItemChosen(_itemIndex));
+        // selectButton.onClick.AddListener(() => _controller.OnItemChosen(_itemIndex));
     }
 
     // This method is needed to pass the controller reference
