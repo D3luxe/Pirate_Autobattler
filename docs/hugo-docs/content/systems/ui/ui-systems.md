@@ -37,7 +37,7 @@ This section details the implementation of the dynamic tooltip description syste
     *   It iterates through the `RuntimeAbility`'s `RuntimeAction`s and calls `runtimeAction.BuildDescription(context)` to get the dynamic description string.
 
 *   **`TooltipUtility` (`PirateRoguelike.UI.Utilities.TooltipUtility`):**
-    >   File Path: Assets/Scripts/UI/TooltipUtility.cs
+    >   File Path: Assets/Scripts/UI/Utilities/TooltipUtility.cs
     *   A static helper class that provides a simple method (`RegisterTooltipCallbacks`) for registering the necessary `PointerEnterEvent` and `PointerLeaveEvent` on a UI element. It takes an `ISlotViewData` and a `panelRoot` as input, and passes the `RuntimeItem` from the `ISlotViewData` to the `TooltipController.Show()` method.
 
 *   **`TooltipPanelStyle.uss`:**
@@ -98,11 +98,10 @@ This system centralizes the logic for moving, equipping, and swapping items, dec
     *   Represents the movable, visual representation of an item (icon, frame, etc.).
     *   Its `SlotManipulator` handles initiating drag-and-drop operations.
 
-*   **`UIInteractionService` (`PirateRoguelike.Services.UIInteractionService`):**
-    >   File Path: Assets/Scripts/Core/UIInteractionService.cs
+*   **`UIInteractionService` (`PirateRoguelike.UI.UIInteractionService`):**
+    >   File Path: Assets/Scripts/UI/UIInteractionService.cs
     *   A static class that holds the current global UI state (e.g., `IsInCombat`). It provides methods that the UI can query to ask for permission to perform an action.
-    *   The `ItemManipulationService` will only perform actions after they have been approved by the `UIInteractionService`.
-    *   This service now allows item manipulation for `SlotContainerType.Shop` when not in combat, enabling shop item purchases.
+    *   The `ItemManipulationService` will only perform actions after they have been approved by the `UIInteractionService`.n    *   This service now allows item manipulation for `SlotContainerType.Shop` when not in combat, enabling shop item purchases.
 
 ### 2.2. How it Works (Example: Item Swap)
 
@@ -147,21 +146,183 @@ The enemy panel now fully utilizes the new runtime item system and tooltip setup
 
 ### UI - Controllers & ViewModels
 *   `Assets/Scripts/UI/UIManager.cs` (New central UI manager)
-*   `Assets/Scripts/UI/PlayerPanel/PlayerPanelController.cs` (Contains `PlayerPanelDataViewModel` and `SlotDataViewModel`) - For more details on the underlying data structures, refer to the [Runtime Data Systems Overview]({{< myrelref "../core/runtime-data-systems.md" >}}).
-*   `Assets/Scripts/UI/EnemyPanel/EnemyPanelController.cs` - This controller manages the enemy's UI panel. For more details on combat systems, refer to the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}). For a comprehensive understanding of core game systems, refer to the [Core Systems Overview]({{< myrelref "../core/_index.md" >}}).
+*   `Assets/Scripts/UI/PlayerPanel/PlayerPanelController.cs` (Contains `PlayerPanelDataViewModel` and `SlotDataViewModel`)
+*   `Assets/Scripts/UI/EnemyPanel/EnemyPanelController.cs`
 *   `Assets/Scripts/UI/PlayerPanel/PlayerPanelData.cs` (Contains `ISlotViewData`, `IPlayerPanelData` interfaces etc.)
-*   `Assets/Scripts/UI/TooltipController.cs` - This controller manages the tooltip system. For more details on combat systems, refer to the [Combat System Overview]({{< myrelref "../combat/combat-system-overview.md" >}}).
+*   `Assets/Scripts/UI/TooltipController.cs`
 
 ### UI - Components & Manipulators
 *   `Assets/Scripts/UI/Components/SlotElement.cs` (The slot container)
 *   `Assets/Scripts/UI/Components/ItemElement.cs` (The draggable item)
 *   `Assets/Scripts/UI/PlayerPanel/SlotManipulator.cs`
 *   `Assets/Scripts/UI/EffectDisplay.cs`
-*   `Assets/Scripts/UI/TooltipUtility.cs` - This utility provides helper methods for tooltip management. For a comprehensive understanding of core game systems, refer to the [Core Systems Overview]({{< myrelref "../core/_index.md" >}}).
-*   `Assets/Scripts/Core/UIInteractionService.cs` - This service is crucial for managing global UI state and ensuring that UI actions are only performed when appropriate. For a comprehensive understanding of core game systems, refer to the [Core Systems Overview]({{< myrelref "../core/_index.md" >}}).
+*   `Assets/Scripts/UI/Utilities/TooltipUtility.cs`
+*   `Assets/Scripts/UI/UIInteractionService.cs`
 
 ## 5. UI Toolkit Event Handling Notes
 
 *   **`TrickleDown.TrickleDown`:** When registering callbacks for `KeyDownEvent` (and other events where early intervention is critical), using `TrickleDown.TrickleDown` ensures that your callback is executed during the TrickleDown phase of event propagation. This allows you to process or `PreventDefault()` the event before other elements or the default behavior of the target element (e.g., `TextField`) can consume or modify it. This is crucial for achieving precise control over UI element behavior, especially for input fields.
 
+## 6. UI Systems Architecture (PlantUML Class Diagram)
 
+This diagram illustrates the relationships and interactions between the core UI components.
+
+```plantuml
+@startuml
+' --- STYLING ---
+skinparam style strictuml
+skinparam shadowing true
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 16
+skinparam backgroundColor #b4b4b42c
+!pragma usecasesquare
+skinparam class {
+    BorderColor #A9A9A9
+    BorderThickness 1.5
+    ArrowColor #555555
+    ArrowThickness 1.5
+}
+skinparam note {
+    BackgroundColor #FFFFE0
+    BorderColor #B4B4B4
+}
+
+' Define stereotype colors
+skinparam class<<Controller>> {
+    BackgroundColor #FFD700 ' Gold
+}
+skinparam class<<Service>> {
+    BackgroundColor #90EE90 ' Light Green
+}
+skinparam class<<EventBus>> {
+    BackgroundColor #FFB6C1 ' Light Pink
+}
+skinparam class<<ViewModel>> {
+    BackgroundColor #ADD8E6 ' Light Blue
+}
+skinparam class<<Component>> {
+    BackgroundColor #D3D3D3 ' Light Gray
+}
+skinparam class<<Utility>> {
+    BackgroundColor #E6E6FA ' Lavender
+}
+skinparam class<<Manipulator>> {
+    BackgroundColor #F0E68C ' Khaki
+}
+
+' --- CLASSES ---
+class UIManager <<Controller>> {
+    + Initialize()
+    + InitializeRunUI()
+}
+
+class PlayerPanelController <<Controller>> {
+    + Initialize()
+}
+
+class EnemyPanelController <<Controller>> {
+    + Initialize()
+}
+
+class ShopController <<Controller>> {
+    + RegisterTooltipCallbacks()
+}
+
+class RewardUIController <<Controller>> {
+    + RegisterTooltipCallbacks()
+}
+
+class TooltipController <<Controller>> {
+    + Show()
+    + Hide()
+    + Initialize()
+}
+
+class EffectDisplay <<Component>> {
+    + SetData()
+}
+
+class TooltipUtility <<Utility>> {
+    + RegisterTooltipCallbacks()
+}
+
+class ItemManipulationService <<Service>> {
+    + RequestSwap()
+    + RequestPurchase()
+    + RequestClaimReward()
+}
+
+class ItemManipulationEvents <<EventBus>> {
+    + OnItemMoved
+    + OnItemAdded
+    + OnItemRemoved
+    + OnRewardItemClaimed
+    + DispatchItemMoved()
+    + DispatchItemAdded()
+    + DispatchItemRemoved()
+    + DispatchRewardItemClaimed()
+}
+
+class SlotManipulator <<Manipulator>> {
+    + OnPointerDown()
+    + OnPointerMove()
+    + OnPointerUp()
+}
+
+class PlayerPanelDataViewModel <<ViewModel>> {
+    + UpdateObservableLists()
+}
+
+class SlotElement <<Component>> {
+    + ObserveISlotViewData()
+}
+
+class ItemElement <<Component>> {
+    + SlotManipulator
+}
+
+class UIInteractionService <<Service>> {
+    + IsInCombat: bool
+    + CanManipulateItem()
+}
+
+' --- RELATIONSHIPS ---
+UIManager --> PlayerPanelController : instantiates >
+UIManager --> EnemyPanelController : instantiates >
+UIManager --> TooltipController : instantiates & initializes >
+UIManager --> ShopController : instantiates >
+UIManager --> RewardUIController : instantiates >
+
+TooltipController <-- TooltipUtility : used by >
+TooltipController <-- EffectDisplay : uses >
+
+TooltipUtility --> TooltipController : calls Show/Hide >
+
+ItemManipulationService <-- SlotManipulator : calls requests >
+ItemManipulationService --> UIInteractionService : checks permission >
+
+ItemManipulationEvents <-- ItemManipulationService : dispatches >
+ItemManipulationEvents --> PlayerPanelDataViewModel : subscribes to >
+ItemManipulationEvents --> EnemyPanelController : subscribes to >
+ItemManipulationEvents --> RewardUIController : subscribes to >
+
+SlotManipulator --> ItemManipulationService : initiates requests >
+SlotManipulator --> UIInteractionService : checks permission >
+
+PlayerPanelDataViewModel <-- ItemManipulationEvents : updates from >
+PlayerPanelDataViewModel --> SlotElement : binds to >
+
+SlotElement *-- ItemElement : contains >
+SlotElement --> PlayerPanelDataViewModel : observes >
+
+ItemElement *-- SlotManipulator : attaches >
+
+EnemyPanelController --> TooltipUtility : uses >
+EnemyPanelController --> ItemManipulationEvents : subscribes to >
+
+ShopController --> TooltipUtility : uses >
+
+RewardUIController --> TooltipUtility : uses >
+RewardUIController --> ItemManipulationEvents : subscribes to >
+
+@enduml

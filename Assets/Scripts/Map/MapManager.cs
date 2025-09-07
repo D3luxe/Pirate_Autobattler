@@ -246,9 +246,13 @@ namespace Pirate.MapGen
             }
 
             // Assuming _convertedMapNodes is populated correctly and matches the structure of _mapGraphData.nodes
-            if (graphNode.row < _convertedMapNodes.Count && graphNode.col < _convertedMapNodes[graphNode.row].Count)
+            if (_convertedMapNodes != null && graphNode.row < _convertedMapNodes.Count)
             {
-                return _convertedMapNodes[graphNode.row].FirstOrDefault(n => n.columnIndex == graphNode.row && n.rowIndex == graphNode.col);
+                var node = _convertedMapNodes[graphNode.row].FirstOrDefault(n => n.rowIndex == graphNode.col);
+                if (node != null)
+                {
+                    return node;
+                }
             }
             
             Debug.LogError($"Converted MapNodeData not found for node ID {nodeId} at row {graphNode.row}, col {graphNode.col}.");

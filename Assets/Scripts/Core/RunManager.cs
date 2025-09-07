@@ -132,6 +132,8 @@ namespace PirateRoguelike.Core
             switch (encounterType)
             {
                 case PirateRoguelike.Data.EncounterType.Battle:
+                case PirateRoguelike.Data.EncounterType.Boss:
+                case PirateRoguelike.Data.EncounterType.Elite:
                     SceneManager.LoadScene("Battle");
                     break;
                 case PirateRoguelike.Data.EncounterType.Shop:
@@ -149,13 +151,25 @@ namespace PirateRoguelike.Core
                     SceneManager.LoadScene("Shop");
                     break;
                 case PirateRoguelike.Data.EncounterType.Treasure:
-                    Debug.Log("Treasure encounter triggered. Implementation pending.");
+                    // Treasure is handled in the Run scene directly without a scene change.
+                    // TODO: Create and call RewardService.GenerateTreasureReward
+                    // RewardService.GenerateTreasureReward(GameSession.CurrentRunState.currentColumnIndex);
+                    if (UIManager.Instance != null && UIManager.Instance.RewardUIController != null)
+                    {
+                        // TODO: Create a method to show only treasure rewards
+                        // UIManager.Instance.RewardUIController.ShowRewards(RewardService.GetCurrentRewardItems(), RewardService.GetCurrentRewardGold());
+                        Debug.Log("Treasure encounter triggered. UI Implementation pending.");
+                    }
+                    else
+                    {
+                        Debug.LogError("UIManager or RewardUIController not available to show treasure reward.");
+                    }
                     break;
-                case PirateRoguelike.Data.EncounterType.Boss:
-                    SceneManager.LoadScene("Battle");
+                case PirateRoguelike.Data.EncounterType.Port:
+                    SceneManager.LoadScene("Port");
                     break;
-                case PirateRoguelike.Data.EncounterType.Elite:
-                    SceneManager.LoadScene("Battle");
+                case PirateRoguelike.Data.EncounterType.Event:
+                    SceneManager.LoadScene("Event");
                     break;
                 default:
                     Debug.LogWarning($"Unhandled encounter type: {encounterType}");
@@ -178,6 +192,12 @@ namespace PirateRoguelike.Core
 
     private void OnRunSceneLoaded()
     {
+        // Always clear the debug encounter when returning to the run scene.
+        if (GameSession.DebugEncounterToLoad != null)
+        {
+            GameSession.DebugEncounterToLoad = null;
+        }
+
         if (GameSession.CurrentRunState != null && GameSession.CurrentRunState.battleRewards != null && GameSession.CurrentRunState.battleRewards.Count > 0)
         {
             Debug.Log($"RunManager: Detected {GameSession.CurrentRunState.battleRewards.Count} battle rewards.");

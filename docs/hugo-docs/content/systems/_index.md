@@ -34,7 +34,7 @@ The game's functionality is distributed among several key systems:
     *   **Interaction:** Provides data to all other systems and dispatches events when core game state changes.
 
 *   **`PirateRoguelike.Core.RunManager` (`Assets/Scripts/Core/RunManager.cs`):**
-    *   **Responsibility:** A persistent singleton that manages the overall game flow within a "run." It instantiates core game managers (like `Pirate.MapGen.MapManager`), handles scene transitions (e.g., to Battle, Shop), and reacts to player progress on the map. **It also centralizes the management of debug and save hotkey input actions.**
+    *   **Responsibility:** A persistent singleton that manages the overall game flow within a "run." It instantiates core game managers (like `Pirate.MapGen.MapManager`), handles scene transitions based on encounter type (e.g., to `Battle`, `Shop`, `Port`, `Event`), and reacts to player progress on the map. It also handles non-scene-changing encounters like `Treasure` directly. **It also centralizes the management of debug and save hotkey input actions.**
     *   **Interaction:** Orchestrates the initialization of `Pirate.MapGen.MapManager` and `PirateRoguelike.UI.UIManager`. Reacts to `PirateRoguelike.Core.GameSession` events (e.g., `OnPlayerNodeChanged`).
 
 *   **`PirateRoguelike.UI.UIManager` (`Assets/Scripts/UI/UIManager.cs`):**

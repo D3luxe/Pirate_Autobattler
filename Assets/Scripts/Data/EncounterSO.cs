@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 using System.Collections.Generic;
 
 namespace PirateRoguelike.Data
@@ -30,6 +31,8 @@ namespace PirateRoguelike.Data
         [Header("Event")]
         public string eventTitle;
         public string eventDescription;
+        public VisualTreeAsset eventUxml;
+        public StyleSheet eventUss;
         public int minFloor; // Minimum floor index for this event to appear
         public int maxFloor; // Maximum floor index for this event to appear
         public List<EventChoice> eventChoices;

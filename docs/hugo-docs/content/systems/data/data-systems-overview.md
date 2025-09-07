@@ -101,9 +101,11 @@ This section details the primary ScriptableObjects used to define static game da
         *   `portHealPercent` (float): For port encounters, percentage of health healed.
         *   `eventTitle` (string): For event encounters, the title of the event.
         *   `eventDescription` (string): For event encounters, the description of the event.
+        *   `eventUxml` (`VisualTreeAsset`): For event encounters, the UXML asset that defines the UI structure.
+        *   `eventUss` (`StyleSheet`): For event encounters, the USS asset for styling the UI.
         *   `minFloor`, `maxFloor` (int): Floor range for event encounters.
         *   `eventChoices` (List of `EventChoice`): For event encounters, a list of choices the player can make.
-    *   **Relationships:** Contains lists of `EnemySO`s and `EventChoice`s.
+    *   **Relationships:** Contains lists of `EnemySO`s and `EventChoice`s. References `VisualTreeAsset` and `StyleSheet` for event UI.
 
 *   **`EnemySO` (`Assets/Scripts/Data/EnemySO.cs`):**
     *   **Purpose:** Defines a specific enemy, including its base ship type and initial equipped items.
@@ -230,6 +232,7 @@ class DamageActionSO <<SO>> {
 
 class HealActionSO <<SO>> {
     + healAmount: int
+    + healTarget: HealTargetType
 }
 
 class EffectSO <<SO>> {
@@ -247,7 +250,18 @@ class EncounterSO <<SO>> {
     + type: EncounterType
     + weight: float
     + isElite: bool
+    + eliteRewardDepthBonus: int
+    + iconPath: string
+    + tooltipText: string
     + enemies: List<EnemySO>
+    + shopItemCount: int
+    + portHealPercent: float
+    + eventTitle: string
+    + eventDescription: string
+    + eventUxml: VisualTreeAsset
+    + eventUss: StyleSheet
+    + minFloor: int
+    + maxFloor: int
     + eventChoices: List<EventChoice>
 }
 
@@ -295,6 +309,12 @@ class ShipSO <<SO>> {
     + art: Sprite
     + rarity: Rarity
     + Cost: int
+}
+
+class VisualTreeAsset <<Serializable>> {
+}
+
+class StyleSheet <<Serializable>> {
 }
 
 enum TriggerType <<Enum>> {
@@ -358,6 +378,11 @@ enum TargetingStrategy <<Enum>> {
     HighestDamage
 }
 
+enum HealTargetType <<Enum>> {
+    Caster
+    Target
+}
+
 class RarityMilestone <<Serializable>> {
     + floor: int
     + weights: List<RarityWeight>
@@ -409,6 +434,8 @@ EffectSO "1" --> "1" ActionSO : ticks with >
 
 EncounterSO "1" *-- "many" EnemySO : contains >
 EncounterSO "1" *-- "many" EventChoice : defines >
+EncounterSO "1" --> "1" VisualTreeAsset : uses >
+EncounterSO "1" --> "1" StyleSheet : uses >
 
 EnemySO "1" --> "1" ShipSO : uses >
 EnemySO "1" *-- "many" ItemSO : equips >
@@ -429,6 +456,7 @@ ItemRef "1" --> "1" ItemSO : references >
 
 AbilitySO "1" --> "1" TriggerType : uses >
 ActionSO "1" --> "1" ActionType : uses >
+HealActionSO "1" --> "1" HealTargetType : uses >
 ItemSO "1" --> "1" Rarity : uses >
 ShipSO "1" --> "1" Rarity : uses >
 EncounterSO "1" --> "1" EncounterType : uses >

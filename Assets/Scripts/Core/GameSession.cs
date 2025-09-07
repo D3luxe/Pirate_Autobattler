@@ -24,6 +24,9 @@ namespace PirateRoguelike.Core
     public static bool ShouldLoadSavedGame { get; set; } = false;
     public static RunState SavedRunStateToLoad { get; set; } = null;
 
+    // For debug-spawning encounters directly
+    public static EncounterSO DebugEncounterToLoad { get; set; }
+
     public static event Action OnPlayerNodeChanged; // New event
 
     public static void InvokeOnPlayerNodeChanged()
