@@ -171,254 +171,224 @@ This diagram illustrates the relationships between the various ScriptableObjects
 
 ```plantuml
 @startuml
+left to right direction
 ' --- STYLING ---
 skinparam style strictuml
 skinparam shadowing true
 skinparam defaultFontName "Segoe UI"
-skinparam defaultFontSize 16
+skinparam defaultFontSize 14
+skinparam linetype ortho
+skinparam ArrowFontName Impact
+skinparam ArrowThickness 1
+skinparam ArrowColor #000000
 skinparam backgroundColor #b4b4b42c
-!pragma usecasesquare
+skinparam package {
+    BorderColor #555555
+    FontColor #333333
+    StereotypeFontColor #333333
+}
 skinparam class {
     BorderColor #A9A9A9
-    BorderThickness 1.5
-    ArrowColor #555555
-    ArrowThickness 1.5
+    ArrowColor #141414ff
 }
-skinparam note {
-    BackgroundColor #FFFFE0
-    BorderColor #B4B4B4
+' Define stereotype colors using the classic, reliable syntax
+skinparam classBackgroundColor<<SO>> #ADD8E6
+skinparam classBackgroundColor<<AbstractSO>> #ADD8E6
+skinparam classFontStyle<<AbstractSO>> italic
+skinparam classBackgroundColor<<Enum>> #D3D3D3
+skinparam classBackgroundColor<<Serializable>> #FFFF99
+
+skinparam packageBackgroundColor #LightCyan
+
+title Static Data Architecture
+
+' --- PACKAGES & CLASSES ---
+
+package "Core Configuration & Rules" {
+    class RunConfigSO <<SO>> {
+        + startingLives: int
+        + startingGold: int
+        + inventorySize: int
+        + rewardGoldPerWin: int
+        + rerollBaseCost: int
+        + rerollGrowth: float
+        + rarityMilestones: List<RarityMilestone>
+        + eliteModifier: int
+        + rules: RulesSO
+    }
+    class RarityMilestone <<Serializable>> {
+        + floor: int
+        + weights: List<RarityWeight>
+    }
+    class RarityWeight <<Serializable>> {
+        + rarity: Rarity
+        + weight: int
+    }
+    class RulesSO <<SO>> {
+    }
 }
 
-' Define stereotype colors
-skinparam class<<SO>> {
-    BackgroundColor #ADD8E6 ' Light Blue
-}
-skinparam class<<AbstractSO>> {
-    BackgroundColor #ADD8E6
-    FontColor #808080
-    FontStyle italic
-}
-skinparam class<<Enum>> {
-    BackgroundColor #D3D3D3 ' Light Gray
-}
-skinparam class<<Struct>> {
-    BackgroundColor #D3D3D3
-}
-skinparam class<<Serializable>> {
-    BackgroundColor #FFFF99 ' Light Yellow
-}
-
-' --- CLASSES ---
-abstract class ActionSO <<AbstractSO>> {
-    + description: string
-    + Execute(ctx: CombatContext)
-    + GetActionType(): ActionType
-}
-
-class AbilitySO <<SO>> {
-    + id: string
-    + displayName: string
-    + trigger: TriggerType
-    + actions: List<ActionSO>
-}
-
-class ApplyEffectActionSO <<SO>> {
-    + effectToApply: EffectSO
+package "Combatants & Equipment" {
+    class ItemSO <<SO>> {
+        + id: string
+        + displayName: string
+        + description: string
+        + icon: Sprite
+        + rarity: Rarity
+        + isActive: bool
+        + cooldownSec: float
+        + abilities: List<AbilitySO>
+        + tags: List<Tag>
+        + synergyRules: List<SynergyRule>
+        + Cost: int
+    }
+    class ShipSO <<SO>> {
+        + id: string
+        + displayName: string
+        + baseMaxHealth: int
+        + baseItemSlots: int
+        + builtInItems: List<ItemRef>
+        + itemLoadout: List<ItemRef>
+        + art: Sprite
+        + rarity: Rarity
+        + Cost: int
+    }
+    class EnemySO <<SO>> {
+        + id: string
+        + displayName: string
+        + shipId: string
+        + itemLoadout: List<ItemSO>
+        + targetingStrategy: TargetingStrategy
+    }
 }
 
-class DamageActionSO <<SO>> {
-    + damageAmount: int
+package "Ability & Action System" {
+    class AbilitySO <<SO>> {
+        + id: string
+        + displayName: string
+        + trigger: TriggerType
+        + actions: List<ActionSO>
+    }
+    abstract class ActionSO <<AbstractSO>> {
+        + description: string
+        + Execute(ctx: CombatContext)
+        + GetActionType(): ActionType
+    }
+    class EffectSO <<SO>> {
+        + id: string
+        + displayName: string
+        + duration: float
+        + tickInterval: float
+        + tickAction: ActionSO
+        + isStackable: bool
+        + maxStacks: int
+    }
+    class ApplyEffectActionSO <<SO>> {
+        + effectToApply: EffectSO
+    }
+    class DamageActionSO <<SO>> {
+        + damageAmount: int
+    }
+    class HealActionSO <<SO>> {
+        + healAmount: int
+        + healTarget: HealTargetType
+    }
 }
 
-class HealActionSO <<SO>> {
-    + healAmount: int
-    + healTarget: HealTargetType
+package "Encounters & Events" {
+    class EncounterSO <<SO>> {
+        + id: string
+        + type: EncounterType
+        + weight: float
+        + isElite: bool
+        + eliteRewardDepthBonus: int
+        + iconPath: string
+        + tooltipText: string
+        + enemies: List<EnemySO>
+        + shopItemCount: int
+        + portHealPercent: float
+        + eventTitle: string
+        + eventDescription: string
+        + eventUxml: VisualTreeAsset
+        + eventUss: StyleSheet
+        + minFloor: int
+        + maxFloor: int
+        + eventChoices: List<EventChoice>
+    }
+    class EventChoice <<Serializable>> {
+        + choiceText: string
+        + goldCost: int
+        + lifeCost: int
+        + itemRewardId: string
+        + shipRewardId: string
+        + nextEncounterId: string
+        + outcomeText: string
+    }
+    class VisualTreeAsset <<Serializable>> {}
+    class StyleSheet <<Serializable>> {}
 }
 
-class EffectSO <<SO>> {
-    + id: string
-    + displayName: string
-    + duration: float
-    + tickInterval: float
-    + tickAction: ActionSO
-    + isStackable: bool
-    + maxStacks: int
-}
-
-class EncounterSO <<SO>> {
-    + id: string
-    + type: EncounterType
-    + weight: float
-    + isElite: bool
-    + eliteRewardDepthBonus: int
-    + iconPath: string
-    + tooltipText: string
-    + enemies: List<EnemySO>
-    + shopItemCount: int
-    + portHealPercent: float
-    + eventTitle: string
-    + eventDescription: string
-    + eventUxml: VisualTreeAsset
-    + eventUss: StyleSheet
-    + minFloor: int
-    + maxFloor: int
-    + eventChoices: List<EventChoice>
-}
-
-class EnemySO <<SO>> {
-    + id: string
-    + displayName: string
-    + shipId: string
-    + itemLoadout: List<ItemSO>
-    + targetingStrategy: TargetingStrategy
-}
-
-class ItemSO <<SO>> {
-    + id: string
-    + displayName: string
-    + description: string
-    + icon: Sprite
-    + rarity: Rarity
-    + isActive: bool
-    + cooldownSec: float
-    + abilities: List<AbilitySO>
-    + tags: List<Tag>
-    + synergyRules: List<SynergyRule>
-    + Cost: int
-}
-
-class RunConfigSO <<SO>> {
-    + startingLives: int
-    + startingGold: int
-    + inventorySize: int
-    + rewardGoldPerWin: int
-    + rerollBaseCost: int
-    + rerollGrowth: float
-    + rarityMilestones: List<RarityMilestone>
-    + eliteModifier: int
-    + rules: RulesSO
-}
-
-class ShipSO <<SO>> {
-    + id: string
-    + displayName: string
-    + baseMaxHealth: int
-    + baseItemSlots: int
-    + builtInItems: List<ItemRef>
-    + itemLoadout: List<ItemRef>
-    + art: Sprite
-    + rarity: Rarity
-    + Cost: int
-}
-
-class VisualTreeAsset <<Serializable>> {
-}
-
-class StyleSheet <<Serializable>> {
-}
-
-enum TriggerType <<Enum>> {
-    OnItemReady
-    OnAllyActivate
-    OnBattleStart
-    OnEncounterEnd
-    OnDamageDealt
-    OnDamageReceived
-    OnHeal
-    OnShieldGained
-    OnDebuffApplied
-    OnBuffApplied
-    OnTick
-}
-
-enum ActionType <<Enum>> {
-    Buff
-    Damage
-    Heal
-    Shield
-    Debuff
-    StatChange
-    Meta
-    Burn
-    Poison
-    Stun
-}
-
-enum Rarity <<Enum>> {
-    Bronze
-    Silver
-    Gold
-    Diamond
-}
-
-enum EncounterType <<Enum>> {
-    Battle
-    Elite
-    Shop
-    Port
-    Event
-    Treasure
-    Boss
-    Unknown
-}
-
-enum StatType <<Enum>> {
-    Attack
-    Defense
-}
-
-enum StatModifierType <<Enum>> {
-    Flat
-    Percentage
-}
-
-enum TargetingStrategy <<Enum>> {
-    Player
-    LowestHealth
-    HighestDamage
-}
-
-enum HealTargetType <<Enum>> {
-    Caster
-    Target
-}
-
-class RarityMilestone <<Serializable>> {
-    + floor: int
-    + weights: List<RarityWeight>
-}
-
-class RarityWeight <<Serializable>> {
-    + rarity: Rarity
-    + weight: int
-}
-
-class RarityTieredValue <<Serializable>> {
-    + rarity: Rarity
-    + value: float
-}
-
-class ItemRef <<Serializable>> {
-    + id: string
-}
-
-class Tag <<Serializable>> {
-    + id: string
-    + displayName: string
-}
-
-class SynergyRule <<Serializable>> {
-    + description: string
-}
-
-class EventChoice <<Serializable>> {
-    + choiceText: string
-    + goldCost: int
-    + lifeCost: int
-    + itemRewardId: string
-    + shipRewardId: string
-    + nextEncounterId: string
-    + outcomeText: string
+package "Shared Data Structures & Enums" {
+    class ItemRef <<Serializable>> {
+        + id: string
+    }
+    class Tag <<Serializable>> {
+        + id: string
+        + displayName: string
+    }
+    class SynergyRule <<Serializable>> {
+        + description: string
+    }
+    enum Rarity <<Enum>> {
+        Bronze
+        Silver
+        Gold
+        Diamond
+    }
+    enum TriggerType <<Enum>> {
+        OnItemReady
+        OnAllyActivate
+        OnBattleStart
+        OnEncounterEnd
+        OnDamageDealt
+        OnDamageReceived
+        OnHeal
+        OnShieldGained
+        OnDebuffApplied
+        OnBuffApplied
+        OnTick
+    }
+    enum ActionType <<Enum>> {
+        Buff
+        Damage
+        Heal
+        Shield
+        Debuff
+        StatChange
+        Meta
+        Burn
+        Poison
+        Stun
+    }
+    enum EncounterType <<Enum>> {
+        Battle
+        Elite
+        Shop
+        Port
+        Event
+        Treasure
+        Boss
+        Unknown
+    }
+    enum TargetingStrategy <<Enum>> {
+        Player
+        LowestHealth
+        HighestDamage
+    }
+    enum HealTargetType <<Enum>> {
+        Caster
+        Target
+    }
 }
 
 ' --- RELATIONSHIPS ---
@@ -426,41 +396,39 @@ ActionSO <|-- ApplyEffectActionSO
 ActionSO <|-- DamageActionSO
 ActionSO <|-- HealActionSO
 
-AbilitySO "1" *-- "many" ActionSO : contains >
-ItemSO "1" *-- "many" AbilitySO : grants >
+AbilitySO "1" *-- "*" ActionSO : contains
+ItemSO "1" *-- "*" AbilitySO : grants
 
-ApplyEffectActionSO "1" --> "1" EffectSO : applies >
-EffectSO "1" --> "1" ActionSO : ticks with >
+ApplyEffectActionSO "1" --> "1" EffectSO : applies
+EffectSO "1" --> "1" ActionSO : "ticks with"
 
-EncounterSO "1" *-- "many" EnemySO : contains >
-EncounterSO "1" *-- "many" EventChoice : defines >
-EncounterSO "1" --> "1" VisualTreeAsset : uses >
-EncounterSO "1" --> "1" StyleSheet : uses >
+EncounterSO "1" *-- "*" EnemySO : contains
+EncounterSO "1" *-- "*" EventChoice : defines
+EncounterSO "1" --> "1" VisualTreeAsset : uses
+EncounterSO "1" --> "1" StyleSheet : uses
 
-EnemySO "1" --> "1" ShipSO : uses >
-EnemySO "1" *-- "many" ItemSO : equips >
+EnemySO "1" ..> ShipSO : "uses (by id)"
+EnemySO "1" *-- "*" ItemSO : equips
 
-ItemSO "1" *-- "many" Tag : has >
-ItemSO "1" *-- "many" SynergyRule : defines >
+ItemSO "1" *-- "*" Tag : has
+ItemSO "1" *-- "*" SynergyRule : defines
 
-RunConfigSO "1" *-- "many" RarityMilestone : defines >
-RunConfigSO "1" --> "1" RulesSO : uses >
+RunConfigSO "1" *-- "*" RarityMilestone : defines
+RunConfigSO "1" --> "1" RulesSO : uses
 
-ShipSO "1" *-- "many" ItemRef : has >
+ShipSO "1" *-- "*" ItemRef : has
+RarityMilestone "1" *-- "*" RarityWeight : defines
+RarityWeight "1" ..> Rarity
 
-RarityMilestone "1" *-- "many" RarityWeight : defines >
-RarityWeight "1" --> "1" Rarity : uses >
-RarityTieredValue "1" --> "1" Rarity : uses >
+ItemRef "1" ..> ItemSO : "references (by id)"
 
-ItemRef "1" --> "1" ItemSO : references >
-
-AbilitySO "1" --> "1" TriggerType : uses >
-ActionSO "1" --> "1" ActionType : uses >
-HealActionSO "1" --> "1" HealTargetType : uses >
-ItemSO "1" --> "1" Rarity : uses >
-ShipSO "1" --> "1" Rarity : uses >
-EncounterSO "1" --> "1" EncounterType : uses >
-EnemySO "1" --> "1" TargetingStrategy : uses >
+AbilitySO "1" ..> TriggerType
+ActionSO "1" ..> ActionType
+HealActionSO "1" ..> HealTargetType
+ItemSO "1" ..> Rarity
+ShipSO "1" ..> Rarity
+EncounterSO "1" ..> EncounterType
+EnemySO "1" ..> TargetingStrategy
 
 @enduml
 ```

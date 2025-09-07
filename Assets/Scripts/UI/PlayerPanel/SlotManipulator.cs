@@ -5,6 +5,7 @@ using System.Linq;
 using PirateRoguelike.Services;
 using PirateRoguelike.UI.Components;
 using PirateRoguelike.Data;
+using PirateRoguelike.Commands; // New using statement
 
 namespace PirateRoguelike.UI
 {
@@ -135,60 +136,52 @@ namespace PirateRoguelike.UI
             target.style.visibility = Visibility.Visible;
 
             global::PirateRoguelike.Services.SlotId fromSlotId = new global::PirateRoguelike.Services.SlotId(_sourceSlotData.SlotId, _fromContainer);
+            global::PirateRoguelike.Services.SlotId toSlotId = (dropSlotData != null) ? new global::PirateRoguelike.Services.SlotId(dropSlotData.SlotId, toContainer) : new global::PirateRoguelike.Services.SlotId(-1, global::PirateRoguelike.Services.SlotContainerType.Inventory); // Default to inventory if no specific target
+
+            ICommand command = null;
 
             if (!IsDragging && _fromContainer == global::PirateRoguelike.Services.SlotContainerType.Shop)
             {
-                ItemManipulationService.Instance.RequestPurchase(fromSlotId, new global::PirateRoguelike.Services.SlotId(-1, global::PirateRoguelike.Services.SlotContainerType.Inventory));
-                CleanUp();
-                target.ReleasePointer(evt.pointerId);
-                return;
+                // Click on shop item
+                ItemSO itemToPurchase = _sourceSlotData.CurrentItemInstance.Def; // Assuming ISlotViewData provides CurrentItemInstance.Def
+                command = new PurchaseItemCommand(fromSlotId, toSlotId, itemToPurchase);
             }
-
-            if (_fromContainer == global::PirateRoguelike.Services.SlotContainerType.Shop)
+            else if (_fromContainer == global::PirateRoguelike.Services.SlotContainerType.Shop)
             {
-                if (dropTargetElement != null && dropSlotData != null && (toContainer == global::PirateRoguelike.Services.SlotContainerType.Inventory || toContainer == global::PirateRoguelike.Services.SlotContainerType.Equipment))
-                {
-                    global::PirateRoguelike.Services.SlotId toSlotId = new global::PirateRoguelike.Services.SlotId(dropSlotData.SlotId, toContainer);
-
-                    if (!dropSlotData.IsEmpty)
-                    {
-                        ItemManipulationService.Instance.RequestPurchase(fromSlotId, new global::PirateRoguelike.Services.SlotId(-1, global::PirateRoguelike.Services.SlotContainerType.Inventory));
-                    }
-                    else
-                    {
-                        ItemManipulationService.Instance.RequestPurchase(fromSlotId, toSlotId);
-                    }
-                }
-                else
-                {
-                    // Dropped outside valid inventory/equipment, cancel purchase
-                }
+                // Drag from shop
+                ItemSO itemToPurchase = _sourceSlotData.CurrentItemInstance.Def; // Assuming ISlotViewData provides CurrentItemInstance.Def
+                command = new PurchaseItemCommand(fromSlotId, toSlotId, itemToPurchase);
             }
             else if (_fromContainer == global::PirateRoguelike.Services.SlotContainerType.Inventory || _fromContainer == global::PirateRoguelike.Services.SlotContainerType.Equipment)
             {
+                // Drag from inventory/equipment
                 if (dropTargetElement != null && dropSlotData != null)
                 {
-                    global::PirateRoguelike.Services.SlotId toSlotId = new global::PirateRoguelike.Services.SlotId(dropSlotData.SlotId, toContainer);
-                    ItemManipulationService.Instance.RequestSwap(fromSlotId, toSlotId);
+                    command = new SwapItemCommand(fromSlotId, toSlotId);
                 }
             }
             else if (_fromContainer == global::PirateRoguelike.Services.SlotContainerType.Reward)
             {
+                ItemSO itemToClaim = _sourceSlotData.CurrentItemInstance.Def; // Assuming ISlotViewData provides CurrentItemInstance.Def
                 if (dropTargetElement != null && dropSlotData != null && (toContainer == global::PirateRoguelike.Services.SlotContainerType.Inventory || toContainer == global::PirateRoguelike.Services.SlotContainerType.Equipment))
                 {
-                    global::PirateRoguelike.Services.SlotId toSlotId = new global::PirateRoguelike.Services.SlotId(dropSlotData.SlotId, toContainer);
-                    ItemManipulationService.Instance.RequestClaimReward(fromSlotId, toSlotId, _sourceSlotData.CurrentItemInstance.Def);
+                    // Drag from reward to inventory/equipment
+                    command = new ClaimRewardItemCommand(fromSlotId, toSlotId, itemToClaim);
                 }
                 else if (!IsDragging) // Click to claim
                 {
-                    // If not dragging, it's a click. Try to claim to first available inventory/equipment slot.
-                    ItemManipulationService.Instance.RequestClaimReward(fromSlotId, new global::PirateRoguelike.Services.SlotId(-1, global::PirateRoguelike.Services.SlotContainerType.Inventory), _sourceSlotData.CurrentItemInstance.Def);
+                    // Click on reward item
+                    command = new ClaimRewardItemCommand(fromSlotId, toSlotId, itemToClaim);
                 }
                 else
                 {
-                    // Dropped outside valid inventory/equipment, or not a click
                     Debug.LogWarning("Reward item dropped outside valid target or not a click.");
                 }
+            }
+
+            if (command != null)
+            {
+                UICommandProcessor.Instance.ProcessCommand(command);
             }
 
             CleanUp();

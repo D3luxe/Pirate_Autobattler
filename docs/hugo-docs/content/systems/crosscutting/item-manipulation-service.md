@@ -11,12 +11,11 @@ The Item Manipulation Service (`ItemManipulationService.cs`) is a central single
 
 ## Design
 
-The service is designed as a singleton to provide a single, authoritative point of control for item operations.
+The service is designed as a singleton to provide a single, authoritative point of control for item operations. Its methods are now primarily invoked by command objects (e.g., `PurchaseItemCommand`, `SwapItemCommand`) after those commands have performed necessary validation.
 
 *   **Singleton Pattern:** Implemented as a static singleton (`ItemManipulationService.Instance`) to ensure a single instance manages all item manipulations globally.
 *   **Dependencies:** It is initialized with an `IGameSession` instance, through which it accesses core game components like `Economy`, `Inventory`, and `PlayerShip`.
-*   **Interaction with `UIInteractionService`:** Before executing any item manipulation, the service consults `UIInteractionService.CanManipulateItem` to verify that the action is permissible given the current UI state (e.g., not in combat, debug console not open). This prevents unintended or disallowed actions.
-*   **Decoupling:** The service operates by modifying the underlying game state (e.g., adding/removing items from inventory). It does not directly manipulate UI elements; instead, changes to the game state trigger UI updates through an event-driven architecture (e.g., `ItemManipulationEvents`). It also dispatches `OnRewardItemClaimed` when a reward item is successfully claimed.
+*   **Decoupling:** The service operates by modifying the underlying game state (e.g., adding/removing items from inventory). It does not directly manipulate UI elements; instead, changes to the game state trigger UI updates through an event-driven architecture (e.g., `ItemManipulationEvents`). It also dispatches `OnRewardItemClaimed` when a reward item is successfully claimed. Validation logic previously residing here has been moved to the command objects that invoke this service.
 
 ## Implementation Details
 
@@ -24,25 +23,20 @@ The service is designed as a singleton to provide a single, authoritative point 
 
 *   **`ItemManipulationService` (`Assets/Scripts/Core/ItemManipulationService.cs`):**
     *   **`Initialize(IGameSession gameSession)`:** Sets up the service's dependency on the `IGameSession` instance, providing access to core game data and services.
-    *   **`RequestSwap(SlotId fromSlot, SlotId toSlot)`:**
+    *   **`PerformSwap(SlotId fromSlot, SlotId toSlot)`:**
         *   Receives `SlotId` objects representing the source and destination slots.
-        *   Performs a preliminary check using `UIInteractionService.CanManipulateItem` for both `fromSlot` and `toSlot` containers.
-        *   Delegates the actual item movement logic to the `ExecuteSwap` private method.
-    *   **`RequestPurchase(SlotId shopSlot, SlotId playerSlot)`:**
-        *   Validates that the `shopSlot` originates from a `SlotContainerType.Shop`.
-        *   Retrieves the `ItemSO` corresponding to the item being purchased from `ShopManager.Instance.GetShopItem(shopSlot.Index)`. This represents a direct coupling to the `ShopManager`.
-        *   Verifies if the player possesses sufficient gold using `_gameSession.Economy.TrySpendGold(itemToPurchase.Cost)`. If the purchase fails due to insufficient funds, gold is not spent, and a message is displayed via `ShopManager.Instance.DisplayMessage`.
-        *   Determines the `targetFinalSlot` for the purchased item. It prioritizes finding the first available empty slot in the player's inventory, then in their equipment. If no suitable slot is found, the gold is refunded, and an "Inventory full!" message is displayed.
+        *   Manages the low-level logic for swapping `ItemInstance` objects between any two specified slots. This involves retrieving items from their current locations, removing them, and then placing them into their new target slots.
+        *   This method is now public and is called by `SwapItemCommand.Execute()`.
+    *   **`PerformPurchase(ItemSO itemToPurchase, SlotId targetFinalSlot, SlotId shopSlot)`:**
+        *   Receives the `ItemSO` to purchase, the final destination `SlotId`, and the source `shopSlot`.
         *   Adds the newly purchased `ItemInstance` to the `targetFinalSlot` within either `_gameSession.Inventory` or `_gameSession.PlayerShip`.
         *   Upon successful purchase, the item is removed from the shop's available items via `ShopManager.Instance.RemoveShopItem(shopSlot.Index)`.
-    *   **`RequestClaimReward(SlotId sourceSlot, SlotId destinationSlot, ItemSO itemToClaimFromSource)`:**
-        *   Receives `SlotId` objects representing the source (must be `SlotContainerType.Reward`), destination slots, and the `ItemSO` to claim.
-        *   Uses the provided `itemToClaimFromSource` directly, ensuring the correct item is processed regardless of its original index in the reward list.
-        *   Determines the `targetFinalSlot` for the claimed item, prioritizing empty inventory then equipment slots.
+        *   This method is called by `PurchaseItemCommand.Execute()` after all validation (gold, slot availability) has passed.
+    *   **`PerformClaimReward(ItemSO itemToClaim, SlotId targetFinalSlot, SlotId sourceSlot)`:**
+        *   Receives the `ItemSO` to claim, the final destination `SlotId`, and the source `sourceSlot`.
         *   Adds the `ItemInstance` to the `targetFinalSlot` within `_gameSession.Inventory` or `_gameSession.PlayerShip`.
-        *   Upon successful claim, calls `RewardService.RemoveClaimedItem(itemToClaimFromSource)` to update the reward state by removing the specific `ItemSO` instance.
-    *   **`ExecuteSwap(SlotId slotA, SlotId slotB)` (Private Method):**
-        *   Manages the low-level logic for swapping `ItemInstance` objects between any two specified slots. This involves retrieving items from their current locations, removing them, and then placing them into their new target slots.
+        *   Upon successful claim, calls `RewardService.RemoveClaimedItem(itemToClaim)` to update the reward state by removing the specific `ItemSO` instance.
+        *   This method is called by `ClaimRewardItemCommand.Execute()` after all validation (slot availability) has passed.
 *   **`SlotId` (`PirateRoguelike.Services.SlotId`):**
     *   A lightweight `struct` used throughout the item manipulation system to uniquely identify an item slot. It combines an integer `Index` (representing the slot's position within its container) and a `SlotContainerType` (specifying the type of container, e.g., Inventory, Equipment, Shop).
 *   **`SlotContainerType` (`PirateRoguelike.Services.SlotContainerType`):**
@@ -91,15 +85,18 @@ skinparam class<<Data>> {
 skinparam class<<Manager>> {
     BackgroundColor #DDA0DD
 }
+skinparam class<<Command>> {
+    BackgroundColor #FFC0CB ' Pink
+}
 
 ' --- CLASSES ---
 class ItemManipulationService <<Service>> {
     + {static} Instance : ItemManipulationService
     - IGameSession _gameSession
     + Initialize(gameSession: IGameSession)
-    + RequestSwap(fromSlot: SlotId, toSlot: SlotId)
-    + RequestPurchase(shopSlot: SlotId, playerSlot: SlotId)
-    - ExecuteSwap(slotA: SlotId, slotB: SlotId)
+    + PerformSwap(slotA: SlotId, slotB: SlotId)
+    + PerformPurchase(itemToPurchase: ItemSO, targetFinalSlot: SlotId, shopSlot: SlotId)
+    + PerformClaimReward(itemToClaim: ItemSO, targetFinalSlot: SlotId, sourceSlot: SlotId)
 }
 
 interface IGameSession <<Interface>> {
@@ -109,7 +106,8 @@ interface IGameSession <<Interface>> {
 }
 
 class EconomyService <<Service>> {
-    + TrySpendGold(amount: int) : bool
+    + CanAfford(amount: int) : bool
+    + SpendGold(amount: int)
     + AddGold(amount: int)
     + Gold : int
 }
@@ -162,14 +160,59 @@ class ItemInstance <<Data>> {
     ' Represents a runtime instance of an ItemSO
 }
 
+interface ICommand <<Command>> {
+    + CanExecute(): bool
+    + Execute(): void
+}
+
+class PurchaseItemCommand <<Command>> {
+    - _shopSlot: SlotId
+    - _playerTargetSlot: SlotId
+    - _itemToPurchase: ItemSO
+    + CanExecute(): bool
+    + Execute(): void
+}
+
+class SwapItemCommand <<Command>> {
+    - _fromSlot: SlotId
+    - _toSlot: SlotId
+    + CanExecute(): bool
+    + Execute(): void
+}
+
+class ClaimRewardItemCommand <<Command>> {
+    - _sourceSlot: SlotId
+    - _destinationSlot: SlotId
+    - _itemToClaim: ItemSO
+    + CanExecute(): bool
+    + Execute(): void
+}
+
+class UICommandProcessor <<Service>> {
+    + {static} Instance: UICommandProcessor
+    + ProcessCommand(command: ICommand)
+}
+
 ' --- RELATIONSHIPS ---
 ItemManipulationService "1" -- "1" IGameSession : uses >
-ItemManipulationService "1" -- "1" UIInteractionService : checks >
-ItemManipulationService "1" -- "1" ShopManager : interacts with >
 
-IGameSession <|-- EconomyService
-IGameSession <|-- Inventory
-IGameSession <|-- ShipState
+PurchaseItemCommand --> ItemManipulationService : calls PerformPurchase >
+PurchaseItemCommand --> UIInteractionService : checks permission >
+PurchaseItemCommand --> EconomyService : checks/spends gold >
+PurchaseItemCommand --> ShopManager : interacts with >
+
+SwapItemCommand --> ItemManipulationService : calls PerformSwap >
+SwapItemCommand --> UIInteractionService : checks permission >
+
+ClaimRewardItemCommand --> ItemManipulationService : calls PerformClaimReward >
+ClaimRewardItemCommand --> UIInteractionService : checks permission >
+
+UICommandProcessor --> ICommand : processes >
+UICommandProcessor --> UIInteractionService : checks permission >
+
+ICommand <|-- PurchaseItemCommand
+ICommand <|-- SwapItemCommand
+ICommand <|-- ClaimRewardItemCommand
 
 ItemManipulationService ..> SlotId : uses
 ItemManipulationService ..> SlotContainerType : uses

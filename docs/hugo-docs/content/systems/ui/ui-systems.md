@@ -56,12 +56,32 @@ This system is used by multiple parts of the UI to ensure consistent behavior.
 
 This system centralizes the logic for moving, equipping, and swapping items, decoupling the UI from direct game state manipulation. It interacts with the [runtime item system]({{< myrelref "../core/runtime-data-systems.md" >}}).
 
+### 2.0. Command Pattern for UI Interactions
+
+To further decouple UI components from direct business logic and validation, a Command Pattern has been implemented for all item manipulation actions. This pattern centralizes the logic for validating and executing user requests, making the system more robust, testable, and extensible.
+
+#### Core Components (Command Pattern):
+
+*   **`ICommand` (`PirateRoguelike.Commands.ICommand`):**
+    >   File Path: Assets/Scripts/Commands/ICommand.cs
+    *   An interface defining the contract for all UI commands, with `CanExecute()` for validation and `Execute()` for performing the action.
+
+*   **`UICommandProcessor` (`PirateRoguelike.Commands.UICommandProcessor`):**
+    >   File Path: Assets/Scripts/Commands/UICommandProcessor.cs
+    *   A singleton service that acts as the central dispatcher for all UI commands. It receives an `ICommand` object, first calls `command.CanExecute()` to validate the request, and if valid, proceeds to call `command.Execute()`.
+
+*   **Specific Command Implementations:**
+    *   **`PurchaseItemCommand` (`PirateRoguelike.Commands.PurchaseItemCommand`):** Handles the logic for purchasing items from the shop.
+    *   **`SwapItemCommand` (`PirateRoguelike.Commands.SwapItemCommand`):** Handles the logic for swapping items between inventory and equipment slots.
+    *   **`ClaimRewardItemCommand` (`PirateRoguelike.Commands.ClaimRewardItemCommand`):** Handles the logic for claiming reward items.
+
+    These command classes encapsulate all necessary data, validation rules (e.g., gold checks, slot availability, combat state), and the specific calls to underlying services (like `ItemManipulationService`) required to perform their respective actions.
+
 ### 2.1. Core Components
 
 *   **`ItemManipulationService` (`PirateRoguelike.Services.ItemManipulationService`):**
     >   File Path: Assets/Scripts/Core/ItemManipulationService.cs
-    *   A singleton that acts as the central authority for all item operations.
-    *   Interacts directly with `GameSession`'s `Inventory` and `PlayerShip` to modify the underlying game state.
+    *   A singleton that acts as the central authority for all item operations. Its `Request...` methods have been removed. It now exposes `Perform...` methods (e.g., `PerformSwap`, `PerformPurchase`, `PerformClaimReward`) that are called by the command objects to execute the core item manipulation logic after validation has occurred. It interacts directly with `GameSession`'s `Inventory` and `PlayerShip` to modify the underlying game state.
 
 *   **`ItemManipulationEvents` (`PirateRoguelike.Events.ItemManipulationEvents`):**
     >   File Path: Assets/Scripts/Core/ItemManipulationEvents.cs
@@ -71,10 +91,7 @@ This system centralizes the logic for moving, equipping, and swapping items, dec
     >   File Path: Assets/Scripts/UI/PlayerPanel/SlotManipulator.cs
     *   A `PointerManipulator` attached to each `ItemElement`. It detects drag-and-drop gestures.
     *   **Drag Initiation:** Dragging is now initiated only after the mouse moves beyond a small threshold from the initial click position, allowing for distinct click actions.
-    *   Initiates requests by calling methods on `ItemManipulationService` (e.g., `SwapItems`, `RequestPurchase`, `RequestClaimReward`). It passes the specific `ItemSO` to be claimed, ensuring correct item manipulation. It does not modify game state directly.
-    *   **Shop Item Interaction:**
-        *   **Click-to-Buy:** A quick click on a shop item triggers an immediate purchase to an available inventory slot.
-        *   **Drag-and-Drop Purchase:** Dragging a shop item and dropping it over a valid inventory or equipment slot triggers a purchase. Dropping it elsewhere cancels the purchase, and the item visually returns to the shop.
+    *   **Initiates Commands:** Instead of directly calling `ItemManipulationService`, the `SlotManipulator` now creates and dispatches command objects (e.g., `PurchaseItemCommand`, `SwapItemCommand`, `ClaimRewardItemCommand`) to the `UICommandProcessor`. This significantly decouples the UI input handling from the business logic and validation.
     *   **Conflict Prevention:** This manipulator now checks `UIStateService.IsConsoleOpen` and will not initiate drag operations if the debug console is active, preventing input conflicts.
 
 *   **`Inventory` (`PirateRoguelike.Services.Inventory`):**
@@ -103,15 +120,20 @@ This system centralizes the logic for moving, equipping, and swapping items, dec
     *   A static class that holds the current global UI state (e.g., `IsInCombat`). It provides methods that the UI can query to ask for permission to perform an action.
     *   The `ItemManipulationService` will only perform actions after they have been approved by the `UIInteractionService`.n    *   This service now allows item manipulation for `SlotContainerType.Shop` when not in combat, enabling shop item purchases.
 
-### 2.2. How it Works (Example: Item Swap)
+### 2.2. How it Works (Example: Item Swap with Command Pattern)
 
 1.  A user drags an `ItemElement` from `Slot A` and drops it onto `Slot B`.
-2.  The `SlotManipulator` on the dragged `ItemElement` detects the drop and calls `ItemManipulationService.Instance.SwapItems(Slot A ID, Slot B ID)`.
-3.  `ItemManipulationService` performs the logic to swap the `ItemInstance` objects between the source and destination containers (`Inventory` or `ShipState`).
-4.  During this process, `Inventory` and/or `ShipState` dispatch `ItemManipulationEvents` (e.g., `OnItemMoved`).
-5.  The `PlayerPanelDataViewModel` receives these events and updates the `CurrentItemInstance` property on the affected `SlotDataViewModel` objects in its `ObservableList`s.
-6.  Because the `SlotElement`s are bound to these view models, their `PropertyChanged` event fires.
-7.  The `SlotElement` for `Slot A` and `Slot B` detect the change to `CurrentItemInstance` and call their `UpdateItemElement` method, which visually reflects the swap by re-binding, creating, or destroying their child `ItemElement`s.
+2.  The `SlotManipulator` on the dragged `ItemElement` detects the drop and creates a `SwapItemCommand` object, encapsulating the source and target `SlotId`s.
+3.  The `SlotManipulator` then sends this `SwapItemCommand` to the `UICommandProcessor.Instance.ProcessCommand()` method.
+4.  The `UICommandProcessor` first calls `command.CanExecute()`.
+    *   The `SwapItemCommand.CanExecute()` method performs all necessary validation (e.g., checking `UIStateService.IsConsoleOpen`, `UIInteractionService.CanManipulateItem` for both slots).
+5.  If `CanExecute()` returns `true`, the `UICommandProcessor` then calls `command.Execute()`.
+6.  The `SwapItemCommand.Execute()` method calls `ItemManipulationService.Instance.PerformSwap(Slot A ID, Slot B ID)`.
+7.  `ItemManipulationService` performs the logic to swap the `ItemInstance` objects between the source and destination containers (`Inventory` or `ShipState`).
+8.  During this process, `Inventory` and/or `ShipState` dispatch `ItemManipulationEvents` (e.g., `OnItemMoved`).
+9.  The `PlayerPanelDataViewModel` receives these events and updates the `CurrentItemInstance` property on the affected `SlotDataViewModel` objects in its `ObservableList`s.
+10. Because the `SlotElement`s are bound to these view models, their `PropertyChanged` event fires.
+11. The `SlotElement` for `Slot A` and `Slot B` detect the change to `CurrentItemInstance` and call their `UpdateItemElement` method, which visually reflects the swap by re-binding, creating, or destroying their child `ItemElement`s.
 
 ### 2.3. Benefits of the Universal System
 
@@ -168,198 +190,186 @@ The enemy panel now fully utilizes the new runtime item system and tooltip setup
 
 *   **`TrickleDown.TrickleDown`:** When registering callbacks for `KeyDownEvent` (and other events where early intervention is critical), using `TrickleDown.TrickleDown` ensures that your callback is executed during the TrickleDown phase of event propagation. This allows you to process or `PreventDefault()` the event before other elements or the default behavior of the target element (e.g., `TextField`) can consume or modify it. This is crucial for achieving precise control over UI element behavior, especially for input fields.
 
-## 6. UI Systems Architecture (PlantUML Class Diagram)
+## 6. UI Systems Architecture (PlantUML Sequence Diagram - Purchase Item Flow)
 
-This diagram illustrates the relationships and interactions between the core UI components.
+This diagram illustrates the flow of control for a purchase item interaction using the Command Pattern.
 
 ```plantuml
 @startuml
+left to right direction
 ' --- STYLING ---
 skinparam style strictuml
 skinparam shadowing true
 skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 16
+skinparam linetype ortho
+skinparam ArrowFontName Impact
+skinparam ArrowThickness 1
+skinparam ArrowColor #000000
 skinparam backgroundColor #b4b4b42c
-!pragma usecasesquare
+
 skinparam class {
-    BorderColor #A9A9A9
-    BorderThickness 1.5
-    ArrowColor #555555
-    ArrowThickness 1.5
+    BackgroundColor WhiteSmoke
+    BorderColor #666666
+    ArrowColor #1d1d1dff
+    !option handWritten true
 }
-skinparam note {
-    BackgroundColor #FFFFE0
-    BorderColor #B4B4B4
-}
-
-' Define stereotype colors
-skinparam class<<Controller>> {
-    BackgroundColor #FFD700 ' Gold
-}
-skinparam class<<Service>> {
-    BackgroundColor #90EE90 ' Light Green
-}
-skinparam class<<EventBus>> {
-    BackgroundColor #FFB6C1 ' Light Pink
-}
-skinparam class<<ViewModel>> {
-    BackgroundColor #ADD8E6 ' Light Blue
-}
-skinparam class<<Component>> {
-    BackgroundColor #D3D3D3 ' Light Gray
-}
-skinparam class<<Utility>> {
-    BackgroundColor #E6E6FA ' Lavender
-}
-skinparam class<<Manipulator>> {
-    BackgroundColor #F0E68C ' Khaki
+skinparam package {
+    BorderColor #555555
+    FontColor #333333
+    StereotypeFontColor #333333
 }
 
-' --- CLASSES ---
-class UIManager <<Controller>> {
-    + Initialize()
-    + InitializeRunUI()
+' --- TOP LEVEL: COMMAND PROCESSOR ---
+package "Command Processor" <<Service>> #LightCyan {
+    class UICommandProcessor {
+        + Instance: UICommandProcessor
+        + ProcessCommand(command: ICommand)
+    }
+    interface ICommand {
+        + CanExecute(): bool
+        + Execute(): void
+    }
+    UICommandProcessor -> ICommand : processes
 }
 
-class PlayerPanelController <<Controller>> {
-    + Initialize()
+' --- MIDDLE LAYER: CONCRETE COMMANDS ---
+package "Commands" <<Command>> #LightCyan {
+    class SwapItemCommand {
+        - _fromSlot: SlotId
+        - _toSlot: SlotId
+        + CanExecute(): bool
+        + Execute(): void
+    }
+    class ClaimRewardItemCommand {
+        - _sourceSlot: SlotId
+        - _destinationSlot: SlotId
+        - _itemToClaim: ItemSO
+        + CanExecute(): bool
+        + Execute(): void
+    }
+    class PurchaseItemCommand {
+        - _shopSlot: SlotId
+        - _playerTargetSlot: SlotId
+        - _itemToPurchase: ItemSO
+        + CanExecute(): bool
+        + Execute(): void
+    }
+    ICommand <|-- SwapItemCommand
+    ICommand <|-- ClaimRewardItemCommand
+    ICommand <|-- PurchaseItemCommand
 }
 
-class EnemyPanelController <<Controller>> {
-    + Initialize()
+' --- SERVICE LAYER ---
+package "Services & Managers" #LightCyan {
+    package "Core Services" <<Service>> #LightBlue {
+        class ItemManipulationService {
+            + Instance: ItemManipulationService
+            - _gameSession: IGameSession
+            + Initialize(gameSession: IGameSession)
+            + PerformSwap(slotA: SlotId, slotB: SlotId)
+            + PerformPurchase(itemToPurchase: ItemSO, targetFinalSlot: SlotId, shopSlot: SlotId)
+            + PerformClaimReward(itemToClaim: ItemSO, targetFinalSlot: SlotId, sourceSlot: SlotId)
+        }
+        class UIInteractionService {
+            + CanManipulateItem(containerType: SlotContainerType): bool
+        }
+    }
+    package "Domain Managers" {
+        class ShopManager <<Manager>> #Plum {
+            + Instance: ShopManager
+            + GetShopItem(index: int): ItemSO
+            + RemoveShopItem(index: int)
+            + DisplayMessage(message: string)
+        }
+        class EconomyService <<Service>> #LightBlue {
+            + Gold: int
+            + CanAfford(amount: int): bool
+            + SpendGold(amount: int)
+            + AddGold(amount: int)
+        }
+    }
 }
 
-class ShopController <<Controller>> {
-    + RegisterTooltipCallbacks()
+' --- DATA & STATE LAYER ---
+package "Data Models & State" #LightCyan {
+    package "Game Session" #Yellow {
+        interface IGameSession {
+            + Economy: EconomyService
+            + Inventory: Inventory
+            + PlayerShip: ShipState
+        }
+    }
+    package "Data Structures" <<Data>> #LightBlue {
+        enum SlotContainerType {
+            Inventory
+            Equipment
+            Shop
+            Crafting
+        }
+        class SlotId {
+            + Index: int
+            + ContainerType: SlotContainerType
+        }
+    }
+    package "State Containers" <<Data>> #LightBlue {
+        class Inventory {
+            + AddItemAt(item: ItemInstance, index: int): bool
+            + RemoveItemAt(index: int): ItemInstance
+            + GetItemAt(index: int): ItemInstance
+            + IsSlotOccupied(index: int): bool
+            + GetFirstEmptySlot(): int
+        }
+        class ShipState {
+            + SetEquipment(index: int, item: ItemInstance): bool
+            + RemoveEquippedAt(index: int): ItemInstance
+            + GetEquippedItem(index: int): ItemInstance
+            + IsEquipmentSlotOccupied(index: int): bool
+            + GetFirstEmptyEquipmentSlot(): int
+        }
+    }
+    package "Item Representation" <<Data>> #LightBlue {
+        class ItemInstance {
+        }
+        class ItemSO {
+            + Cost: int
+            + displayName: string
+        }
+    }
 }
 
-class RewardUIController <<Controller>> {
-    + RegisterTooltipCallbacks()
-}
+' --- RELATIONSHIPS BETWEEN LAYERS ---
 
-class TooltipController <<Controller>> {
-    + Show()
-    + Hide()
-    + Initialize()
-}
+' Commands -> Services
+' Lengthened the arrows to give labels more space
+SwapItemCommand --> ItemManipulationService : calls PerformSwap
+ClaimRewardItemCommand ---> ItemManipulationService : calls PerformClaimReward
+PurchaseItemCommand ----> ItemManipulationService : Core Calls PerformPurchase
 
-class EffectDisplay <<Component>> {
-    + SetData()
-}
+' Each command individually checks permission with the UIInteractionService
+' Lengthened the dotted arrows significantly
+SwapItemCommand ....> UIInteractionService : checks permission
+ClaimRewardItemCommand .....> UIInteractionService : checks permission
+PurchaseItemCommand ......> UIInteractionService : checks permission
 
-class TooltipUtility <<Utility>> {
-    + RegisterTooltipCallbacks()
-}
+' Purchase Command -> Domain Managers
+' Lengthened arrows and added a newline to the label
+PurchaseItemCommand ....> ShopManager : interacts with
+PurchaseItemCommand .....> EconomyService : "checks/\nspends gold"
 
-class ItemManipulationService <<Service>> {
-    + RequestSwap()
-    + RequestPurchase()
-    + RequestClaimReward()
-}
+' Services -> Data
+ItemManipulationService "1" *-- "1" IGameSession : uses
+ItemManipulationService ..> SlotId : uses
 
-class ItemManipulationEvents <<EventBus>> {
-    + OnItemMoved
-    + OnItemAdded
-    + OnItemRemoved
-    + OnRewardItemClaimed
-    + DispatchItemMoved()
-    + DispatchItemAdded()
-    + DispatchItemRemoved()
-    + DispatchRewardItemClaimed()
-}
+' GameSession Interface Implementation (Conceptual)
+IGameSession ..> EconomyService
+IGameSession ..> Inventory
+IGameSession ..> ShipState
 
-class SlotManipulator <<Manipulator>> {
-    + OnPointerDown()
-    + OnPointerMove()
-    + OnPointerUp()
-}
-
-class PlayerPanelDataViewModel <<ViewModel>> {
-    + UpdateObservableLists()
-}
-
-class SlotElement <<Component>> {
-    + ObserveISlotViewData()
-}
-
-class ItemElement <<Component>> {
-    + SlotManipulator
-}
-
-class UIInteractionService <<Service>> {
-    + IsInCombat: bool
-    + CanManipulateItem()
-}
-
-class ServiceLocator <<Service>> {
-    + {static} Register()
-    + {static} Resolve()
-}
-
-class UIAssetRegistry <<Serializable>> {
-    + ShipDisplayElementUXML
-    + SlotElementUXML
-    + ItemElementUXML
-}
-
-class GlobalUIService <<Service>> {
-    + GlobalUIRoot
-    + Initialize()
-}
-
-' --- RELATIONSHIPS ---
-GameInitializer --> ServiceLocator : registers >
-
-ServiceLocator --> UIManager : resolves >
-ServiceLocator --> PlayerPanelController : resolves >
-ServiceLocator --> MapView : resolves >
-ServiceLocator --> TooltipController : resolves >
-ServiceLocator --> DebugConsoleController : resolves >
-ServiceLocator --> RewardUIController : resolves >
-ServiceLocator --> UIAssetRegistry : resolves >
-ServiceLocator --> GlobalUIService : resolves >
-
-UIManager --> PlayerPanelController : initializes >
-UIManager --> TooltipController : initializes >
-UIManager --> DebugConsoleController : initializes >
-UIManager --> RewardUIController : initializes >
-
-TooltipController <-- TooltipUtility : used by >
-TooltipController <-- EffectDisplay : uses >
-
-TooltipUtility --> TooltipController : calls Show/Hide >
-TooltipUtility --> GlobalUIService : resolves >
-
-ItemManipulationService <-- SlotManipulator : calls requests >
-ItemManipulationService --> UIInteractionService : checks permission >
-
-ItemManipulationEvents <-- ItemManipulationService : dispatches >
-ItemManipulationEvents --> PlayerPanelDataViewModel : subscribes to >
-ItemManipulationEvents --> EnemyPanelController : subscribes to >
-ItemManipulationEvents --> RewardUIController : subscribes to >
-
-SlotManipulator --> ItemManipulationService : initiates requests >
-SlotManipulator --> UIInteractionService : checks permission >
-
-PlayerPanelDataViewModel <-- ItemManipulationEvents : updates from >
-PlayerPanelDataViewModel --> SlotElement : binds to >
-
-SlotElement *-- ItemElement : contains >
-SlotElement --> PlayerPanelDataViewModel : observes >
-SlotElement --> UIAssetRegistry : resolves >
-
-ItemElement *-- SlotManipulator : attaches >
-ItemElement --> UIAssetRegistry : resolves >
-
-EnemyPanelController --> TooltipUtility : uses >
-EnemyPanelController --> ItemManipulationEvents : subscribes to >
-
-ShopController --> TooltipUtility : uses >
-
-RewardUIController --> TooltipUtility : uses >
-RewardUIController --> ItemManipulationEvents : subscribes to >
-RewardUIController --> GlobalUIService : resolves >
-
-ShipDisplayElement --> UIAssetRegistry : resolves >
+' Data Structure Relationships
+Inventory "1" -- "*" ItemInstance : contains
+ShipState "1" -- "*" ItemInstance : equips
+ItemInstance "1" -- "1" ItemSO : wraps
 
 @enduml
+```

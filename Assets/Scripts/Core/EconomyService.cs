@@ -63,6 +63,18 @@ namespace PirateRoguelike.Services
         return false;
     }
 
+    public void SpendGold(int amount)
+    {
+        Gold -= amount;
+        OnGoldChanged?.Invoke(Gold);
+    }
+
+    // NEW: CanAfford method
+    public bool CanAfford(int amount)
+    {
+        return Gold >= amount;
+    }
+
     public void AddLives(int amount)
     {
         Lives += amount;
