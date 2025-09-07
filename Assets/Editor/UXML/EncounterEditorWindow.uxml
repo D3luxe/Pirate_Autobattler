@@ -1,0 +1,29 @@
+<UXML xmlns:ui="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements">
+    <ui:VisualElement class="root">
+        <ui:VisualElement name="left-column" class="column left-column"/>
+        <ui:VisualElement name="right-column" class="column right-column">
+            <!-- Common properties will be added here by C# -->
+
+            <!-- Conditional UI Containers -->
+            <ui:VisualElement name="battle-properties" class="encounter-type-properties">
+                <ui:Label text="Battle Properties" class="header"/>
+                <!-- Battle-specific fields will be added here by C# -->
+            </ui:VisualElement>
+
+            <ui:VisualElement name="shop-properties" class="encounter-type-properties">
+                <ui:Label text="Shop Properties" class="header"/>
+                <!-- Shop-specific fields will be added here by C# -->
+            </ui:VisualElement>
+
+            <ui:VisualElement name="port-properties" class="encounter-type-properties">
+                <ui:Label text="Port Properties" class="header"/>
+                <!-- Port-specific fields will be added here by C# -->
+            </ui:VisualElement>
+
+            <ui:VisualElement name="event-properties" class="encounter-type-properties">
+                <ui:Label text="Event Properties" class="header"/>
+                <!-- Event-specific fields will be added here by C# -->
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</UXML>

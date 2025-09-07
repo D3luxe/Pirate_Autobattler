@@ -1,32 +1,32 @@
-PlantUML 1.2025.5beta3
-[From string (line 126) ]
- 
-@startuml
-skinparam style strictuml
-skinparam shadowing true
-skinparam defaultFontName "Segoe UI"
-skinparam defaultFontSize 16
-...
-... ( skipping 98 lines )
-...
-activate ShopM
-ShopM --> IMS :
-deactivate ShopM
- 
-IMS --> PIC : bool (purchaseSuccessful)
-deactivate IMS
- 
-alt Purchase successful
-PIC -> ShopM : DisplayMessage("Purchased Item!")
-else Purchase failed (should not happen if CanExecute is robust)
-PIC -> GE : AddGold(itemCost) (refund)
-PIC -> ShopM : DisplayMessage("Purchase failed!")
-end
- 
-deactivate PIC
-UCP --> SM : Command executed
-deactivate UCP
- 
- 
-note over GI, GPS, IMS
-Syntax Error? (Assumed diagram type: sequence)
+ObjectDisposedException: SerializedProperty eventChoices.Array.data[1] has disappeared!
+UnityEditor.SerializedProperty.SyncSerializedObjectVersion () (at <e926e9c7db684472928e12ac2693beec>:0)
+UnityEditor.SerializedProperty.CopyInternal () (at <e926e9c7db684472928e12ac2693beec>:0)
+UnityEditor.SerializedProperty.Copy () (at <e926e9c7db684472928e12ac2693beec>:0)
+UnityEditor.SerializedProperty.FindPropertyRelative (System.String relativePropertyPath) (at <e926e9c7db684472928e12ac2693beec>:0)
+EncounterEditorWindow+EventChoiceRow.Bind (UnityEditor.SerializedProperty choiceElementProperty) (at Assets/Editor/EncounterEditorWindow.cs:62)
+EncounterEditorWindow+<>c__DisplayClass11_1.<DisplayEncounterDetails>b__1 (UnityEngine.UIElements.VisualElement element, System.Int32 index) (at Assets/Editor/EncounterEditorWindow.cs:225)
+UnityEngine.UIElements.ListViewController.BindItem (UnityEngine.UIElements.VisualElement element, System.Int32 index) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.CollectionViewController.InvokeBindItem (UnityEngine.UIElements.ReusableCollectionItem reusableItem, System.Int32 index) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.BaseListViewController.InvokeBindItem (UnityEngine.UIElements.ReusableCollectionItem reusableItem, System.Int32 index) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VerticalVirtualizationController`1[T].Setup (T recycledItem, System.Int32 newIndex) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.VerticalVirtualizationController`1[T].Refresh (System.Boolean rebuild) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.BaseVerticalCollectionView.RefreshItems () (at <aae110a54f4e40afadedeea84895fc4b>:0)
+EncounterEditorWindow+<>c__DisplayClass11_0.<DisplayEncounterDetails>b__3 (UnityEngine.UIElements.BaseListView lv) (at Assets/Editor/EncounterEditorWindow.cs:260)
+UnityEngine.UIElements.BaseListView.OnRemoveClicked () (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.Clickable.Invoke (UnityEngine.UIElements.EventBase evt) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.Clickable.ProcessUpEvent (UnityEngine.UIElements.EventBase evt, UnityEngine.Vector2 localPosition, System.Int32 pointerId) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.Clickable.OnPointerUp (UnityEngine.UIElements.PointerUpEvent evt) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.EventCallbackFunctor`1[TEventType].Invoke (UnityEngine.UIElements.EventBase evt) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.EventCallbackRegistry+DynamicCallbackList.Invoke (UnityEngine.UIElements.EventBase evt, UnityEngine.UIElements.BaseVisualElementPanel panel, UnityEngine.UIElements.VisualElement target) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.EventDispatchUtilities.HandleEventAcrossPropagationPathWithCompatibilityEvent (UnityEngine.UIElements.EventBase evt, UnityEngine.UIElements.EventBase compatibilityEvt, UnityEngine.UIElements.BaseVisualElementPanel panel, UnityEngine.UIElements.VisualElement target, System.Boolean isCapturingTarget) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.EventDispatchUtilities.DispatchToCapturingElementOrElementUnderPointer (UnityEngine.UIElements.EventBase evt, UnityEngine.UIElements.BaseVisualElementPanel panel, System.Int32 pointerId, UnityEngine.Vector2 position) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.PointerUpEvent.Dispatch (UnityEngine.UIElements.BaseVisualElementPanel panel) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.EventDispatcher.ProcessEvent (UnityEngine.UIElements.EventBase evt, UnityEngine.UIElements.BaseVisualElementPanel panel) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.EventDispatcher.Dispatch (UnityEngine.UIElements.EventBase evt, UnityEngine.UIElements.BaseVisualElementPanel panel, UnityEngine.UIElements.DispatchMode dispatchMode) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.BaseVisualElementPanel.SendEvent (UnityEngine.UIElements.EventBase e, UnityEngine.UIElements.DispatchMode dispatchMode) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.UIElementsUtility.DoDispatch (UnityEngine.UIElements.BaseVisualElementPanel panel) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.UIElementsUtility.UnityEngine.UIElements.IUIElementsUtility.ProcessEvent (System.Int32 instanceID, System.IntPtr nativeEventPtr, System.Boolean& eventHandled) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.UIEventRegistration.ProcessEvent (System.Int32 instanceID, System.IntPtr nativeEventPtr) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.UIElements.UIEventRegistration+<>c.<.cctor>b__1_2 (System.Int32 i, System.IntPtr ptr) (at <aae110a54f4e40afadedeea84895fc4b>:0)
+UnityEngine.GUIUtility.ProcessEvent (System.Int32 instanceID, System.IntPtr nativeEventPtr, System.Boolean& result) (at <1d184d5861484785ae690c151b86eca2>:0)
+
