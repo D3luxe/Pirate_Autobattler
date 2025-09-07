@@ -21,7 +21,7 @@ This section details the implementation of the dynamic tooltip description syste
 
 *   **`TooltipController` (`PirateRoguelike.UI.TooltipController`):**
     >   File Path: Assets/Scripts/UI/TooltipController.cs
-    *   A persistent singleton (`MonoBehaviour`) that orchestrates all tooltip activity. It is instantiated and initialized by the `UIManager`.
+    *   A persistent singleton (`MonoBehaviour`) that orchestrates all tooltip activity. It is instantiated by `GameInitializer` and initialized by `UIManager`.
     *   Exposes public `Show(RuntimeItem item, VisualElement targetElement, VisualElement panelRoot)` and `Hide()` methods to control tooltip visibility and positioning.
     *   Dynamically populates the tooltip's UXML fields with data from the provided `RuntimeItem`.
     *   Manages fade-in/out animations by toggling USS classes.
@@ -50,7 +50,7 @@ This system is used by multiple parts of the UI to ensure consistent behavior.
 *   **`PlayerPanelView.cs`:** The player's inventory and equipment slots are composed of `SlotElement`s, which are populated with `ItemElement`s based on data from the `PlayerPanelDataViewModel`.
 *   **`EnemyPanelController.cs`:** The enemy's equipment display dynamically creates `SlotElement`s and binds them to the enemy's `ShipState` data.
 *   **`ShopController.cs`:** The shop interface is now a primary consumer of this system. It uses `SlotElement`s to display items for sale. It uses a special `ShopSlotViewModel` to provide price data, and contextual CSS to make the price visible only within the shop. Crucially, `ShopController` now explicitly registers tooltip callbacks for each shop item, ensuring tooltips appear on hover.
-*   **`RewardUIController.cs`:** The reward interface utilizes this system for displaying reward items. It uses `SlotElement`s to display items and `RewardItemSlotViewData` to provide item data. It is explicitly called by `RunManager` (for battle rewards) or `DebugConsoleController` (for debug rewards) to display rewards. It integrates with the `UIManager`'s global root for proper layering and event handling, and registers tooltip callbacks for reward items.
+*   **`RewardUIController.cs`:** The reward interface utilizes this system for displaying reward items. It uses `SlotElement`s to display items and `RewardItemSlotViewData` to provide item data. It is explicitly called by `RunManager` (for battle rewards) or `DebugConsoleController` (for debug rewards) to display rewards. It integrates with the `GlobalUIService`'s global root for proper layering and event handling, and registers tooltip callbacks for reward items.
 
 ## 2. Universal Item Manipulation System
 
@@ -158,6 +158,11 @@ The enemy panel now fully utilizes the new runtime item system and tooltip setup
 *   `Assets/Scripts/UI/EffectDisplay.cs`
 *   `Assets/Scripts/UI/Utilities/TooltipUtility.cs`
 *   `Assets/Scripts/UI/UIInteractionService.cs`
+
+### New Infrastructure
+*   `Assets/Scripts/Core/ServiceLocator.cs`
+*   `Assets/Scripts/UI/UIAssetRegistry.cs`
+*   `Assets/Scripts/UI/GlobalUIService.cs`
 
 ## 5. UI Toolkit Event Handling Notes
 
@@ -286,17 +291,44 @@ class UIInteractionService <<Service>> {
     + CanManipulateItem()
 }
 
+class ServiceLocator <<Service>> {
+    + {static} Register()
+    + {static} Resolve()
+}
+
+class UIAssetRegistry <<Serializable>> {
+    + ShipDisplayElementUXML
+    + SlotElementUXML
+    + ItemElementUXML
+}
+
+class GlobalUIService <<Service>> {
+    + GlobalUIRoot
+    + Initialize()
+}
+
 ' --- RELATIONSHIPS ---
-UIManager --> PlayerPanelController : instantiates >
-UIManager --> EnemyPanelController : instantiates >
-UIManager --> TooltipController : instantiates & initializes >
-UIManager --> ShopController : instantiates >
-UIManager --> RewardUIController : instantiates >
+GameInitializer --> ServiceLocator : registers >
+
+ServiceLocator --> UIManager : resolves >
+ServiceLocator --> PlayerPanelController : resolves >
+ServiceLocator --> MapView : resolves >
+ServiceLocator --> TooltipController : resolves >
+ServiceLocator --> DebugConsoleController : resolves >
+ServiceLocator --> RewardUIController : resolves >
+ServiceLocator --> UIAssetRegistry : resolves >
+ServiceLocator --> GlobalUIService : resolves >
+
+UIManager --> PlayerPanelController : initializes >
+UIManager --> TooltipController : initializes >
+UIManager --> DebugConsoleController : initializes >
+UIManager --> RewardUIController : initializes >
 
 TooltipController <-- TooltipUtility : used by >
 TooltipController <-- EffectDisplay : uses >
 
 TooltipUtility --> TooltipController : calls Show/Hide >
+TooltipUtility --> GlobalUIService : resolves >
 
 ItemManipulationService <-- SlotManipulator : calls requests >
 ItemManipulationService --> UIInteractionService : checks permission >
@@ -314,8 +346,10 @@ PlayerPanelDataViewModel --> SlotElement : binds to >
 
 SlotElement *-- ItemElement : contains >
 SlotElement --> PlayerPanelDataViewModel : observes >
+SlotElement --> UIAssetRegistry : resolves >
 
 ItemElement *-- SlotManipulator : attaches >
+ItemElement --> UIAssetRegistry : resolves >
 
 EnemyPanelController --> TooltipUtility : uses >
 EnemyPanelController --> ItemManipulationEvents : subscribes to >
@@ -324,5 +358,8 @@ ShopController --> TooltipUtility : uses >
 
 RewardUIController --> TooltipUtility : uses >
 RewardUIController --> ItemManipulationEvents : subscribes to >
+RewardUIController --> GlobalUIService : resolves >
+
+ShipDisplayElement --> UIAssetRegistry : resolves >
 
 @enduml

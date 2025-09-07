@@ -38,8 +38,8 @@ The game's functionality is distributed among several key systems:
     *   **Interaction:** Orchestrates the initialization of `Pirate.MapGen.MapManager` and `PirateRoguelike.UI.UIManager`. Reacts to `PirateRoguelike.Core.GameSession` events (e.g., `OnPlayerNodeChanged`).
 
 *   **`PirateRoguelike.UI.UIManager` (`Assets/Scripts/UI/UIManager.cs`):**
-    *   **Responsibility:** A persistent singleton dedicated to instantiating and managing all global UI elements (player panel, map view, tooltips). It acts as the central point for UI initialization and display.
-    *   **Interaction:** Receives explicit initialization calls from `PirateRoguelike.Core.GameInitializer` and `PirateRoguelike.Core.RunManager`. Provides references to UI controllers (e.g., `PirateRoguelike.UI.PlayerPanelController`) to other systems.
+    *   **Responsibility:** A persistent singleton dedicated to coordinating and displaying global UI elements. It receives its dependencies (other UI controllers) from the `GameInitializer` via the `ServiceLocator`.
+    *   **Interaction:** Receives explicit initialization calls from `PirateRoguelike.Core.GameInitializer`. Provides references to UI controllers (e.g., `PirateRoguelike.UI.PlayerPanelController`) to other systems.
 
 *   **`PirateRoguelike.Services.UIStateService` (`Assets/Scripts/Services/UIStateService.cs`):**
     *   **Responsibility:** A static class providing global UI state flags, such as `IsConsoleOpen`, to coordinate behavior across different UI components.
@@ -81,7 +81,7 @@ This convention ensures that readers can quickly identify the origin of a class 
 The systems interact primarily through a combination of:
 
 *   **Explicit Initialization Calls:** The `PirateRoguelike.Core.GameInitializer` orchestrates the initial setup, explicitly calling `Initialize()` methods on `PirateRoguelike.Core.RunManager` and `PirateRoguelike.UI.UIManager` in a guaranteed sequence.
-*   **Singleton Access:** Managers (e.g., `PirateRoguelike.Core.GameSession.Instance`, `Pirate.MapGen.MapManager.Instance`, `PirateRoguelike.UI.UIManager.Instance`) provide global access points for other systems to retrieve data or trigger actions.
+*   **Service Locator Access:** The `PirateRoguelike.Core.ServiceLocator` provides a central registry for services and components, allowing systems to resolve their dependencies without direct coupling.
 *   **Event-Driven Communication (`PirateRoguelike.Core.EventBus`):** The `PirateRoguelike.Core.EventBus` is used for decoupled, one-to-many communication. Systems dispatch events (e.g., `OnPlayerNodeChanged`, `OnBattleStart`, `OnDamageReceived`), and other interested systems subscribe to react without direct dependencies.
 *   **Data Binding (UI):** UI components often bind to ViewModels (`PlayerPanelDataViewModel`, `EnemyShipViewData`) which, in turn, observe changes in the `PirateRoguelike.Core.GameSession` or other game state. This ensures the UI automatically updates when underlying data changes.
 *   **Direct Method Calls:** For tightly coupled operations (e.g., `PirateRoguelike.Combat.CombatController` calling `PirateRoguelike.Core.ShipState` methods), direct method calls are used.
@@ -92,15 +92,11 @@ The systems interact primarily through a combination of:
 2.  **`PirateRoguelike.Core.GameInitializer.Start()`** in the `Boot` scene:
     *   Initializes `PirateRoguelike.Core.GameSession` (creating `PlayerShip`, `PirateRoguelike.Services.Inventory`, etc.).
     *   Instantiates `PirateRoguelike.Core.RunManager` and calls `PirateRoguelike.Core.RunManager.Instance.Initialize()`.
-    *   Instantiates `PirateRoguelike.UI.UIManager` and calls `PirateRoguelike.UI.UIManager.Instance.Initialize()`.
-    *   Loads `Run.unity`.
+    *   Instantiates all top-level UI components (including `PirateRoguelike.UI.UIManager`, `PirateRoguelike.UI.PlayerPanelController`, `PirateRoguelike.UI.MapView`, etc.) and registers them with the `PirateRoguelike.Core.ServiceLocator`. It then calls `PirateRoguelike.UI.UIManager.Initialize()` passing the resolved UI components.
 3.  **`PirateRoguelike.Core.RunManager.OnRunSceneLoaded()`** (triggered by `Run.unity` loading):
     *   Ensures `Pirate.MapGen.MapManager` generates map data.
-    *   Calls `PirateRoguelike.UI.UIManager.Instance.InitializeRunUI()`.
-4.  **`PirateRoguelike.UI.UIManager.InitializeRunUI()`**:
-    *   Initializes `PirateRoguelike.UI.PlayerPanelController` (which sets up its ViewModel and View).
-    *   Calls `PirateRoguelike.UI.MapView.Show()` to display the map.
-5.  **`PlayerPanelDataViewModel`** (initialized by `PirateRoguelike.UI.PlayerPanelController`):
+    *   Resolves `PirateRoguelike.UI.PlayerPanelController` and `PirateRoguelike.UI.MapView` from the `ServiceLocator` and calls their respective initialization/display methods.
+4.  **`PlayerPanelDataViewModel`** (initialized by `PirateRoguelike.UI.PlayerPanelController`):
     *   Subscribes to `PirateRoguelike.Core.GameSession` events (e.g., `OnPlayerShipInitialized`).
     *   Manually updates its properties from `PirateRoguelike.Core.GameSession` (e.g., `ShipName`, `CurrentHp`, `Gold`).
     *   The `PlayerPanelView` (and its `ShipDisplayElement`) automatically update via data binding.

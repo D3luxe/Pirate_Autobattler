@@ -91,7 +91,7 @@ namespace PirateRoguelike.UI
                     var viewModel = new RewardItemSlotViewData(new ItemInstance(item));
                     slotElement.Bind(viewModel);
                     _rewardItemsContainer.Add(slotElement);
-                    PirateRoguelike.UI.Utilities.TooltipUtility.RegisterTooltipCallbacks(slotElement, viewModel, UIManager.Instance.GlobalUIRoot);
+                    PirateRoguelike.UI.Utilities.TooltipUtility.RegisterTooltipCallbacks(slotElement, viewModel, ServiceLocator.Resolve<GlobalUIService>().GlobalUIRoot);
                 }
                 _skipButton.text = $"Skip (+{Mathf.RoundToInt(_initialGoldReward * 0.5f)} Gold)"; // Update skip button text
                 _skipButton.style.display = DisplayStyle.Flex; // Show skip button if items are present

@@ -88,22 +88,22 @@ namespace PirateRoguelike.Core
 
         // Add starter items to inventory
         ItemSO starterItem1 = GameDataRegistry.GetItem("item_cannon_wood");
-        Debug.Log($"GameSession: starterItem1 (cannon_wood) is null: {starterItem1 == null}");
+        //Debug.Log($"GameSession: starterItem1 (cannon_wood) is null: {starterItem1 == null}");
         if (starterItem1 != null) Debug.Log($"GameSession: AddItem(cannon_wood) success: {Inventory.AddItem(new ItemInstance(starterItem1))}");
         ItemSO starterItem2 = GameDataRegistry.GetItem("item_deckhand");
-        Debug.Log($"GameSession: starterItem2 (deckhand) is null: {starterItem2 == null}");
+        //Debug.Log($"GameSession: starterItem2 (deckhand) is null: {starterItem2 == null}");
         if (starterItem2 != null) Debug.Log($"GameSession: AddItem(deckhand) success: {Inventory.AddItem(new ItemInstance(starterItem2))}");
-        Debug.Log($"GameSession: Inventory.Slots.Count after adding: {Inventory.Slots.Count}");
+        //Debug.Log($"GameSession: Inventory.Slots.Count after adding: {Inventory.Slots.Count}");
         foreach (var slot in Inventory.Slots)
         {
-            if (slot.Item != null) Debug.Log($"GameSession: Inventory item ID: {slot.Item.Def.id}");
+            //if (slot.Item != null) Debug.Log($"GameSession: Inventory item ID: {slot.Item.Def.id}");
         }
         InvokeOnInventoryInitialized(); // Invoke event after Inventory is populated
 
         Debug.Log($"GameSession: PlayerShip.Equipped.Length: {PlayerShip.Equipped.Length}");
         foreach (var item in PlayerShip.Equipped)
         {
-            if (item != null) Debug.Log($"GameSession: Equipped item ID: {item.Def.id}");
+            //if (item != null) Debug.Log($"GameSession: Equipped item ID: {item.Def.id}");
         }
     }
 

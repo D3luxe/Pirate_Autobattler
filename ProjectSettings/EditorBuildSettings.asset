@@ -23,6 +23,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Shop.unity
     guid: 03a847b27e2ff8d4aa947f1d888a6039
+  - enabled: 1
+    path: Assets/Scenes/Port.unity
+    guid: 61f3ec003eaab504ea156619d38a575c
+  - enabled: 1
+    path: Assets/Scenes/Event.unity
+    guid: 364aefd530affb84a862aa8ae2a0067f
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 4e0c36f4727d644489ef0e112b5b4629, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

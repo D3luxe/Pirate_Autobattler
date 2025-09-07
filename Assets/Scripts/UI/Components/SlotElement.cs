@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.ComponentModel;
+using PirateRoguelike.Core;
 
 namespace PirateRoguelike.UI.Components
 {
@@ -14,7 +15,7 @@ namespace PirateRoguelike.UI.Components
         public SlotElement()
         {
             // Load UXML and add to hierarchy
-            var visualTree = UIManager.Instance.SlotElementUXML;
+            var visualTree = ServiceLocator.Resolve<UIAssetRegistry>().SlotElementUXML;
             visualTree.CloneTree(this);
 
             this.AddToClassList("slot"); // Add the "slot" class to the SlotElement itself

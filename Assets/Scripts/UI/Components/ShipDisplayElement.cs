@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.ComponentModel;
+using PirateRoguelike.Core;
 
 namespace PirateRoguelike.UI.Components
 {
@@ -20,7 +21,7 @@ namespace PirateRoguelike.UI.Components
         public ShipDisplayElement()
         {
             // Load UXML and add to hierarchy
-            var visualTree = UIManager.Instance.ShipDisplayElementUXML;
+            var visualTree = ServiceLocator.Resolve<UIAssetRegistry>().ShipDisplayElementUXML;
             visualTree.CloneTree(this);
 
             // Query elements here, after the UXML has been cloned

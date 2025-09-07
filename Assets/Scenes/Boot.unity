@@ -152,6 +152,13 @@ MonoBehaviour:
   uiManagerPrefab: {fileID: 8324493647197269750, guid: daa8e622323849c4fa546e49b7d5fd7a, type: 3}
   runConfig: {fileID: 11400000, guid: 20c85d27094dac045b8bde7a8c53baba, type: 2}
   debugStartingShip: {fileID: 11400000, guid: 14f3e203ca43f504091a5df9e105e479, type: 2}
+  globalUIOverlayPrefab: {fileID: 8004934526173211991, guid: 6f2494b50d401fc4a83cb8fb9e1a5040, type: 3}
+  playerPanelPrefab: {fileID: 6940418046087843524, guid: bcf83ad999425f54da9e52316e3c4b89, type: 3}
+  mapViewPrefab: {fileID: 6386911918127072378, guid: ad18e79558b8f9d409586eb0ab994690, type: 3}
+  tooltipManagerPrefab: {fileID: 6294734344320484715, guid: c8173fb64b71637418ce567650adbe5c, type: 3}
+  debugConsolePrefab: {fileID: 27078478518024827, guid: 69d3ee032750f0b4f95a2c53b73fa97f, type: 3}
+  rewardUIPrefab: {fileID: 4615069877605295715, guid: c1b66b7f39bea2c4e94d3d232ce5485b, type: 3}
+  uiAssetRegistry: {fileID: 11400000, guid: 397b2496dd88afe42aade92d4e792fc1, type: 2}
 --- !u!4 &260597548
 Transform:
   m_ObjectHideFlags: 0

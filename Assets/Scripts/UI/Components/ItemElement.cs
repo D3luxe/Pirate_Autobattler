@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using PirateRoguelike.Data;
 using System.ComponentModel;
+using PirateRoguelike.Core;
 
 namespace PirateRoguelike.UI.Components
 {
@@ -17,7 +18,7 @@ namespace PirateRoguelike.UI.Components
         {
             Debug.Log("ItemElement: Constructor called.");
             // Load UXML and add to hierarchy
-            var visualTree = UIManager.Instance.ItemElementUXML;
+            var visualTree = ServiceLocator.Resolve<UIAssetRegistry>().ItemElementUXML;
             visualTree.CloneTree(this);
 
             // Query elements

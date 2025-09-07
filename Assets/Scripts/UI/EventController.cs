@@ -35,10 +35,10 @@ namespace PirateRoguelike.UI
             }
 
             // 2. Get the global UI root
-            var globalRoot = UIManager.Instance?.GlobalUIRoot;
+            var globalRoot = ServiceLocator.Resolve<GlobalUIService>().GlobalUIRoot;
             if (globalRoot == null)
             {
-                 Debug.LogError("EventController: UIManager or its GlobalUIRoot is not available. Returning to Run scene.");
+                 Debug.LogError("EventController: GlobalUIService or its GlobalUIRoot is not available. Returning to Run scene.");
                 ReturnToMap();
                 return;
             }

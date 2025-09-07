@@ -9,33 +9,14 @@ namespace PirateRoguelike.UI
 {
     public static UIManager Instance { get; private set; }
 
-    [Header("UI Prefabs")]
-    [SerializeField] private GameObject playerPanelPrefab;
-    [SerializeField] private GameObject mapViewPrefab;
-    [SerializeField] private GameObject tooltipManagerPrefab;
-    [SerializeField] private GameObject globalUIOverlayPrefab;
-    [SerializeField] private GameObject debugConsolePrefab; // Added for Debug Console
-    [SerializeField] private GameObject rewardUIPrefab; // Added for Reward UI
-
-    [Header("UXML Assets")]
-    [SerializeField] private VisualTreeAsset _shipDisplayElementUXML;
-    [SerializeField] private VisualTreeAsset _slotElementUXML;
-    [SerializeField] private VisualTreeAsset _itemElementUXML; // Added for ItemElement
-
-    public VisualTreeAsset ShipDisplayElementUXML => _shipDisplayElementUXML;
-    public VisualTreeAsset SlotElementUXML => _slotElementUXML;
-    public VisualTreeAsset ItemElementUXML => _itemElementUXML; // Added for ItemElement
-
-
     private PlayerPanelController _playerPanelController;
     private MapView _mapView;
     private TooltipController _tooltipController;
     private UIDocument _globalUIOverlayDocument;
-    private DebugConsoleController _debugConsoleController; // Added for Debug Console
-    private RewardUIController _rewardUIController; // Added for Reward UI
+    private DebugConsoleController _debugConsoleController;
+    private RewardUIController _rewardUIController;
 
-    public VisualElement GlobalUIRoot => _globalUIOverlayDocument?.rootVisualElement;
-    public RewardUIController RewardUIController => _rewardUIController; // Expose RewardUIController
+    public RewardUIController RewardUIController => _rewardUIController;
 
     void Awake()
     {
@@ -48,60 +29,14 @@ namespace PirateRoguelike.UI
         DontDestroyOnLoad(gameObject);
     }
 
-    public void Initialize()
+    public void Initialize(PlayerPanelController playerPanelController, MapView mapView, TooltipController tooltipController, UIDocument globalUIOverlayDocument, DebugConsoleController debugConsoleController, RewardUIController rewardUIController)
     {
-        InstantiateUI();
-    }
-
-    private void InstantiateUI()
-    {
-        // Instantiate Global UI Overlay
-        if (globalUIOverlayPrefab != null)
-        {
-            GameObject globalUIInstance = Instantiate(globalUIOverlayPrefab, transform);
-            _globalUIOverlayDocument = globalUIInstance.GetComponent<UIDocument>();
-            if (_globalUIOverlayDocument == null)
-            {
-                Debug.LogError("GlobalUIOverlay Prefab does not have a UIDocument component!");
-            }
-        }
-        else
-        {
-            Debug.LogError("GlobalUIOverlay Prefab is not assigned in UIManager!");
-        }
-
-        // Instantiate PlayerPanel UI
-        if (playerPanelPrefab != null)
-        {
-            GameObject panelInstance = Instantiate(playerPanelPrefab, transform);
-            _playerPanelController = panelInstance.GetComponent<PlayerPanelController>();
-        }
-        else
-        {
-            Debug.LogError("PlayerPanel Prefab is not assigned in UIManager!");
-        }
-
-        // Instantiate MapView UI from prefab
-        if (mapViewPrefab != null)
-        {
-            GameObject mapViewInstance = Instantiate(mapViewPrefab, transform);
-            _mapView = mapViewInstance.GetComponent<MapView>();
-        }
-        else
-        {
-            Debug.LogError("MapView Prefab is not assigned in UIManager!");
-        }
-
-        // Instantiate TooltipManager UI
-        if (tooltipManagerPrefab != null)
-        {
-            GameObject tooltipInstance = Instantiate(tooltipManagerPrefab, transform);
-            _tooltipController = tooltipInstance.GetComponent<TooltipController>();
-        }
-        else
-        {
-            Debug.LogError("TooltipManager Prefab is not assigned in UIManager!");
-        }
+        _playerPanelController = playerPanelController;
+        _mapView = mapView;
+        _tooltipController = tooltipController;
+        _globalUIOverlayDocument = globalUIOverlayDocument;
+        _debugConsoleController = debugConsoleController;
+        _rewardUIController = rewardUIController;
 
         // Initial hookups
         if (_playerPanelController != null && _mapView != null)
@@ -118,42 +53,22 @@ namespace PirateRoguelike.UI
             Debug.LogError("TooltipController or Global UI Overlay Document is null. Cannot initialize tooltip.");
         }
 
-        // Instantiate Debug Console
-        if (debugConsolePrefab != null)
+        if (_debugConsoleController != null && _globalUIOverlayDocument != null)
         {
-            GameObject debugConsoleInstance = Instantiate(debugConsolePrefab, transform);
-            _debugConsoleController = debugConsoleInstance.GetComponent<DebugConsoleController>();
-            if (_debugConsoleController != null && GlobalUIRoot != null)
-            {
-                _debugConsoleController.Initialize(GlobalUIRoot);
-            }
-            else
-            {
-                Debug.LogError("DebugConsoleController or GlobalUIRoot is null. Cannot initialize debug console.");
-            }
+            _debugConsoleController.Initialize(_globalUIOverlayDocument.rootVisualElement);
         }
         else
         {
-            Debug.LogError("DebugConsole Prefab is not assigned in UIManager!");
+            Debug.LogError("DebugConsoleController or GlobalUIRoot is null. Cannot initialize debug console.");
         }
 
-        // Instantiate Reward UI
-        if (rewardUIPrefab != null)
+        if (_rewardUIController != null && _globalUIOverlayDocument != null)
         {
-            GameObject rewardUIInstance = Instantiate(rewardUIPrefab, transform);
-            _rewardUIController = rewardUIInstance.GetComponent<RewardUIController>();
-            if (_rewardUIController != null && GlobalUIRoot != null)
-            {
-                GlobalUIRoot.Add(_rewardUIController.GetComponent<UIDocument>().rootVisualElement);
-            }
-            else
-            {
-                Debug.LogError("RewardUIController or GlobalUIRoot is null. Cannot initialize reward UI.");
-            }
+            _globalUIOverlayDocument.rootVisualElement.Add(_rewardUIController.GetComponent<UIDocument>().rootVisualElement);
         }
         else
         {
-            Debug.LogError("RewardUI Prefab is not assigned in UIManager!");
+            Debug.LogError("RewardUIController or GlobalUIRoot is null. Cannot initialize reward UI.");
         }
     }
 

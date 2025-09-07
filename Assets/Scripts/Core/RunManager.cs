@@ -154,15 +154,15 @@ namespace PirateRoguelike.Core
                     // Treasure is handled in the Run scene directly without a scene change.
                     // TODO: Create and call RewardService.GenerateTreasureReward
                     // RewardService.GenerateTreasureReward(GameSession.CurrentRunState.currentColumnIndex);
-                    if (UIManager.Instance != null && UIManager.Instance.RewardUIController != null)
+                    if (ServiceLocator.Resolve<RewardUIController>() != null)
                     {
                         // TODO: Create a method to show only treasure rewards
-                        // UIManager.Instance.RewardUIController.ShowRewards(RewardService.GetCurrentRewardItems(), RewardService.GetCurrentRewardGold());
+                        // ServiceLocator.Resolve<RewardUIController>().ShowRewards(RewardService.GetCurrentRewardItems(), RewardService.GetCurrentRewardGold());
                         Debug.Log("Treasure encounter triggered. UI Implementation pending.");
                     }
                     else
                     {
-                        Debug.LogError("UIManager or RewardUIController not available to show treasure reward.");
+                        Debug.LogError("RewardUIController not available to show treasure reward.");
                     }
                     break;
                 case PirateRoguelike.Data.EncounterType.Port:
@@ -201,15 +201,15 @@ namespace PirateRoguelike.Core
         if (GameSession.CurrentRunState != null && GameSession.CurrentRunState.battleRewards != null && GameSession.CurrentRunState.battleRewards.Count > 0)
         {
             Debug.Log($"RunManager: Detected {GameSession.CurrentRunState.battleRewards.Count} battle rewards.");
-            // Show Reward UI via UIManager
-            if (UIManager.Instance != null && UIManager.Instance.RewardUIController != null)
+            // Show Reward UI via ServiceLocator
+            if (ServiceLocator.Resolve<RewardUIController>() != null)
             {
-                UIManager.Instance.RewardUIController.ShowRewards(GameSession.CurrentRunState.battleRewards, RewardService.GetCurrentRewardGold());
+                ServiceLocator.Resolve<RewardUIController>().ShowRewards(GameSession.CurrentRunState.battleRewards, RewardService.GetCurrentRewardGold());
                 GameSession.CurrentRunState.battleRewards = null; // Clear rewards after showing
             }
             else
             {
-                Debug.LogError("UIManager or RewardUIController is null. Cannot show battle rewards.");
+                Debug.LogError("RewardUIController is null. Cannot show battle rewards.");
             }
         }
 
@@ -239,10 +239,8 @@ namespace PirateRoguelike.Core
         }
 
         // Initialize and show UI now that all data is ready
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.InitializeRunUI();
-        }
+        ServiceLocator.Resolve<PlayerPanelController>().Initialize(new GameSessionWrapper());
+        ServiceLocator.Resolve<MapView>().Show();
     }
 
     private void HandleToggleConsole(InputAction.CallbackContext context)

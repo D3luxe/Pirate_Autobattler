@@ -24,7 +24,7 @@ namespace PirateRoguelike.UI
 
         private void Awake()
         {
-            Debug.Log("DebugConsoleController: Awake() called. Starting initialization.");
+            //Debug.Log("DebugConsoleController: Awake() called. Starting initialization.");
 
             // --- Step 1: Instantiate the UXML ---
             if (debugConsoleUxml == null)
@@ -39,7 +39,7 @@ namespace PirateRoguelike.UI
                 Debug.LogError("DebugConsoleController: _rootElement is NULL after instantiating debugConsoleUxml. UXML instantiation failed.");
                 return; // Critical error, cannot proceed
             }
-            Debug.Log($"DebugConsoleController: _rootElement instantiated successfully. Type: {_rootElement.GetType().Name}");
+            //Debug.Log($"DebugConsoleController: _rootElement instantiated successfully. Type: {_rootElement.GetType().Name}");
 
             // --- Step 2: Apply the USS ---
             if (debugConsoleUss == null)
@@ -49,7 +49,7 @@ namespace PirateRoguelike.UI
             else
             {
                 _rootElement.styleSheets.Add(debugConsoleUss);
-                Debug.Log("DebugConsoleController: debugConsoleUss applied.");
+                //Debug.Log("DebugConsoleController: debugConsoleUss applied.");
             }
 
             // --- Step 3: Get references to UI elements ---
@@ -60,7 +60,7 @@ namespace PirateRoguelike.UI
             }
             else
             {
-                Debug.Log("DebugConsoleController: _outputScrollView found.");
+                //Debug.Log("DebugConsoleController: _outputScrollView found.");
             }
 
             _inputField = _rootElement.Q<TextField>("input-field");
@@ -70,55 +70,55 @@ namespace PirateRoguelike.UI
             }
             else
             {
-                Debug.Log("DebugConsoleController: _inputField found.");
+                //Debug.Log("DebugConsoleController: _inputField found.");
             }
 
             // --- Step 4: Set initial visibility ---
             _rootElement.style.display = DisplayStyle.None;
             _isConsoleVisible = false;
-            Debug.Log("DebugConsoleController: Initial visibility set to hidden. Awake() finished.");
+            //Debug.Log("DebugConsoleController: Initial visibility set to hidden. Awake() finished.");
         }
 
         public void Initialize(VisualElement rootElementToAttachTo)
         {
-            Debug.Log("DebugConsoleController: Initialize() called. Attaching _rootElement.");
+            //Debug.Log("DebugConsoleController: Initialize() called. Attaching _rootElement.");
             if (_rootElement == null)
             {
                 Debug.LogError("DebugConsoleController: _rootElement is NULL in Initialize()! Cannot attach to hierarchy.");
                 return;
             }
             rootElementToAttachTo.Add(_rootElement);
-            Debug.Log("DebugConsoleController: _rootElement added to rootElementToAttachTo. Logging initial message.");
+            //Debug.Log("DebugConsoleController: _rootElement added to rootElementToAttachTo. Logging initial message.");
             Log("Debug Console Initialized. Press ` to toggle.");
         }
 
         private void OnEnable()
         {
-            Debug.Log("DebugConsoleController: OnEnable() called. Subscribing to RunManager.OnToggleConsole.");
+            //Debug.Log("DebugConsoleController: OnEnable() called. Subscribing to RunManager.OnToggleConsole.");
             RunManager.OnToggleConsole += ToggleConsole;
 
             if (_inputField != null)
             {
                 _inputField.RegisterCallback<KeyDownEvent>(OnInputKeyDown, TrickleDown.TrickleDown);
-                Debug.Log("DebugConsoleController: KeyDownEvent registered for _inputField with TrickleDown.");
+                //Debug.Log("DebugConsoleController: KeyDownEvent registered for _inputField with TrickleDown.");
             }
             else
             {
                 Debug.LogWarning("DebugConsoleController: _inputField is NULL in OnEnable(), cannot register events.");
             }
-            Debug.Log("DebugConsoleController: OnEnable() finished.");
+            //Debug.Log("DebugConsoleController: OnEnable() finished.");
         }
 
         private void OnDisable()
         {
-            Debug.Log("DebugConsoleController: OnDisable() called. Unsubscribing from RunManager.OnToggleConsole.");
+            //Debug.Log("DebugConsoleController: OnDisable() called. Unsubscribing from RunManager.OnToggleConsole.");
             RunManager.OnToggleConsole -= ToggleConsole;
 
             if (_inputField != null)
             {
                 _inputField.UnregisterCallback<KeyDownEvent>(OnInputKeyDown);
             }
-            Debug.Log("DebugConsoleController: OnDisable() finished.");
+            //Debug.Log("DebugConsoleController: OnDisable() finished.");
         }
 
         private void OnInputKeyDown(KeyDownEvent evt)
@@ -134,7 +134,7 @@ namespace PirateRoguelike.UI
 
         private void ToggleConsole()
         {
-            Debug.Log("DebugConsoleController: ToggleConsole() called. Current visibility: " + _isConsoleVisible);
+            //Debug.Log("DebugConsoleController: ToggleConsole() called. Current visibility: " + _isConsoleVisible);
             if (_rootElement == null)
             {
                 Debug.LogError("DebugConsoleController: _rootElement is NULL in ToggleConsole()! Cannot toggle visibility.");
@@ -162,7 +162,7 @@ namespace PirateRoguelike.UI
                 if (_inputField != null)
                 {
                     _inputField.Blur(); // Remove focus when hiding
-                    Debug.Log("DebugConsoleController: Console hidden, input field blurred.");
+                    //Debug.Log("DebugConsoleController: Console hidden, input field blurred.");
                 }
                 else
                 {
@@ -434,16 +434,16 @@ namespace PirateRoguelike.UI
                     RewardService.GenerateDebugReward(floorIndex, isElite, goldAmount, itemCount);
 
                     // Explicitly show the reward UI
-                    if (UIManager.Instance != null && UIManager.Instance.RewardUIController != null)
+                    if (ServiceLocator.Resolve<RewardUIController>() != null)
                     {
-                        UIManager.Instance.RewardUIController.ShowRewards(
+                        ServiceLocator.Resolve<RewardUIController>().ShowRewards(
                             RewardService.GetCurrentRewardItems().Select(item => new ItemInstance(item).ToSerializable()).ToList(),
                             RewardService.GetCurrentRewardGold()
                         );
                     }
                     else
                     {
-                        Log("Error: UIManager or RewardUIController is not initialized. Cannot show debug rewards.");
+                        Log("Error: RewardUIController is not initialized. Cannot show debug rewards.");
                     }
                     Log($"Generated reward: Gold: {goldAmount}, Items: {(showItems ? (itemCount?.ToString() ?? "default") : "none")}, Elite: {isElite}, Floor: {floorIndex}.");
                     break;
