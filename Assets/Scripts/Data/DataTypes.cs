@@ -72,12 +72,8 @@ namespace PirateRoguelike.Data
     public class EventChoice
     {
         public string choiceText;
-        public int goldCost; // Cost to make this choice
-        public int lifeCost; // Life cost to make this choice
-        public string itemRewardId; // ID of item to give as reward
-        public string shipRewardId; // ID of ship to give as reward
-        public string nextEncounterId; // For branching events, ID of next encounter
         public string outcomeText; // Text describing the outcome of the choice
+        public List<EventChoiceAction> actions;
     }
 
     public enum TargetingStrategy { Player, LowestHealth, HighestDamage }

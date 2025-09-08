@@ -1,11 +1,11 @@
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
-using UnityEditor.UIElements;
 using System.Collections.Generic;
 using System.Linq;
 using PirateRoguelike.Data; // Assuming EncounterSO is in this namespace
 using System; // Added for Func and Action
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
 public class EncounterEditorWindow : EditorWindow
 {
@@ -23,49 +23,292 @@ public class EncounterEditorWindow : EditorWindow
     public class EventChoiceRow : VisualElement
     {
         public TextField ChoiceTextField { get; private set; }
-        public IntegerField GoldCostField { get; private set; }
-        public IntegerField LifeCostField { get; private set; }
-        public TextField ItemRewardIdField { get; private set; }
-        public TextField ShipRewardIdField { get; private set; }
-        public TextField NextEncounterIdField { get; private set; }
         public TextField OutcomeTextField { get; private set; }
+        private ListView _actionsListView;
+        private SerializedProperty _actionsSerializedProperty;
 
         public EventChoiceRow()
         {
             style.flexDirection = FlexDirection.Column;
+            style.marginBottom = 10;
+            style.borderBottomWidth = 1;
+            style.borderBottomColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
 
             ChoiceTextField = new TextField("Choice Text");
             Add(ChoiceTextField);
 
-            GoldCostField = new IntegerField("Gold Cost");
-            Add(GoldCostField);
-
-            LifeCostField = new IntegerField("Life Cost");
-            Add(LifeCostField);
-
-            ItemRewardIdField = new TextField("Item Reward ID");
-            Add(ItemRewardIdField);
-
-            ShipRewardIdField = new TextField("Ship Reward ID");
-            Add(ShipRewardIdField);
-
-            NextEncounterIdField = new TextField("Next Encounter ID");
-            Add(NextEncounterIdField);
-
             OutcomeTextField = new TextField("Outcome Text");
             OutcomeTextField.multiline = true;
             Add(OutcomeTextField);
+
+            _actionsListView = new ListView();
+            _actionsListView.headerTitle = "Actions";
+            _actionsListView.showAddRemoveFooter = true;
+            _actionsListView.reorderable = true;
+            _actionsListView.makeItem = () =>
+            {
+                // Container for the ObjectField and the specific action fields
+                VisualElement itemContainer = new VisualElement();
+                itemContainer.style.flexDirection = FlexDirection.Column;
+
+                // ObjectField to select the EventChoiceAction asset
+                ObjectField actionObjectField = new ObjectField();
+                actionObjectField.objectType = typeof(PirateRoguelike.Data.EventChoiceAction);
+                actionObjectField.allowSceneObjects = false;
+                actionObjectField.label = "Action";
+                itemContainer.Add(actionObjectField);
+
+                // Container for the specific fields of the action
+                VisualElement specificFieldsContainer = new VisualElement();
+                specificFieldsContainer.name = "specific-fields-container"; // Give it a name for easy lookup
+                itemContainer.Add(specificFieldsContainer);
+
+                return itemContainer;
+            };
+                        _actionsListView = new ListView();
+            _actionsListView.headerTitle = "Actions";
+            _actionsListView.showAddRemoveFooter = true;
+            _actionsListView.reorderable = true;
+            _actionsListView.makeItem = () =>
+            {
+                // Container for the ObjectField and the specific action fields
+                VisualElement itemContainer = new VisualElement();
+                itemContainer.style.flexDirection = FlexDirection.Column;
+
+                // ObjectField to select the EventChoiceAction asset
+                ObjectField actionObjectField = new ObjectField();
+                actionObjectField.objectType = typeof(PirateRoguelike.Data.EventChoiceAction);
+                actionObjectField.allowSceneObjects = false;
+                actionObjectField.label = "Action";
+                itemContainer.Add(actionObjectField);
+
+                // Container for the specific fields of the action
+                VisualElement specificFieldsContainer = new VisualElement();
+                specificFieldsContainer.name = "specific-fields-container"; // Give it a name for easy lookup
+                itemContainer.Add(specificFieldsContainer);
+
+                return itemContainer;
+            };
+              _actionsListView.bindItem = (element, index) =>
+              {
+                  ObjectField actionObjectField = element.Q<ObjectField>();
+                  VisualElement specificFieldsContainer = element.Q<VisualElement>("specific-fields-container");
+
+                  // Ensure _actionsSerializedProperty is valid
+                  if (_actionsSerializedProperty == null || !_actionsSerializedProperty.isArray || index < 0 || index >= _actionsSerializedProperty.arraySize)
+                  {
+                      Debug.LogError($"Invalid _actionsSerializedProperty or index out of bounds. Index: {index}, ArraySize: {_actionsSerializedProperty?.arraySize ?? -1}");
+                      actionObjectField.value = null;
+                      specificFieldsContainer.Clear();
+                      return;
+                  }
+
+                  SerializedProperty actionProperty = _actionsSerializedProperty.GetArrayElementAtIndex(index);
+
+                  // Manually set the value of the ObjectField
+                  actionObjectField.value = actionProperty.objectReferenceValue;
+
+                  // Register callback for when the ObjectField value changes
+                  actionObjectField.RegisterValueChangedCallback(evt =>
+                  {
+                      // Update the SerializedProperty with the new value
+                      actionProperty.objectReferenceValue = evt.newValue;
+
+                      // Apply changes to the parent SerializedObject (EncounterSO's SerializedObject)
+                      // This is crucial for persisting the reference to the new EventChoiceAction
+                      _actionsSerializedProperty.serializedObject.ApplyModifiedProperties();
+
+                      // Re-bind the item to refresh the specific fields based on the new action type
+                      _actionsListView.RefreshItem(index);
+                  });
+
+                  // Clear previous specific fields
+                  specificFieldsContainer.Clear();
+
+                  // Dynamically create and bind fields based on the action's type
+                  PirateRoguelike.Data.EventChoiceAction actionInstance = actionProperty.objectReferenceValue as PirateRoguelike.Data.EventChoiceAction;
+                  if (actionInstance != null)
+                  {
+                      // NEW: Create a SerializedObject for the actionInstance
+                      SerializedObject actionSerializedObject = new SerializedObject(actionInstance);
+                      actionSerializedObject.Update(); // Ensure it's up-to-date
+
+                      if (actionInstance is PirateRoguelike.Data.Actions.GainResourceAction)
+                      {
+                          specificFieldsContainer.style.flexDirection = FlexDirection.Row;
+                          specificFieldsContainer.style.justifyContent = Justify.SpaceBetween;
+
+                          EnumField resourceTypeField = new EnumField("Resource Type");
+                          SerializedProperty resourceTypeProp = actionSerializedObject.FindProperty("resourceType");
+                          if (resourceTypeProp != null)
+                          {
+                              resourceTypeField.BindProperty(resourceTypeProp);
+                              specificFieldsContainer.Add(resourceTypeField);
+                          }
+                          else
+                          {
+                              Debug.LogError($"Property 'resourceType' not found in GainResourceAction for index {index}.");
+                          }
+
+                          IntegerField amountField = new IntegerField("Amount");
+                          SerializedProperty amountProp = actionSerializedObject.FindProperty("amount");
+                          if (amountProp != null)
+                          {
+                              amountField.BindProperty(amountProp);
+                              specificFieldsContainer.Add(amountField);
+                          }
+                          else
+                          {
+                              Debug.LogError($"Property 'amount' not found in GainResourceAction for index {index}.");
+                          }
+                      }
+                      else if (actionInstance is PirateRoguelike.Data.Actions.ModifyStatAction)
+                      {
+                          specificFieldsContainer.style.flexDirection = FlexDirection.Row;
+                          specificFieldsContainer.style.justifyContent = Justify.SpaceBetween;
+
+                          EnumField statTypeField = new EnumField("Stat Type");
+                          SerializedProperty statTypeProp = actionSerializedObject.FindProperty("statType");
+                          if (statTypeProp != null)
+                          {
+                              statTypeField.BindProperty(statTypeProp);
+                              specificFieldsContainer.Add(statTypeField);
+                          }
+                          else
+                          {
+                              Debug.LogError($"Property 'statType' not found in ModifyStatAction for index {index}.");
+                          }
+
+                          IntegerField amountField = new IntegerField("Amount");
+                          SerializedProperty amountProp = actionSerializedObject.FindProperty("amount");
+                          if (amountProp != null)
+                          {
+                              amountField.BindProperty(amountProp);
+                              specificFieldsContainer.Add(amountField);
+                          }
+                          else
+                          {
+                              Debug.LogError($"Property 'amount' not found in ModifyStatAction for index {index}.");
+                          }
+                      }
+                      else if (actionInstance is PirateRoguelike.Data.Actions.GiveItemAction)
+                      {
+                          TextField itemIdField = new TextField("Item ID");
+                          SerializedProperty itemIdProp = actionSerializedObject.FindProperty("itemId");
+                          if (itemIdProp != null)
+                          {
+                              itemIdField.BindProperty(itemIdProp);
+                              specificFieldsContainer.Add(itemIdField);
+                          }
+                          else
+                          {
+                              Debug.LogError($"Property 'itemId' not found in GiveItemAction for index {index}.");
+                          }
+                      }
+                      else if (actionInstance is PirateRoguelike.Data.Actions.GiveShipAction)
+                      {
+                          TextField shipIdField = new TextField("Ship ID");
+                          SerializedProperty shipIdProp = actionSerializedObject.FindProperty("shipId");
+                          if (shipIdProp != null)
+                          {
+                              shipIdField.BindProperty(shipIdProp);
+                              specificFieldsContainer.Add(shipIdField);
+                          }
+                          else
+                          {
+                              Debug.LogError($"Property 'shipId' not found in GiveShipAction for index {index}.");
+                          }
+                      }
+                      else if (actionInstance is PirateRoguelike.Data.Actions.LoadEncounterAction)
+                      {
+                          TextField encounterIdField = new TextField("Encounter ID");
+                          SerializedProperty encounterIdProp = actionSerializedObject.FindProperty("encounterId");
+                          if (encounterIdProp != null)
+                          {
+                              encounterIdField.BindProperty(encounterIdProp);
+                              specificFieldsContainer.Add(encounterIdField);
+                          }
+                          else
+                          {
+                              Debug.LogError($"Property 'encounterId' not found in LoadEncounterAction for index {index}.");
+                          }
+                      }
+                      // Add more else if blocks for other action types as needed
+
+                      // Apply modified properties to the action's SerializedObject
+                      actionSerializedObject.ApplyModifiedProperties();
+                  }
+              };
+
+            // Custom add logic for actions list
+            _actionsListView.onAdd = (lv) =>
+            {
+                int newIndex = _actionsSerializedProperty.arraySize;
+                _actionsSerializedProperty.InsertArrayElementAtIndex(newIndex);
+                SerializedProperty newElementProperty = _actionsSerializedProperty.GetArrayElementAtIndex(newIndex);
+
+                // Create a new instance of a default EventChoiceAction (e.g., GainResourceAction)
+                // and make it a sub-asset of the current EncounterSO.
+                PirateRoguelike.Data.Actions.GainResourceAction newAction = ScriptableObject.CreateInstance<PirateRoguelike.Data.Actions.GainResourceAction>();
+                newAction.name = $"New Gain Resource Action {newIndex}"; // Give it a unique name
+
+                // Add the new action as a sub-asset to the EncounterSO
+                AssetDatabase.AddObjectToAsset(newAction, _actionsSerializedProperty.serializedObject.targetObject);
+                AssetDatabase.SaveAssets(); // Save the asset database to ensure the sub-asset is written to disk
+
+                newElementProperty.objectReferenceValue = newAction; // Assign the new sub-asset
+
+                _actionsSerializedProperty.serializedObject.ApplyModifiedProperties();
+                lv.RefreshItems();
+                lv.ScrollToItem(newIndex);
+            };
+
+            // Custom remove logic for actions list
+            _actionsListView.onRemove = (lv) =>
+            {
+                int selectedIndex = lv.selectedIndex;
+                if (selectedIndex < 0 || selectedIndex >= _actionsSerializedProperty.arraySize) return;
+
+                SerializedProperty elementToRemoveProperty = _actionsSerializedProperty.GetArrayElementAtIndex(selectedIndex);
+                PirateRoguelike.Data.EventChoiceAction actionToRemove = elementToRemoveProperty.objectReferenceValue as PirateRoguelike.Data.EventChoiceAction;
+
+                // Remove the element from the SerializedProperty array
+                _actionsSerializedProperty.DeleteArrayElementAtIndex(selectedIndex);
+
+                // Destroy the sub-asset if it exists
+                if (actionToRemove != null)
+                {
+                    // Check if it's a sub-asset of the current EncounterSO
+                    if (AssetDatabase.IsSubAsset(actionToRemove))
+                    {
+                        AssetDatabase.RemoveObjectFromAsset(actionToRemove);
+                        AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
+                        DestroyImmediate(actionToRemove, true); // Destroy the actual object
+                    }
+                    else
+                    {
+                        // If it's not a sub-asset, it might be a top-level asset.
+                        // We should not destroy top-level assets automatically.
+                        Debug.LogWarning($"EventChoiceAction '{actionToRemove.name}' is not a sub-asset. Not destroying it automatically.");
+                    }
+                }
+
+                _actionsSerializedProperty.serializedObject.ApplyModifiedProperties();
+                lv.RefreshItems();
+            };
+
+            Add(_actionsListView);
+            _actionsListView.fixedItemHeight = 80; // Adjust as needed to accommodate fields
+            Add(_actionsListView);
         }
 
         public void Bind(SerializedProperty choiceElementProperty)
         {
             ChoiceTextField.BindProperty(choiceElementProperty.FindPropertyRelative("choiceText"));
-            GoldCostField.BindProperty(choiceElementProperty.FindPropertyRelative("goldCost"));
-            LifeCostField.BindProperty(choiceElementProperty.FindPropertyRelative("lifeCost"));
-            ItemRewardIdField.BindProperty(choiceElementProperty.FindPropertyRelative("itemRewardId"));
-            ShipRewardIdField.BindProperty(choiceElementProperty.FindPropertyRelative("shipRewardId"));
-            NextEncounterIdField.BindProperty(choiceElementProperty.FindPropertyRelative("nextEncounterId"));
             OutcomeTextField.BindProperty(choiceElementProperty.FindPropertyRelative("outcomeText"));
+            _actionsSerializedProperty = choiceElementProperty.FindPropertyRelative("actions");
+            _actionsListView.BindProperty(_actionsSerializedProperty);
         }
     }
 
@@ -137,7 +380,6 @@ public class EncounterEditorWindow : EditorWindow
         }
         return encounters;
     }
-
     private void DisplayEncounterDetails()
     {
         _rightColumn.Clear(); // Clear previous details
@@ -150,6 +392,7 @@ public class EncounterEditorWindow : EditorWindow
 
         // --- Step 3: Basic Property Binding ---
         _serializedObject = new SerializedObject(_selectedEncounter);
+        _serializedObject.Update(); // NEW: Ensure SerializedObject is up-to-date
 
         // Common Properties
         TextField idField = new TextField("ID");

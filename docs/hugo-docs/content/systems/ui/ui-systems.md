@@ -47,6 +47,8 @@ This section details the implementation of the dynamic tooltip description syste
 
 This system is used by multiple parts of the UI to ensure consistent behavior.
 
+*   **EventController.cs:** The `EventController` now leverages the modular event system to dynamically display and execute event choices. It processes `EventChoiceAction`s, which define the UI and game logic for event outcomes. For more details on the modular event system, refer to the [Encounter System Overview]({{< myrelref "systems/encounters/encounter-system-overview.md" >}}).
+
 *   **`PlayerPanelView.cs`:** The player's inventory and equipment slots are composed of `SlotElement`s, which are populated with `ItemElement`s based on data from the `PlayerPanelDataViewModel`.
 *   **`EnemyPanelController.cs`:** The enemy's equipment display dynamically creates `SlotElement`s and binds them to the enemy's `ShipState` data.
 *   **`ShopController.cs`:** The shop interface is now a primary consumer of this system. It uses `SlotElement`s to display items for sale. It uses a special `ShopSlotViewModel` to provide price data, and contextual CSS to make the price visible only within the shop. Crucially, `ShopController` now explicitly registers tooltip callbacks for each shop item, ensuring tooltips appear on hover.
@@ -189,6 +191,15 @@ The enemy panel now fully utilizes the new runtime item system and tooltip setup
 ## 5. UI Toolkit Event Handling Notes
 
 *   **`TrickleDown.TrickleDown`:** When registering callbacks for `KeyDownEvent` (and other events where early intervention is critical), using `TrickleDown.TrickleDown` ensures that your callback is executed during the TrickleDown phase of event propagation. This allows you to process or `PreventDefault()` the event before other elements or the default behavior of the target element (e.g., `TextField`) can consume or modify it. This is crucial for achieving precise control over UI element behavior, especially for input fields.
+
+## 7. Editor UI Tools
+
+The project utilizes custom Unity Editor UI tools to streamline content creation and management.
+
+*   **`EncounterEditorWindow` (`Assets/Editor/EncounterEditorWindow.cs`):**
+    *   A dedicated editor window for creating and configuring `EncounterSO` assets.
+    *   It provides a user-friendly interface for defining encounter properties, including dynamic UI based on `EncounterType`.
+    *   Crucially, it supports the modular event system, allowing designers to assign `EventChoiceAction` ScriptableObjects to event choices directly within the editor. For more details on the modular event system, refer to the [Encounter System Overview]({{< myrelref "systems/encounters/encounter-system-overview.md" >}}).
 
 ## 6. UI Systems Architecture (PlantUML Sequence Diagram - Purchase Item Flow)
 

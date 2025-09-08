@@ -57,7 +57,13 @@ The game's functionality is distributed among several key systems:
     *   **Responsibility:** Defines and loads all static game content (items, ships, enemies, abilities) using `ScriptableObject`s. Manages runtime representations of these data.
     *   **Interaction:** `PirateRoguelike.Core.GameDataRegistry` loads data at startup. Runtime data objects (`PirateRoguelike.Data.ItemInstance`, `PirateRoguelike.Core.ShipState`) are used by `PirateRoguelike.Core.GameSession`, `PirateRoguelike.Services.Inventory`, and combat systems.
 
-*   **UI Systems (`Assets/Scripts/UI/`):**
+*   **UI Systems (`Assets/Scripts/UI/`):
+    *   **Responsibility:** Manages all visual user interface elements. Utilizes UI Toolkit for component creation and data binding.
+    *   **Interaction:** `PirateRoguelike.UI.PlayerPanelController` and `PirateRoguelike.UI.EnemyPanelController` act as adapters between game state and UI views. Components like `ShipDisplayElement` bind directly to view models.
+
+*   **Encounter System & Editor (`Assets/Scripts/Data/EncounterSO.cs`, `Assets/Editor/EncounterEditorWindow.cs`):
+    *   **Responsibility:** Manages the definition and behavior of various in-game encounters (battles, shops, events, etc.) and provides a dedicated editor tool for their creation and configuration. This includes the modular event system for dynamic event outcomes.
+    *   **Interaction:** Encounters define the player's journey through the map. The `EncounterEditorWindow` facilitates content creation by allowing designers to configure encounter properties and their associated modular event actions directly within the Unity Editor. For more details, refer to the [Encounter System Overview]({{< myrelref "systems/encounters/encounter-system-overview.md" >}}).
     *   **Responsibility:** Manages all visual user interface elements. Utilizes UI Toolkit for component creation and data binding.
     *   **Interaction:** `PirateRoguelike.UI.PlayerPanelController` and `PirateRoguelike.UI.EnemyPanelController` act as adapters between game state and UI views. Components like `ShipDisplayElement` bind directly to view models.
 

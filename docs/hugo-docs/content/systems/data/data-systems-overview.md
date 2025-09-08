@@ -85,6 +85,14 @@ This section details the primary ScriptableObjects used to define static game da
         *   `maxStacks` (int): Maximum number of stacks if `isStackable` is true.
     *   **Relationships:** Contains an `ActionSO` for its tick effect. Referenced by `ApplyEffectActionSO`.
 
+*   **`EventChoiceAction` (`Assets/Scripts/Data/EventChoiceAction.cs`):**
+    *   **Purpose:** Abstract base class for all concrete actions that an `EventChoice` can execute. These actions define the modular outcomes of an event choice (e.g., gaining resources, modifying stats, giving items).
+    *   **Create Asset Menu:** `Pirate/Event Actions/Base Action` (Note: Concrete implementations will have specific menus).
+    *   **Key Fields:** (Abstract, concrete implementations define fields)
+    *   **Methods:**
+        *   `Execute(PlayerContext context)`: Abstract method to be implemented by subclasses, containing the action's logic.
+    *   **Relationships:** Parent class for `GainResourceAction`, `ModifyStatAction`, `GiveItemAction`, `GiveShipAction`, `LoadEncounterAction`. Referenced by `EventChoice`.
+
 *   **`EncounterSO` (`Assets/Scripts/Data/EncounterSO.cs`):**
     *   **Purpose:** Defines the parameters for different types of encounters a player can face on the map (e.g., battle, shop, event, port).
     *   **Create Asset Menu:** `Pirate/Data/Encounter`
@@ -104,7 +112,7 @@ This section details the primary ScriptableObjects used to define static game da
         *   `eventUxml` (`VisualTreeAsset`): For event encounters, the UXML asset that defines the UI structure.
         *   `eventUss` (`StyleSheet`): For event encounters, the USS asset for styling the UI.
         *   `minFloor`, `maxFloor` (int): Floor range for event encounters.
-        *   `eventChoices` (List of `EventChoice`): For event encounters, a list of choices the player can make.
+        *   `eventChoices` (List of `EventChoice`): For event encounters, a list of choices the player can make. Each `EventChoice` now contains a list of `EventChoiceAction`s, defining the modular outcomes.
     *   **Relationships:** Contains lists of `EnemySO`s and `EventChoice`s. References `VisualTreeAsset` and `StyleSheet` for event UI.
 
 *   **`EnemySO` (`Assets/Scripts/Data/EnemySO.cs`):**
@@ -317,12 +325,11 @@ package "Encounters & Events" {
     }
     class EventChoice <<Serializable>> {
         + choiceText: string
-        + goldCost: int
-        + lifeCost: int
-        + itemRewardId: string
-        + shipRewardId: string
-        + nextEncounterId: string
         + outcomeText: string
+        + actions: List<EventChoiceAction>
+    }
+    abstract class EventChoiceAction <<AbstractSO>> {
+        + Execute(PlayerContext context)
     }
     class VisualTreeAsset <<Serializable>> {}
     class StyleSheet <<Serializable>> {}
@@ -406,6 +413,8 @@ EncounterSO "1" *-- "*" EnemySO : contains
 EncounterSO "1" *-- "*" EventChoice : defines
 EncounterSO "1" --> "1" VisualTreeAsset : uses
 EncounterSO "1" --> "1" StyleSheet : uses
+
+EventChoice "1" *-- "*" EventChoiceAction : defines
 
 EnemySO "1" ..> ShipSO : "uses (by id)"
 EnemySO "1" *-- "*" ItemSO : equips

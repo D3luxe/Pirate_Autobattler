@@ -4,6 +4,8 @@ using UnityEngine.UIElements;
 using PirateRoguelike.Core;
 using PirateRoguelike.Data;
 using Pirate.MapGen;
+using PirateRoguelike.Services;
+using PirateRoguelike.Saving;
 
 namespace PirateRoguelike.UI
 {
@@ -89,12 +91,86 @@ namespace PirateRoguelike.UI
             }
         }
 
+        // Temporary concrete implementations for PlayerContext services
+    // These should ideally be properly injected or resolved via a ServiceLocator
+    private class ConcreteEconomyService : IEconomyService
+    {
+        public void AddGold(int amount) => GameSession.Economy.AddGold(amount);
+        public bool TrySpendGold(int amount) => GameSession.Economy.TrySpendGold(amount);
+        public void AddLives(int amount) => GameSession.Economy.AddLives(amount);
+        public void LoseLife() => GameSession.Economy.LoseLife();
+    }
+
+    private class ConcreteInventoryService : IInventoryService
+    {
+        public bool AddItem(string itemId)
+        {
+            ItemSO itemSO = GameDataRegistry.GetItem(itemId);
+            if (itemSO == null) return false;
+            return GameSession.Inventory.AddItem(new ItemInstance(itemSO));
+        }
+
+        public bool RemoveItem(string itemId)
+        {
+            // Find the item in inventory and remove it
+            for (int i = 0; i < GameSession.Inventory.Slots.Count; i++)
+            {
+                if (GameSession.Inventory.Slots[i].Item != null && GameSession.Inventory.Slots[i].Item.Def.id == itemId)
+                {
+                    GameSession.Inventory.RemoveItemAt(i);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public ItemInstance GetItem(string itemId)
+        {
+            // Find the item in inventory and return it
+            foreach (var slot in GameSession.Inventory.Slots)
+            {
+                if (slot.Item != null && slot.Item.Def.id == itemId)
+                {
+                    return slot.Item;
+                }
+            }
+            return null;
+        }
+    }
+
+    private class ConcreteGameSessionService : IGameSessionService
+    {
+        public ShipState PlayerShip => GameSession.PlayerShip;
+        public void SetPlayerShip(ShipState newShipState) => GameSession.PlayerShip = newShipState;
+        public void SetNextEncounter(string encounterId) => GameSession.CurrentRunState.currentEncounterId = encounterId;
+        public void LoadRun(Saving.RunState runState) => GameSession.LoadRun(runState, GameDataRegistry.GetRunConfig());
+        public void StartNewRun() => GameSession.StartNewRun(GameDataRegistry.GetRunConfig(), GameDataRegistry.GetShip("player_ship_default"));
+    }
+
+    private class ConcreteRunManagerService : IRunManagerService
+    {
+        public void ReturnToMap() => SceneManager.LoadScene("Run");
+        public void LoadEncounter(string encounterId)
+        {
+            GameSession.CurrentRunState.currentEncounterId = encounterId;
+            SceneManager.LoadScene("Run");
+        }
+    }
+
         private void OnChoiceSelected(EventChoice choice)
         {
-            // TODO: Implement the consequences of the choice based on the properties of EventChoice (e.g., goldCost, itemRewardId)
-            Debug.Log($"Choice selected: {choice.choiceText}. Outcome Text: {choice.outcomeText}. Implementation of actual outcome is pending.");
+            var economyService = new ConcreteEconomyService();
+            var inventoryService = new ConcreteInventoryService();
+            var gameSessionService = new ConcreteGameSessionService();
+            var runManagerService = new ConcreteRunManagerService();
 
-            // For now, just return to the map after any choice.
+            var playerContext = new PlayerContext(economyService, inventoryService, gameSessionService, runManagerService);
+
+            foreach (var action in choice.actions)
+            {
+                action.Execute(playerContext);
+            }
+
             ReturnToMap();
         }
 

@@ -1,32 +1,62 @@
-ObjectDisposedException: SerializedProperty eventChoices.Array.data[1] has disappeared!
-UnityEditor.SerializedProperty.SyncSerializedObjectVersion () (at <e926e9c7db684472928e12ac2693beec>:0)
-UnityEditor.SerializedProperty.CopyInternal () (at <e926e9c7db684472928e12ac2693beec>:0)
-UnityEditor.SerializedProperty.Copy () (at <e926e9c7db684472928e12ac2693beec>:0)
-UnityEditor.SerializedProperty.FindPropertyRelative (System.String relativePropertyPath) (at <e926e9c7db684472928e12ac2693beec>:0)
-EncounterEditorWindow+EventChoiceRow.Bind (UnityEditor.SerializedProperty choiceElementProperty) (at Assets/Editor/EncounterEditorWindow.cs:62)
-EncounterEditorWindow+<>c__DisplayClass11_1.<DisplayEncounterDetails>b__1 (UnityEngine.UIElements.VisualElement element, System.Int32 index) (at Assets/Editor/EncounterEditorWindow.cs:225)
-UnityEngine.UIElements.ListViewController.BindItem (UnityEngine.UIElements.VisualElement element, System.Int32 index) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.CollectionViewController.InvokeBindItem (UnityEngine.UIElements.ReusableCollectionItem reusableItem, System.Int32 index) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.BaseListViewController.InvokeBindItem (UnityEngine.UIElements.ReusableCollectionItem reusableItem, System.Int32 index) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.VerticalVirtualizationController`1[T].Setup (T recycledItem, System.Int32 newIndex) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.VerticalVirtualizationController`1[T].Refresh (System.Boolean rebuild) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.BaseVerticalCollectionView.RefreshItems () (at <aae110a54f4e40afadedeea84895fc4b>:0)
-EncounterEditorWindow+<>c__DisplayClass11_0.<DisplayEncounterDetails>b__3 (UnityEngine.UIElements.BaseListView lv) (at Assets/Editor/EncounterEditorWindow.cs:260)
-UnityEngine.UIElements.BaseListView.OnRemoveClicked () (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.Clickable.Invoke (UnityEngine.UIElements.EventBase evt) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.Clickable.ProcessUpEvent (UnityEngine.UIElements.EventBase evt, UnityEngine.Vector2 localPosition, System.Int32 pointerId) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.Clickable.OnPointerUp (UnityEngine.UIElements.PointerUpEvent evt) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.EventCallbackFunctor`1[TEventType].Invoke (UnityEngine.UIElements.EventBase evt) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.EventCallbackRegistry+DynamicCallbackList.Invoke (UnityEngine.UIElements.EventBase evt, UnityEngine.UIElements.BaseVisualElementPanel panel, UnityEngine.UIElements.VisualElement target) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.EventDispatchUtilities.HandleEventAcrossPropagationPathWithCompatibilityEvent (UnityEngine.UIElements.EventBase evt, UnityEngine.UIElements.EventBase compatibilityEvt, UnityEngine.UIElements.BaseVisualElementPanel panel, UnityEngine.UIElements.VisualElement target, System.Boolean isCapturingTarget) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.EventDispatchUtilities.DispatchToCapturingElementOrElementUnderPointer (UnityEngine.UIElements.EventBase evt, UnityEngine.UIElements.BaseVisualElementPanel panel, System.Int32 pointerId, UnityEngine.Vector2 position) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.PointerUpEvent.Dispatch (UnityEngine.UIElements.BaseVisualElementPanel panel) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.EventDispatcher.ProcessEvent (UnityEngine.UIElements.EventBase evt, UnityEngine.UIElements.BaseVisualElementPanel panel) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.EventDispatcher.Dispatch (UnityEngine.UIElements.EventBase evt, UnityEngine.UIElements.BaseVisualElementPanel panel, UnityEngine.UIElements.DispatchMode dispatchMode) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.BaseVisualElementPanel.SendEvent (UnityEngine.UIElements.EventBase e, UnityEngine.UIElements.DispatchMode dispatchMode) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.UIElementsUtility.DoDispatch (UnityEngine.UIElements.BaseVisualElementPanel panel) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.UIElementsUtility.UnityEngine.UIElements.IUIElementsUtility.ProcessEvent (System.Int32 instanceID, System.IntPtr nativeEventPtr, System.Boolean& eventHandled) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.UIEventRegistration.ProcessEvent (System.Int32 instanceID, System.IntPtr nativeEventPtr) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.UIElements.UIEventRegistration+<>c.<.cctor>b__1_2 (System.Int32 i, System.IntPtr ptr) (at <aae110a54f4e40afadedeea84895fc4b>:0)
-UnityEngine.GUIUtility.ProcessEvent (System.Int32 instanceID, System.IntPtr nativeEventPtr, System.Boolean& result) (at <1d184d5861484785ae690c151b86eca2>:0)
+Assets\Editor\EncounterEditorWindow.cs(54,17): error CS0246: The type or namespace name 'ObjectField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(54,53): error CS0246: The type or namespace name 'ObjectField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(78,17): error CS0246: The type or namespace name 'ObjectField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(78,53): error CS0246: The type or namespace name 'ObjectField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(93,19): error CS0246: The type or namespace name 'ObjectField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(93,61): error CS0246: The type or namespace name 'ObjectField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(130,49): error CS1061: 'EnumField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'EnumField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(142,43): error CS1061: 'IntegerField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'IntegerField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(159,45): error CS1061: 'EnumField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'EnumField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(171,43): error CS1061: 'IntegerField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'IntegerField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(185,43): error CS1061: 'TextField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'TextField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(199,43): error CS1061: 'TextField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'TextField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(213,48): error CS1061: 'TextField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'TextField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(270,29): error CS1061: 'TextField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'TextField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(271,30): error CS1061: 'TextField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'TextField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(273,30): error CS1061: 'ListView' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'ListView' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(361,17): error CS1061: 'TextField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'TextField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(366,25): error CS1061: 'TextField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'TextField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(370,26): error CS1061: 'TextField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'TextField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(375,19): error CS1061: 'EnumField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'EnumField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(379,23): error CS1061: 'Toggle' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'Toggle' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(383,23): error CS1061: 'IntegerField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'IntegerField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(387,23): error CS1061: 'IntegerField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'IntegerField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(481,39): error CS1061: 'TextField' does not contain a definition for 'BindProperty' and no accessible extension method 'BindProperty' accepting a first argument of type 'TextField' could be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(485,17): error CS0246: The type or namespace name 'ObjectField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(485,50): error CS0246: The type or namespace name 'ObjectField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(490,17): error CS0246: The type or namespace name 'ObjectField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(490,49): error CS0246: The type or namespace name 'ObjectField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(511,25): error CS0246: The type or namespace name 'PropertyField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(511,51): error CS0246: The type or namespace name 'PropertyField' could not be found (are you missing a using directive or an assembly reference?)
+
+Assets\Editor\EncounterEditorWindow.cs(521,37): error CS0246: The type or namespace name 'PropertyField' could not be found (are you missing a using directive or an assembly reference?)
 
