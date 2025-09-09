@@ -1,16 +1,15 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:local="PirateRoguelike.UI.Components" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/PlayerPanel/player-panel.uss?fileID=7433441132597879392&amp;guid=e6042dd557d2a57459742ed1366a4cd0&amp;type=3#player-panel" />
-    <ui:VisualElement name="player-panel" class="player-panel" style="align-items: center; justify-content: center; position: absolute; top: auto; left: auto; right: auto; bottom: 0%;">
-        <ui:VisualElement name="main-container" style="width: 1000px; height: 380px; position: relative; background-image: url(&quot;project://database/Assets/Art/UI/PanelBackgroundWithEquipment.png?fileID=2800000&amp;guid=f366d59ef64fe1b488c13bc5a583333b&amp;type=3#PanelBackgroundWithEquipment&quot;);">
-            <ui:VisualElement name="top-bar" style="position: absolute; width: 750px; left: 125px; height: 70px; top: 23px; justify-content: center; flex-direction: row; align-items: center;">
+    <ui:VisualElement name="player-panel" picking-mode="Ignore" class="player-panel" style="align-items: center; justify-content: center; position: absolute; top: auto; left: auto; right: auto; bottom: 0%; background-image: url(&quot;project://database/Assets/Art/UI/RunUI/runscreen.png?fileID=2800000&amp;guid=3c486389f667cdf4082a711ee190419e&amp;type=3#runscreen&quot;);">
+        <ui:VisualElement name="main-container" style="align-self: center; min-width: 50%; min-height: 35%; width: auto; position: absolute; bottom: 5%;">
+            <ui:VisualElement name="top-bar" style="position: absolute; width: 750px; left: 32px; height: 70px; top: 23px; justify-content: center; flex-direction: row; align-items: center;">
                 <ui:VisualElement name="equipment-bar" class="equipment-bar" style="display: flex; flex-direction: row; flex-wrap: nowrap;" />
             </ui:VisualElement>
-            <ui:VisualElement name="left-column" style="position: absolute; top: 127px; left: 32px; flex-direction: column; align-items: center;">
-            </ui:VisualElement>
-            <ui:VisualElement name="middle-column" style="position: absolute; left: 365px; top: 127px; width: 360px; height: 140px;">
+            <ui:VisualElement name="left-column" style="position: absolute; top: 139px; left: 1%; flex-direction: column; align-items: center;" />
+            <ui:VisualElement name="middle-column" style="position: absolute; left: 328px; top: 183px; width: 360px; height: 140px;">
                 <ui:VisualElement name="inventory-container" style="flex-grow: 1; display: flex; flex-direction: row; flex-wrap: wrap;" />
             </ui:VisualElement>
-            <ui:VisualElement name="right-column" style="position: absolute; top: 119px; left: 756px; width: 200px; height: 220px;">
+            <ui:VisualElement name="right-column" style="position: absolute; top: 157px; left: 660px; width: 200px; height: 220px;">
                 <ui:VisualElement name="counters-container" style="width: 153px; height: 135px;">
                     <ui:VisualElement name="Gold" style="position: absolute; top: 0; left: 0; width: 153px; height: 40px; background-image: url(&quot;project://database/Assets/Art/UI/LabelBackground.png?fileID=2800000&amp;guid=0fa2da96e6ea12842a38562d15c70f6e&amp;type=3#LabelBackground&quot;);">
                         <ui:VisualElement name="gold-counter" class="hud-counter">

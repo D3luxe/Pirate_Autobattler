@@ -40,6 +40,7 @@ Once a valid skeleton is produced, this phase "decorates" the sparse graph with 
     *   **Mid-Act Treasure:** One `Treasure` node is guaranteed to be placed on a random path within a specified row window (e.g., rows 4-6). This is done by selecting one of the existing nodes on a path, not by converting an entire row.
     *   **First Row:** All nodes in the first row (the starting points of the paths) are assigned the `Battle` type.
 2.  **Weighted Random Typing:** All remaining nodes in the skeleton that have not been given a guaranteed type are then assigned a type (`Battle`, `Elite`, `Shop`, etc.) based on a weighted random selection process that respects adjacency rules and other constraints defined in the `RulesSO`.
+3.  **Encounter ID Assignment:** For node types that represent specific, unique content (like `Event`), the `MapView` is responsible for selecting a random, appropriate `EncounterSO` from the `GameDataRegistry` and storing its ID in the `Node`'s `encounterId` field. This decouples the map's structure from its specific content.
 
 ### Phase C: Validation & Repair
 

@@ -13,15 +13,19 @@ MonoBehaviour:
   m_Name: enc_boss
   m_EditorClassIdentifier: Assembly-CSharp::EncounterSO
   id: enc_boss
-  type: 4
+  type: 6
   weight: 1
   isElite: 0
   eliteRewardDepthBonus: 0
+  iconPath: 
+  tooltipText: 
   enemies: []
   shopItemCount: 3
   portHealPercent: 0.3
   eventTitle: The Pirate Lord
   eventDescription: 
+  eventUxml: {fileID: 0}
+  eventUss: {fileID: 0}
   minFloor: 0
   maxFloor: 0
   eventChoices: []

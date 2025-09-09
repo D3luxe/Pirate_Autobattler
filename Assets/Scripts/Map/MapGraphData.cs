@@ -22,6 +22,7 @@ namespace Pirate.MapGen
         public class Node
         {
             public string id;
+            public string encounterId; // The ID of the specific EncounterSO for this node
             public int row;
             public int col;
             public string type; // Corresponds to NodeType enum name (e.g., "Battle", "Elite")

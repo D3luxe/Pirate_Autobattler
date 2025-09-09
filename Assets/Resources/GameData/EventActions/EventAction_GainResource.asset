@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: EventAction_GainResource
   m_EditorClassIdentifier: Assembly-CSharp::PirateRoguelike.Data.Actions.GainResourceAction
   resourceType: 0
-  amount: 0
+  amount: 25

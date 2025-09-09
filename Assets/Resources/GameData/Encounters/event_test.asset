@@ -22,8 +22,14 @@ MonoBehaviour:
   enemies: []
   shopItemCount: 3
   portHealPercent: 0.3
-  eventTitle: 
-  eventDescription: 
+  eventTitle: Event test 12
+  eventDescription: What would you rather...lick a toad or kiss a turd.
+  eventUxml: {fileID: 0}
+  eventUss: {fileID: 0}
   minFloor: 0
   maxFloor: 0
-  eventChoices: []
+  eventChoices:
+  - choiceText: test123
+    outcomeText: You win!
+    actions:
+    - {fileID: 11400000, guid: 026e283989817cb49929471ca4f74d1f, type: 2}

@@ -35,8 +35,11 @@ The encounter system is a core part of the game that defines and manages various
     *   A class that encapsulates necessary game state and services (e.g., `IEconomyService`, `IInventoryService`, `IGameSessionService`, `IRunManagerService`) that `EventChoiceAction`s operate on. This provides a clean, interface-based way for actions to interact with the game state without direct dependencies on monolithic systems.
 
 *   **`EventController` (`Assets/Scripts/UI/EventController.cs`):**
-    *   This UI controller is responsible for handling the display and logic of `Event` encounters.
-    *   When a player selects an `EventChoice`, the `EventController` instantiates a `PlayerContext` and then iterates through the `List<EventChoiceAction>` associated with that choice, calling `action.Execute(playerContext)` for each.
+    *   This UI controller manages the lifecycle of an `Event` encounter's UI. Its responsibilities include:
+        *   Loading either a custom UXML defined in the `EncounterSO` or a default, system-wide event template.
+        *   Populating the UI with the event's title, description, and choices.
+        *   Managing the two-stage view, first showing the player's choices and then displaying the outcome after a selection is made.
+        *   Executing the `EventChoiceAction`s associated with the player's selected choice.
     *   **Note:** For development and testing, the `EventController` can load specific debug encounters via `GameSession.DebugEncounterToLoad`.
 
 ## 3. Encounter Types
@@ -109,6 +112,31 @@ The game's event encounters have been refactored to use a modular, data-driven s
 *   **Decoupling:** Event outcomes are decoupled from the `EventChoice` data structure, making the system more flexible and maintainable.
 *   **Improved Designer Workflow:** The `EncounterEditorWindow` provides a dedicated and intuitive interface for managing these modular actions.
 
+## 5. UI and Data Flow
+
+The process of displaying an event involves coordination between the map UI, the game's run manager, and the event UI controller itself.
+
+1.  **Node Resolution (`MapView.cs`):** When a player clicks on an `Unknown` (?) node, the `MapView` resolves its type. If it becomes an `Event`, the `MapView` then:
+    *   Selects a random, valid `EncounterSO` of the `Event` type from the `GameDataRegistry`.
+    *   Stores the chosen encounter's ID in the `encounterId` field of the `MapGraphData.Node` instance. (Note: This field was added to bridge the gap between procedural map nodes and specific encounter content).
+    *   Stores the **node's ID** (e.g., `node_1_4`) in the `GameSession` to track player location.
+
+2.  **Scene Transition (`RunManager.cs`):** The `RunManager` detects the player has moved to a new node.
+    *   It uses the node ID from the `GameSession` to find the correct `MapGraphData.Node`.
+    *   Seeing the node's type is `Event`, it reads the `node.encounterId` field.
+    *   It retrieves the corresponding `EncounterSO` from the `GameDataRegistry`.
+    *   It places this `EncounterSO` into the `GameSession.DebugEncounterToLoad` static field (re-using the debug hook for convenience).
+    *   Finally, it loads the "Event" scene.
+
+3.  **UI Display (`EventController.cs`):**
+    *   The `EventController`'s `Start()` method executes.
+    *   It checks `GameSession.DebugEncounterToLoad` and finds the `EncounterSO` placed there by the `RunManager`.
+    *   It checks if the `EncounterSO` has a custom `eventUxml` specified. If not, it uses a default `Event_Default.uxml` asset.
+    *   It populates the UI with the event's title, description, and choices.
+    *   The UI is now presented in a two-stage view: first the choices, and after a selection is made, the outcome.
+
+## 6. System Diagrams
+
 ```plantuml
 @startuml
 ' --- STYLING ---
@@ -162,7 +190,7 @@ Controller -> PlayerContext : Instantiates with services
 PlayerContext --> Economy : Provides IEconomyService
 PlayerContext --> Inventory : Provides IInventoryService
 PlayerContext --> GameSession : Provides IGameSessionService
-PlayerContext --> RunManager : Provides IRunManagerService
+PlayerContext --> RunManager : provides IRunManagerService
 
 Controller -> EventChoice : Player selects choice
 loop For each EventChoiceAction in selected choice
@@ -175,3 +203,51 @@ end loop
 deactivate Controller
 
 @enduml
+```
+
+```plantuml
+  @startuml
+  title EventController UI Flow
+
+  actor Player
+  participant "EventController" as Controller
+  participant "EncounterSO" as Data
+  participant "UI Document" as UI
+
+  Player -> Controller : Triggers Event
+  activate Controller
+
+  Controller -> Data : Reads Event Data
+  Controller -> UI : Loads UXML (Custom or Default)
+  Controller -> UI : Binds Title & Description from Data
+
+  loop For each EventChoice in Data
+      Controller -> UI : Create Button
+      UI -> Controller : Register Click Callback
+  end
+
+  UI --> Player : Displays Event UI
+
+  Player -> UI : Clicks Choice Button
+  activate UI
+
+  UI -> Controller : Invokes Click Callback
+  deactivate UI
+
+  Controller -> Controller : Executes choice.Actions
+  Controller -> UI : Hides Choice View
+  Controller -> UI : Shows Outcome View
+  Controller -> UI : Binds choice.outcomeText
+
+  UI --> Player : Displays Outcome
+
+  Player -> UI : Clicks "Continue"
+  activate UI
+  UI -> Controller : Invokes Continue Callback
+  deactivate UI
+
+  Controller -> Player : Closes Event, Returns to Map
+  deactivate Controller
+
+  @enduml
+  ```

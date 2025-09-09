@@ -58,6 +58,7 @@ The `ProcessCommand` method in `DebugConsoleController.cs` parses user input and
 *   `loadscene <sceneName>`: Loads a specified scene (e.g., `MainMenu`, `Boot`, `Run`, `Battle`, `Summary`). **Note:** Using `loadscene shop` will automatically set a default item count for the shop to ensure it is populated correctly for testing.
 *   `skipnode`: Advances the player to the next node on the map.
 *   `giveitem <itemId>`: Gives the player a specified item.
+*   `loadevent <encounterId>`: Loads a specific event for debugging. This is useful for testing event UI and logic without navigating the map.
 *   `generatereward [goldAmount] [showItems] [isElite] [floorIndex]`: Generates a reward window for testing. Defaults: 10 gold, show 3 items, non-elite, floor 5. `showItems` (boolean) controls if items are generated (default 3 items if true, 0 if false).
 
 ## Usage

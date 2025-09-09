@@ -17,6 +17,8 @@
     background-color: rgba(10, 20, 30, 0);
     padding: 10px;
     align-self: center;
+    height: 100%;
+    width: 100%;
 }
 
 .player-panel__left-column {
@@ -81,8 +83,6 @@
     width: 350px;
     height: 140px;
 }
-
-/* SLOT AND ITEM STYLES MOVED TO DEDICATED COMPONENT STYLESHEETS */
 
 .hud-counters {
     flex-direction: row;

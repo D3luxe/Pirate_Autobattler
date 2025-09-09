@@ -29,4 +29,26 @@ MonoBehaviour:
   eventUss: {fileID: 0}
   minFloor: 0
   maxFloor: 0
-  eventChoices: []
+  eventChoices:
+  - choiceText: Ooga Booga
+    outcomeText: +5 gold
+    actions:
+    - {fileID: 11400000, guid: 026e283989817cb49929471ca4f74d1f, type: 2}
+  - choiceText: No Booga
+    outcomeText: +10 health
+    actions:
+    - {fileID: 11400000, guid: 04236976454ecc54f9849a90a8f57ac6, type: 2}
+--- !u!114 &7756035347565697856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2f610af653655d479993108d4d2a338, type: 3}
+  m_Name: New Gain Resource Action 0
+  m_EditorClassIdentifier: Assembly-CSharp::PirateRoguelike.Data.Actions.GainResourceAction
+  resourceType: 0
+  amount: -1

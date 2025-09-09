@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: ModifyStatAction
   m_EditorClassIdentifier: Assembly-CSharp::PirateRoguelike.Data.Actions.ModifyStatAction
   statType: 0
-  amount: 0
+  amount: 10

@@ -169,7 +169,16 @@ namespace PirateRoguelike.Core
                     SceneManager.LoadScene("Port");
                     break;
                 case PirateRoguelike.Data.EncounterType.Event:
-                    SceneManager.LoadScene("Event");
+                    var eventEncounter = GameDataRegistry.GetEncounter(currentNode.encounterId);
+                    if (eventEncounter != null)
+                    {
+                        GameSession.DebugEncounterToLoad = eventEncounter; // Use the debug hook to pass the specific encounter
+                        SceneManager.LoadScene("Event");
+                    }
+                    else
+                    {
+                        Debug.LogError($"Could not find EncounterSO with ID '{currentNode.encounterId}' for node '{currentNode.id}'.");
+                    }
                     break;
                 default:
                     Debug.LogWarning($"Unhandled encounter type: {encounterType}");

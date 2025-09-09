@@ -190,6 +190,36 @@ namespace PirateRoguelike.UI
                     Log("  giveitem <itemId> - Gives the player a specified item.");
                     Log("  startencounter <encounterId> - Starts a specific battle encounter.");
                     Log("  generatereward [goldAmount=10] [showItems=true] <isElite=false> <floorIndex=5> - Generates a reward window for testing.");
+                    Log("  loadevent <encounterId> - Loads a specific event for debugging.");
+                    break;
+
+                case "loadevent":
+                    if (parts.Length > 1)
+                    {
+                        string encounterId = parts[1];
+                        EncounterSO encounter = GameDataRegistry.GetEncounter(encounterId);
+                        if (encounter != null)
+                        {
+                            if (encounter.type == EncounterType.Event)
+                            {
+                                GameSession.DebugEncounterToLoad = encounter;
+                                SceneManager.LoadScene("Event");
+                                Log($"Loading event: {encounterId}");
+                            }
+                            else
+                            {
+                                Log($"Error: Encounter '{encounterId}' is not of type Event.");
+                            }
+                        }
+                        else
+                        {
+                            Log($"Error: Encounter not found: {encounterId}");
+                        }
+                    }
+                    else
+                    {
+                        Log("Usage: loadevent <encounterId>");
+                    }
                     break;
 
                 case "addgold":

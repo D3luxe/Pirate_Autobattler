@@ -719,6 +719,23 @@ namespace PirateRoguelike.UI
                 ve.tooltip = $"Resolved to: {resolvedNodeType.ToString()}"; // Simple tooltip for now
 
                 Debug.Log($"Node {clickedNode.id} resolved from Unknown to {resolvedNodeType}.");
+
+                // If the resolved type is an event, pick a specific event encounter
+                if (resolvedNodeType == Pirate.MapGen.NodeType.Event)
+                {
+                    var allEvents = GameDataRegistry.GetAllEncounters().Where(e => e.type == global::PirateRoguelike.Data.EncounterType.Event).ToList();
+                    if (allEvents.Any())
+                    {
+                        // Using the same RNG for determinism
+                        int eventIndex = (int)(resolutionRng.NextDouble() * allEvents.Count);
+                        clickedNode.encounterId = allEvents[eventIndex].id;
+                        Debug.Log($"Assigned specific event '{clickedNode.encounterId}' to node {clickedNode.id}.");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Node {clickedNode.id} resolved to Event, but no Event encounters are defined in GameDataRegistry!");
+                    }
+                }
             }
             // --- END NEW ---
 

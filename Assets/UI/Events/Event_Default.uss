@@ -1,0 +1,98 @@
+.event-panel-base {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    position: absolute;
+    align-self: center;
+    flex-shrink: 0;
+    top: auto;
+    min-height: auto;
+    width: 100%;
+    height: 100%;
+    left: auto;
+    right: auto;
+    bottom: auto;
+}
+
+.event-panel-content {
+    padding: 20px;
+    border-color: rgb(91, 70, 53);
+    border-width: 5px;
+    border-radius: 10px;
+    position: absolute;
+    background-color: rgba(240, 230, 210, 0.26);
+    width: 50%;
+    align-self: center;
+    left: auto;
+    top: auto;
+    bottom: 28%;
+    right: auto;
+    height: 62%;
+}
+
+.h1 {
+    font-size: 28px;
+    -unity-font-style: bold;
+    color: rgb(51, 51, 51);
+    margin-bottom: 15px;
+    -unity-text-align: upper-center;
+    margin-top: 14px;
+    align-self: center;
+    top: 3%;
+}
+
+.p {
+    font-size: 18px;
+    margin-bottom: 20px;
+    white-space: normal;
+    color: rgb(5, 5, 5);
+    -unity-text-align: upper-center;
+    margin-top: 20px;
+    align-self: center;
+    top: 30%;
+}
+
+.button-group-vertical {
+    align-items: stretch;
+    flex-direction: row;
+    justify-content: center;
+    align-self: center;
+    margin-bottom: 15px;
+}
+
+.event-choice-button {
+    font-size: 16px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 10px;
+    border-color: rgb(91, 70, 53);
+    border-width: 2px;
+    width: 240px;
+    height: auto;
+    margin-right: 15px;
+    margin-left: 15px;
+    color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Art/UI/Button_Blank.png?fileID=2800000&guid=469e4af60b7547147b5ba9f6326056e9&type=3#Button_Blank");
+    -unity-background-scale-mode: scale-to-fit;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-size: 100% 100%;
+}
+
+.event-choice-button:hover {
+    background-color: rgb(220, 208, 179);
+}
+
+#continue-button {
+    align-self: center;
+    width: 200px;
+    margin-top: 20px;
+    bottom: 15px;
+}
+
+.unity-button {
+}
